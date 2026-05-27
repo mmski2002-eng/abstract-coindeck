@@ -1,6 +1,6 @@
 import { createHash, timingSafeEqual } from "crypto";
 import type { NextRequest } from "next/server";
-import { Ed25519PublicKey, Ed25519Signature } from "@aptos-labs/ts-sdk";
+import { verifyMessage } from "viem";
 import {
   ADMIN_CHAIN_ID,
   ADMIN_NONCE_TTL_MS,
@@ -162,13 +162,15 @@ export async function verifyAdminAction(
     return { ok: false, error: "unexpected-full-message" };
   }
 
+  // EVM signature verification — publicKey field holds the EVM address in the migrated flow
   try {
-    const pub = new Ed25519PublicKey(publicKey);
-    const sig = new Ed25519Signature(signature);
-    if (!pub.verifySignature({ message: Buffer.from(fullMessage), signature: sig })) {
-      return { ok: false, error: "invalid-signature" };
-    }
-    const actor = pub.authKey().toString().toLowerCase();
+    const actor = (typeof publicKey === "string" ? publicKey : "").toLowerCase();
+    const valid = await verifyMessage({
+      address: actor as `0x${string}`,
+      message: fullMessage,
+      signature: signature as `0x${string}`,
+    });
+    if (!valid) return { ok: false, error: "invalid-signature" };
     if (!ADMIN_ADDRESSES.has(actor)) {
       return { ok: false, error: `wrong-admin-address:got=${actor}` };
     }

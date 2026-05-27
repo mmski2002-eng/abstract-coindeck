@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import type { Config } from "@wagmi/core";
 import type { TransactionPayload, TxOptions } from "../types";
 import { getErrorMessage } from "../utils";
+import { readEvmChestPrices, readEvmInventory } from "@/lib/evmContracts";
 
 type Card = { playerId: number; tier: number; cardAddr: string };
-type UserCardsResource = { type?: string; data?: { card_addrs?: string[] } };
 const MAX_NICKNAME_BYTES = 14;
 
 function nicknameStorageKey(walletAddress: string) {
@@ -13,6 +14,7 @@ function nicknameStorageKey(walletAddress: string) {
 interface Deps {
   restUrl: string;
   moduleAddress: string;
+  wagmiConfig: Config;
   submitTx: (p: TransactionPayload, opts?: TxOptions) => Promise<void>;
   setBusy: (v: string | null) => void;
   setOnboardingBusy: (v: boolean) => void;
@@ -20,23 +22,24 @@ interface Deps {
   lang: string;
 }
 
-export function useRosterLogic({ restUrl, moduleAddress, submitTx, setBusy, setOnboardingBusy, walletAccount, lang }: Deps) {
+export function useRosterLogic({ restUrl, moduleAddress, wagmiConfig, submitTx, setBusy, setOnboardingBusy, walletAccount, lang }: Deps) {
   const refreshPromiseRef = useRef<Promise<number> | null>(null);
   const latestCardsRef = useRef<Card[]>([]);
   const [chestBuyModal, setChestBuyModal] = useState<{ type: number; label: string; emoji: string; rarity: string; desc: string; price: number; buyBg: string } | null>(null);
   const [chestBuyQty, setChestBuyQty] = useState(1);
   const [chestOpenModal, setChestOpenModal] = useState<{ type: number; label: string; emoji: string; tier: number; available: number; grad: string; ring: string; buyBg: string } | null>(null);
   const [chestOpenQty, setChestOpenQty] = useState(1);
-  const [chestPrice, setChestPrice] = useState(10_000_000);
-  const [chestPrices, setChestPrices] = useState({ wooden: 10_000_000, iron: 30_000_000, silver: 90_000_000 });
+  const [chestPrice, setChestPrice] = useState(1e16);
+  const [chestPrices, setChestPrices] = useState({ wooden: 1e16, iron: 3e16, silver: 9e16 });
+  const [chestPricesWei, setChestPricesWei] = useState({ wooden: 10000000000000000n, iron: 30000000000000000n, silver: 90000000000000000n });
   const [tierMults, setTierMults] = useState([100, 140, 190, 250]);
   const [chestCounts, setChestCounts] = useState({ wooden: 0, iron: 0, silver: 0 });
   const [chestNftAddrs, setChestNftAddrs] = useState<{ wooden: string[]; iron: string[]; silver: string[] }>({ wooden: [], iron: [], silver: [] });
   const [freeClaimed, setFreeClaimed] = useState(false);
   const [flCards, setFlCards] = useState<Card[]>([]);
   const [flChests, setFlChests] = useState(0);
-  const [flInitialized, setFlInitialized] = useState(false);
-  const [flInventoryChecked, setFlInventoryChecked] = useState(false);
+  const [flInitialized, setFlInitialized] = useState(true);
+  const [flInventoryChecked, setFlInventoryChecked] = useState(true);
   const [flError, setFlError] = useState("");
   const [flRefreshing, setFlRefreshing] = useState(false);
   const [openingChest, setOpeningChest] = useState(false);
@@ -53,54 +56,27 @@ export function useRosterLogic({ restUrl, moduleAddress, submitTx, setBusy, setO
   const [newCardKeys, setNewCardKeys] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    fetch(`${restUrl}/view`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ function: `${moduleAddress}::fantasy_league::get_chest_prices`, type_arguments: [], arguments: [] }),
-    }).then((r) => r.ok ? r.json() : null).then((v) => {
-      if (Array.isArray(v) && v.length === 3) {
-        setChestPrices({ wooden: Number(v[0]), iron: Number(v[1]), silver: Number(v[2]) });
-        setChestPrice(Number(v[0]));
-      }
+    readEvmChestPrices(wagmiConfig).then((p) => {
+      setChestPricesWei(p);
+      setChestPrices({ wooden: Number(p.wooden), iron: Number(p.iron), silver: Number(p.silver) });
+      setChestPrice(Number(p.wooden));
     }).catch(() => {});
     fetch("/api/leaderboard/config").then(r => r.ok ? r.json() : null).then(v => {
       if (v?.tierMults) setTierMults(v.tierMults);
     }).catch(() => {});
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function ensureInitialized(nickname?: string) {
-    if (flInitialized) return;
-    let nickBytes = '0x';
-    if (nickname) {
-      const enc = new TextEncoder();
-      // Keep nickname within the byte limit accepted by the contract.
-      let byteLen = 0;
-      let safeLen = 0;
-      for (const ch of nickname) {
-        const b = enc.encode(ch).length;
-        if (byteLen + b > MAX_NICKNAME_BYTES) break;
-        byteLen += b;
-        safeLen += ch.length;
-      }
-      nickBytes = '0x' + Array.from(enc.encode(nickname.slice(0, safeLen)))
-        .map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-    await submitTx({
-      function: `${moduleAddress}::fantasy_league::create_inventory`,
-      typeArguments: [], functionArguments: [nickBytes],
-    });
+  async function ensureInitialized(_nickname?: string) {
+    // EVM: no inventory initialization needed — ERC-721 native
   }
 
   async function hasInventoryOnChain(): Promise<boolean> {
     if (!walletAccount) return false;
     try {
-      const addr = walletAccount.address;
-      const resp = await fetch(`${restUrl}/accounts/${addr}/resources?limit=9999`, {
-        headers: { Accept: "application/json" },
-      });
-      if (!resp.ok) return false;
-      const resources = (await resp.json()) as { type?: string }[];
-      return resources.some((r) => r?.type === `${moduleAddress}::fantasy_league::UserCards`);
+      const addr = String(walletAccount.address ?? "").trim();
+      if (!addr.startsWith("0x")) return false;
+      const inventory = await readEvmInventory(wagmiConfig, addr as `0x${string}`);
+      return inventory.cards.length > 0 || inventory.chests.length > 0;
     } catch {
       return false;
     }
@@ -151,69 +127,33 @@ export function useRosterLogic({ restUrl, moduleAddress, submitTx, setBusy, setO
       try {
         setFlRefreshing(true);
         setFlError("");
-        const addr = walletAccount.address;
-        const resp = await fetch(`${restUrl}/accounts/${addr}/resources?limit=9999`, {
-          headers: { Accept: "application/json" },
-        });
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const resources = (await resp.json()) as UserCardsResource[];
+        const addr = String(walletAccount.address ?? "").trim();
+        if (!addr.startsWith("0x")) throw new Error("Wallet address is not available");
 
-        const ucRes = resources.find((r) => r?.type === `${moduleAddress}::fantasy_league::UserCards`) ?? null;
-        setFlInitialized(ucRes !== null);
+        const inventory = await readEvmInventory(wagmiConfig, addr as `0x${string}`);
+
+        setFlInitialized(true);
         setFlInventoryChecked(true);
-        const cardAddrs: string[] = ucRes?.data?.card_addrs ?? [];
 
-        const fetchCard = async (a: string) => {
-          try {
-            const r = await fetch(`${restUrl}/accounts/${a}/resource/${moduleAddress}::fantasy_league::PlayerCard`, {
-              headers: { Accept: "application/json" },
-            });
-            if (!r.ok) return null;
-            const data = (await r.json()) as { data?: { player_id?: unknown; tier?: unknown } };
-            return { playerId: Number(data?.data?.player_id), tier: Number(data?.data?.tier), cardAddr: a };
-          } catch { return null; }
-        };
-        const cardObjects: (Card | null)[] = [];
-        for (let i = 0; i < cardAddrs.length; i += 10) {
-          const batch = await Promise.all(cardAddrs.slice(i, i + 10).map(fetchCard));
-          cardObjects.push(...batch);
-        }
-        const cards = cardObjects.filter((c): c is Card => c !== null);
+        const cards = inventory.cards.map((card) => ({
+          playerId: card.playerId,
+          tier: card.tier,
+          cardAddr: card.tokenId.toString(),
+        }));
         latestCardsRef.current = cards;
         setFlCards(cards);
         onCards?.(cards);
 
-        try {
-          const nftResp = await fetch(`${restUrl}/view`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Accept: "application/json" },
-            body: JSON.stringify({ function: `${moduleAddress}::fantasy_league::get_chest_nft_addrs`, type_arguments: [], arguments: [String(addr)] }),
-          });
-          if (nftResp.ok) {
-            const result = await nftResp.json();
-            const addrs: string[] = Array.isArray(result) ? (Array.isArray(result[0]) ? result[0] : result) : [];
-            const byType: { wooden: string[]; iron: string[]; silver: string[] } = { wooden: [], iron: [], silver: [] };
-            await Promise.all(addrs.map(async (a) => {
-              try {
-                const tr = await fetch(`${restUrl}/view`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json", Accept: "application/json" },
-                  body: JSON.stringify({ function: `${moduleAddress}::fantasy_league::get_chest_type`, type_arguments: [], arguments: [a] }),
-                });
-                if (tr.ok) {
-                  const tv = await tr.json();
-                  const t = Number(Array.isArray(tv) ? tv[0] : tv);
-                  if (t === 0) byType.wooden.push(a);
-                  else if (t === 1) byType.iron.push(a);
-                  else byType.silver.push(a);
-                }
-              } catch {}
-            }));
-            setChestNftAddrs(byType);
-            setChestCounts({ wooden: byType.wooden.length, iron: byType.iron.length, silver: byType.silver.length });
-            setFlChests(byType.wooden.length + byType.iron.length + byType.silver.length);
-          }
-        } catch {}
+        const byType: { wooden: string[]; iron: string[]; silver: string[] } = { wooden: [], iron: [], silver: [] };
+        for (const chest of inventory.chests) {
+          const tokenId = chest.tokenId.toString();
+          if (chest.chestType === 0) byType.wooden.push(tokenId);
+          else if (chest.chestType === 1) byType.iron.push(tokenId);
+          else byType.silver.push(tokenId);
+        }
+        setChestNftAddrs(byType);
+        setChestCounts({ wooden: byType.wooden.length, iron: byType.iron.length, silver: byType.silver.length });
+        setFlChests(byType.wooden.length + byType.iron.length + byType.silver.length);
         return cards.length;
       } catch (e: unknown) {
         setFlError(getErrorMessage(e));
@@ -262,7 +202,9 @@ export function useRosterLogic({ restUrl, moduleAddress, submitTx, setBusy, setO
     setFlError("");
     try {
       await ensureInitialized();
-      await submitTx({ function: `${moduleAddress}::fantasy_league::buy_chest`, typeArguments: [], functionArguments: [type, qty] });
+      const priceKey = type === 0 ? "wooden" : type === 1 ? "iron" : "silver";
+      const unitPrice = chestPricesWei[priceKey];
+      await submitTx({ function: `${moduleAddress}::fantasy_league::buy_chest`, typeArguments: [], functionArguments: [type, qty], value: unitPrice * BigInt(qty) });
       setChestBuySuccess(type);
       setTimeout(() => setChestBuySuccess(null), 2000);
     } catch (e: unknown) { setFlError(getErrorMessage(e)); }

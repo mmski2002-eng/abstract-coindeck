@@ -90,7 +90,7 @@ export function MarketplaceTab({
                         className="h-8 w-8 rounded-lg object-cover opacity-80 shrink-0" referrerPolicy="no-referrer" />
                       <div className="min-w-0">
                         <div className="text-xs font-semibold truncate">{HEROES[l.playerId]}</div>
-                        <div className="text-[10px] text-zinc-500 truncate">{TIER_NAMES[l.tier]} · {(l.price / 100_000_000).toFixed(2)} MOVE</div>
+                        <div className="text-[10px] text-zinc-500 truncate">{TIER_NAMES[l.tier]} · {(l.price / 100_000_000).toFixed(4)} ETH</div>
                       </div>
                     </div>
                     <button onClick={() => onCancelListing(l.id)} disabled={busy !== null}
@@ -237,7 +237,7 @@ export function MarketplaceTab({
                               {busy === buyKey ? "…" : (lang === "ru" ? "Купить" : "Buy")}
                             </button>
                             <div className="mt-1 text-[10px] text-white/30 text-center">
-                              {lang === "ru" ? "Комиссия платформы" : "Platform fee"}: 5% ({(l.price * 0.05 / 1e8).toFixed(4)} MOVE)
+                              {lang === "ru" ? "Комиссия платформы" : "Platform fee"}: 5% ({(l.price * 0.05 / 1e8).toFixed(4)} ETH)
                             </div>
                           </>
                         )}

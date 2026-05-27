@@ -66,7 +66,7 @@ function StatusBadge({ ok, label, pulse }: { ok: boolean; label: string; pulse?:
 
 function CardShell({ accent, children }: { accent: string; children: React.ReactNode }) {
   return (
-    <div className={`rounded-2xl border bg-black/25 p-4 h-full flex flex-col ${accent}`}>
+    <div className={`rounded-2xl border bg-zinc-900 p-4 h-full flex flex-col ${accent}`}>
       {children}
     </div>
   );
@@ -156,7 +156,7 @@ export function AdminInfoPanel({
     : (ru ? "Отключён" : "Disabled");
 
   return (
-    <div className="rounded-2xl border border-indigo-500/30 bg-indigo-500/[0.04] p-4 space-y-3 mb-4">
+    <div className="rounded-2xl border border-indigo-500/30 bg-zinc-900 p-4 space-y-3 mb-4">
       <div className="flex items-center gap-2">
         <div className="h-px flex-1 bg-indigo-500/20" />
         <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-400/70">
@@ -281,15 +281,15 @@ export function AdminInfoPanel({
             <div className="grid grid-cols-3 gap-3 mb-4">
               <div className="rounded-xl bg-white/[0.03] border border-white/5 p-3 text-center">
                 <div className="text-base font-black text-white font-mono">{fmtMove(governancePolicy.perTxLimit)}</div>
-                <div className="text-[9px] text-zinc-500 mt-0.5">{ru ? "лимит / tx" : "limit / tx"} MOVE</div>
+                <div className="text-[9px] text-zinc-500 mt-0.5">{ru ? "лимит / tx" : "limit / tx"} ETH</div>
               </div>
               <div className="rounded-xl bg-white/[0.03] border border-white/5 p-3 text-center">
                 <div className="text-base font-black text-white font-mono">{fmtMove(governancePolicy.dailyLimit)}</div>
-                <div className="text-[9px] text-zinc-500 mt-0.5">{ru ? "лимит / день" : "limit / day"} MOVE</div>
+                <div className="text-[9px] text-zinc-500 mt-0.5">{ru ? "лимит / день" : "limit / day"} ETH</div>
               </div>
               <div className="rounded-xl bg-amber-500/5 border border-amber-500/15 p-3 text-center">
                 <div className="text-base font-black text-amber-300 font-mono">{fmtMove(governancePolicy.spentToday)}</div>
-                <div className="text-[9px] text-zinc-500 mt-0.5">{ru ? "потрачено сегодня" : "spent today"} MOVE</div>
+                <div className="text-[9px] text-zinc-500 mt-0.5">{ru ? "потрачено сегодня" : "spent today"} ETH</div>
               </div>
             </div>
           </>
@@ -420,7 +420,7 @@ export function AdminInfoPanel({
         {botStatus?.state.lastClaimList && (
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-zinc-500">
             <span>{ru ? "Сумма клейм-листа" : "Total in list"}:
-              <span className="ml-1 font-mono text-zinc-300">{fmtMove(botStatus.state.lastClaimList.totalOctas)} MOVE</span>
+              <span className="ml-1 font-mono text-zinc-300">{fmtMove(botStatus.state.lastClaimList.totalOctas)} ETH</span>
             </span>
             <span>{ru ? "Список создан" : "Generated"}:
               <span className="ml-1 font-mono text-zinc-400">{fmt(botStatus.state.lastClaimList.generatedAt)}</span>
@@ -447,7 +447,7 @@ export function AdminInfoPanel({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <Stat label={ru ? "День" : "Day"} value={tnState?.currentDay ?? "—"} sub={tnState ? `/ ${tnState.totalDays}` : ""} />
           <Stat label={ru ? "Эпоха" : "Epoch"} value={epochNum ?? "—"} />
-          <Stat label={ru ? "Призовой пул" : "Prize pool"} value={tnState ? fmtMove(tnState.prizePool) : "—"} sub="MOVE" />
+          <Stat label={ru ? "Призовой пул" : "Prize pool"} value={tnState ? fmtMove(tnState.prizePool) : "—"} sub="ETH" />
           <Stat label={ru ? "Участники" : "Players"} value={lbRows.length} />
         </div>
       </CardShell>
@@ -480,7 +480,7 @@ export function AdminInfoPanel({
               ] as const).map(({ icon, label, val }) => (
                 <div key={label} className="rounded-lg bg-black/30 border border-white/5 p-2 text-center">
                   <div className="text-lg leading-none">{icon}</div>
-                  <div className="mt-1 font-mono text-[11px] font-bold text-white">{fmtMove(val)}</div>
+                  <div className="mt-1 font-mono text-[11px] font-bold text-white">{(val / 1e18).toFixed(4)}</div>
                   <div className="text-[9px] text-zinc-600">{label}</div>
                 </div>
               ))}

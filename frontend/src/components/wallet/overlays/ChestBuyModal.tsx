@@ -121,8 +121,8 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
               {lang === "ru" ? "Итого" : "Total"}
             </span>
             <span className="text-base font-black text-white">
-              {((modal.price * chestBuyQty) / 1e8).toFixed(2)}
-              <span className="ml-1.5 text-sm font-semibold" style={{ color: t.accent }}>MOVE</span>
+              {((modal.price * chestBuyQty) / 1e18).toFixed(4)}
+              <span className="ml-1.5 text-sm font-semibold" style={{ color: t.accent }}>ETH</span>
             </span>
           </div>
 

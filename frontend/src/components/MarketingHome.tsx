@@ -163,18 +163,21 @@ export function MarketingHome() {
     } catch {}
   }, []);
 
+  const prevIsAdmin = React.useRef(isAdmin);
   useEffect(() => {
-    if (isAdmin) {
-      queueMicrotask(() => setActiveTab("admin"));
-    } else if (activeTab === "admin") {
+    const prev = prevIsAdmin.current;
+    prevIsAdmin.current = isAdmin;
+    if (!isAdmin && prev && activeTab === "admin") {
       queueMicrotask(() => setActiveTab("roster"));
     }
-  }, [isAdmin, activeTab]);
+  }, [activeTab, isAdmin]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
     try {
       localStorage.setItem("cd_theme", theme);
+      document.cookie = `cd_theme=${theme}; path=/; max-age=31536000; samesite=lax`;
     } catch {}
   }, [theme]);
 

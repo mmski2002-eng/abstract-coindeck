@@ -51,7 +51,7 @@ export async function runPreflight(): Promise<void> {
   }
 
   // Mainnet-specific checks.
-  if (addrs.activeNetwork === "movementMainnet") {
+  if (addrs.activeNetwork === "abstractMainnet") {
     if (!process.env.INDEXER_URL) {
       warn("INDEXER_URL is not set — leaderboard will fall back to bulk view calls (slow at scale)");
     }

@@ -1,6 +1,15 @@
 import fs from "fs";
 import { randomUUID } from "crypto";
-import { Account, Aptos, AptosConfig, Ed25519PrivateKey, Network } from "@aptos-labs/ts-sdk";
+// TODO: migrate to EVM — Aptos SDK removed, these stubs throw at runtime
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const Account: any = { fromPrivateKey: () => { throw new Error("Aptos not supported"); } };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const Aptos: any = class { constructor() { throw new Error("Aptos not supported"); } };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const AptosConfig: any = class { constructor() { throw new Error("Aptos not supported"); } };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const Ed25519PrivateKey: any = class { constructor() { throw new Error("Aptos not supported"); } };
+const Network = { CUSTOM: "custom" } as const;
 import { getStatus as getMarketStatus, startJob as startMarketJob, type CoinResult } from "../market-data/worker";
 import { saveDay } from "../oracle-history/lib";
 import {

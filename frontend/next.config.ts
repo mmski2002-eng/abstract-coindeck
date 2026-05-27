@@ -24,17 +24,12 @@ function buildContentSecurityPolicy() {
     "manifest-src 'self'",
     "frame-src 'self'",
     "worker-src 'self' blob:",
-    "connect-src 'self' https://testnet.movementnetwork.xyz wss://*.movementnetwork.xyz https://api.coingecko.com https://assets.coingecko.com",
+    "connect-src 'self' https://api.testnet.abs.xyz https://api.mainnet.abs.xyz wss://api.testnet.abs.xyz wss://api.mainnet.abs.xyz https://api.coingecko.com https://assets.coingecko.com",
   ].join("; ");
 }
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    root: __dirname,
-  },
-  experimental: {
-    turbopackFileSystemCacheForDev: false,
-  },
+  experimental: {},
   async headers() {
     return [
       {

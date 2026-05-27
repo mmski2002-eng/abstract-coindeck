@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useAccount, useChainId, useConfig, useSwitchChain, useSignMessage } from "wagmi";
+import { abstractTestnet } from "viem/chains";
 import { useI18n } from "@/components/LanguageProvider";
 import { ModalKeyframes } from "@/components/ui";
 import {
@@ -12,7 +14,7 @@ import { OnboardingModal } from "./wallet/overlays/OnboardingModal";
 import { MergeAnimation } from "./wallet/overlays/MergeAnimation";
 import { ChestOpeningOverlay } from "./wallet/overlays/ChestOpeningOverlay";
 import { ChestReveal, ChestRevealMulti } from "./wallet/overlays/ChestReveal";
-import { ConnectPortals } from "./wallet/overlays/ConnectPortals"
+import { ConnectPortals, WrongNetworkBlocker } from "./wallet/overlays/ConnectPortals";
 import { LineupConfirmModal } from "./wallet/overlays/LineupConfirmModal";
 import { ChestBuyModal } from "./wallet/overlays/ChestBuyModal";
 import { ChestOpenModal } from "./wallet/overlays/ChestOpenModal";
@@ -30,60 +32,18 @@ import { useTournamentLogic } from "./wallet/hooks/useTournamentLogic"
 import { useRosterLogic } from "./wallet/hooks/useRosterLogic"
 import { useAdminLogic } from "./wallet/hooks/useAdminLogic"
 import { getErrorMessage } from "./wallet/utils";
+import { submitEvmTx } from "@/lib/evmContracts";
 import type { Listing, QuickBuyMergeData, RankRow, TxOptions } from "./wallet/types";
 
-type RazorKit = typeof import("@razorlabs/razorkit");
+type CardData = { playerId: number; tier: number; cardAddr: string };
+type CardGroup = { playerId: number; tier: number; count: number };
 
 type TransactionPayload = {
   function: string;
   typeArguments: unknown[];
   functionArguments: unknown[];
+  value?: bigint;
 };
-
-type WalletNetwork = { chainId?: number; name?: string };
-type WalletWithAdapter = { adapter?: { network?: () => Promise<WalletNetwork | null> } };
-type WalletTxResponse = { hash?: string; transaction_hash?: string };
-type TxProvider = { waitForTransaction?: (args: { transactionHash: string }) => Promise<unknown> };
-type WalletOption = { name?: string; label?: string; adapter?: { name?: string; providerName?: string }; iconUrl?: string; downloadUrl?: unknown };
-type CardData = { playerId: number; tier: number; cardAddr: string };
-type CardGroup = { playerId: number; tier: number; count: number };
-type ChainHelpers = {
-  useSwitchChain?: () => { switchChain: (chainId: number) => unknown };
-  useChainId?: () => number;
-};
-
-const RAZORKIT_LAST_CONNECT_WALLET_KEY = "WK__LAST_CONNECT_WALLET_NAME";
-
-function isMetaMaskWalletOption(walletOption: WalletOption | string | null | undefined): boolean {
-  const option = typeof walletOption === "string" ? { name: walletOption } : walletOption;
-  if (!option) return false;
-
-  const searchable = [
-    option.name,
-    option.label,
-    option.adapter?.name,
-    option.adapter?.providerName,
-    option.iconUrl,
-    typeof option.downloadUrl === "string" ? option.downloadUrl : "",
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-
-  return searchable.includes("metamask") || searchable.includes("nkbihfbeogaeaoehlefnkodbefgpgknn");
-}
-
-function useRazorKit() {
-  const [kit, setKit] = useState<RazorKit | null>(null);
-  useEffect(() => {
-    let mounted = true;
-    import("@razorlabs/razorkit")
-      .then((m) => { if (mounted) setKit(m); })
-      .catch(() => {});
-    return () => { mounted = false; };
-  }, []);
-  return kit;
-}
 
 type Tab = "roster" | "marketplace" | "tournament" | "rankings" | "admin";
 
@@ -111,14 +71,12 @@ const TOUR_DEMO_RANKS: RankRow[] = [
 ];
 
 function Inner({
-  kit,
   activeTab,
   setActiveTab,
   onAdminChange,
   tourDemoMode,
   onStartTour,
 }: {
-  kit: RazorKit;
   activeTab: Tab;
   setActiveTab: (t: Tab) => void;
   onAdminChange?: (v: boolean) => void;
@@ -126,69 +84,26 @@ function Inner({
   onStartTour?: () => void;
 }) {
   const { lang } = useI18n();
-  const wallet = kit.useWallet();
-  const provider = kit.useProvider(REST_URL);
-  const ABSTRACT_TESTNET_CHAIN_ID = 250;
-  const chainHelpers = kit as RazorKit & ChainHelpers;
-  const { switchChain } = chainHelpers.useSwitchChain?.() ?? { switchChain: () => undefined };
-  const currentChainId = chainHelpers.useChainId?.();
+  const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const wagmiConfig = useConfig();
+  const { switchChainAsync } = useSwitchChain();
+  const { signMessageAsync } = useSignMessage();
   const restUrl = REST_URL;
   const moduleAddress = MODULE_ADDRESS;
+  const accountAddress = address ?? null;
+  const walletAccount = accountAddress
+    ? { address: accountAddress, publicKey: accountAddress }
+    : null;
 
-  // kit.useChainId() is set once at connect and never updates — poll adapter.network() directly
-  const [adapterWrongNetwork, setAdapterWrongNetwork] = useState<boolean | null>(null);
-  useEffect(() => {
-    if (!wallet.connected) { setAdapterWrongNetwork(null); return; }
-    let cancelled = false;
-    async function poll() {
-      try {
-        const net = await (wallet as WalletWithAdapter).adapter?.network?.();
-        if (cancelled || !net) return;
-        const onTestnet =
-          net.chainId === ABSTRACT_TESTNET_CHAIN_ID ||
-          (typeof net.name === "string" && net.name.toLowerCase().includes("testnet") && !net.name.toLowerCase().includes("mainnet"));
-        setAdapterWrongNetwork(!onTestnet);
-      } catch { /* adapter.network() unsupported */ }
-    }
-    poll();
-    const id = setInterval(poll, 1500);
-    return () => { cancelled = true; clearInterval(id); };
-  }, [wallet]);
+  const wrongNetwork = isConnected && chainId !== abstractTestnet.id;
 
-  const wrongNetwork = wallet.connected && (
-    adapterWrongNetwork !== null ? adapterWrongNetwork : currentChainId !== ABSTRACT_TESTNET_CHAIN_ID
-  );
-
-  // ── Connect modal ────────────────────────────────────────────────────────────
   const [ctaHost, setCtaHost] = useState<HTMLElement | null>(null);
-  const [connectOpen, setConnectOpen] = useState(false);
-  const [connectError, setConnectError] = useState("");
-  const [connectingWalletName, setConnectingWalletName] = useState("");
-  const [connectStep, setConnectStep] = useState<"list" | "connecting">("list");
-  const [connectHint, setConnectHint] = useState("");
-  const [connectStartedAt, setConnectStartedAt] = useState(0);
 
   useEffect(() => {
     const el = document.getElementById("wallet-cta");
     setCtaHost(el instanceof HTMLElement ? el : null);
   }, []);
-
-  useEffect(() => {
-    if (!connectOpen) return;
-    if (wallet.connected) {
-      setConnectOpen(false); setConnectStep("list"); setConnectHint(""); setConnectStartedAt(0);
-      return;
-    }
-    if (connectStep !== "connecting" || !connectStartedAt) return;
-    const t = window.setTimeout(() => {
-      setConnectHint(
-        lang === "ru"
-          ? "Если окно кошелька не появилось: проверь, что расширение не заблокировано всплывающими окнами."
-          : "If the wallet window didn't appear: make sure popups aren't blocked.",
-      );
-    }, 2500);
-    return () => window.clearTimeout(t);
-  }, [connectOpen, connectStep, connectStartedAt, wallet.connected, lang]);
 
   // ── shared state ─────────────────────────────────────────────────────────────
   const [busy, setBusy] = useState<string | null>(null);
@@ -213,7 +128,8 @@ function Inner({
     newCardKeys,
     ensureInitialized, handleOnboardingCreate,
     onBuyChestTyped, onOpenChestTyped, onMerge, refreshInventory,
-  } = useRosterLogic({ submitTx, setBusy, setOnboardingBusy, walletAccount: wallet.account, lang, restUrl, moduleAddress });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } = useRosterLogic({ submitTx, setBusy, setOnboardingBusy, walletAccount, lang, restUrl, moduleAddress, wagmiConfig });
 
   // ── tournament logic (hook) ───────────────────────────────────────────────────
   const {
@@ -231,7 +147,8 @@ function Inner({
     refreshTournament,
     onSubmitLineup, onCancelLineup, fetchOracleDays, heroScore,
     fetchMarketSnapshot, marketSnapshotCache, fetchLineupStats, lineupStatsCache,
-  } = useTournamentLogic({ submitTx, setBusy, flCards, walletAccount: wallet.account, lang, restUrl, moduleAddress });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } = useTournamentLogic({ submitTx, setBusy, flCards, walletAccount, lang, restUrl, moduleAddress, wagmiConfig });
 
   // ── filter / sort state ───────────────────────────────────────────────────────
   const [filterTeam, setFilterTeam] = useState<string | null>(null);
@@ -251,9 +168,8 @@ function Inner({
     myListingsPage, setMyListingsPage,
     refreshListings, onListCard, onTransferCard, onBuyCard, onBuyCards, onCancelListing,
   } = useMarketplaceLogic({ submitTx, setBusy, flCards, lockedCardAddrs, setFlError, refreshInventory,
-    walletAccount: wallet.account, ensureInitialized, restUrl, moduleAddress });
+    walletAccount, ensureInitialized, restUrl, moduleAddress });
 
-  const accountAddress = wallet.account ? String(wallet.account.address) : null;
   const displayFlCards = useMemo(
     () => (tourDemoMode && flCards.length === 0 ? TOUR_DEMO_CARDS : flCards),
     [tourDemoMode, flCards],
@@ -300,8 +216,8 @@ function Inner({
     refreshTournament,
     restUrl,
     moduleAddress,
-    walletAccount: wallet.account,
-    walletSignMessage: wallet.signMessage,
+    walletAccount,
+    walletSignMessage: signMessageAsync,
     tournamentStartTs: tnState?.startTimestamp ?? null,
   });
 
@@ -315,60 +231,9 @@ function Inner({
 
 
   // ── contract helpers ──────────────────────────────────────────────────────────
-  async function submitTx(payload: TransactionPayload, opts?: TxOptions) {
-    if (opts?.skipSimulation) {
-      const aptosClient = provider as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-      let rawTx: unknown;
-      try {
-        rawTx = await aptosClient.transaction.build.simple({
-          sender: wallet.address!,
-          data: {
-            function: payload.function,
-            typeArguments: payload.typeArguments,
-            functionArguments: payload.functionArguments,
-          },
-          options: { maxGasAmount: opts.maxGasAmount ?? 10000 },
-        });
-      } catch (e) {
-        console.error("[submitTx] build failed:", e);
-        throw e;
-      }
-      let signResult: Awaited<ReturnType<typeof wallet.signTransaction>>;
-      try {
-        signResult = await wallet.signTransaction(rawTx as Parameters<typeof wallet.signTransaction>[0]);
-      } catch (e) {
-        console.error("[submitTx] signTransaction failed:", e);
-        throw e;
-      }
-      if (signResult.status !== "Approved") throw new Error("Transaction rejected by user");
-      let pending: { hash?: string } | undefined;
-      try {
-        pending = await aptosClient.transaction.submit.simple({
-          transaction: rawTx,
-          senderAuthenticator: signResult.args,
-        });
-      } catch (e) {
-        console.error("[submitTx] submit failed:", e);
-        throw e;
-      }
-      const hash = pending?.hash;
-      console.log("[submitTx] submitted hash:", hash);
-      if (hash) {
-        try { await (provider as TxProvider).waitForTransaction?.({ transactionHash: hash }); }
-        catch { await new Promise((r) => setTimeout(r, 2000)); }
-      } else {
-        await new Promise((r) => setTimeout(r, 2000));
-      }
-      return;
-    }
-    const resp = await wallet.signAndSubmitTransaction({ payload, ...opts } as Parameters<typeof wallet.signAndSubmitTransaction>[0]) as WalletTxResponse;
-    const hash = resp.hash ?? resp.transaction_hash;
-    if (hash) {
-      try { await (provider as TxProvider).waitForTransaction?.({ transactionHash: hash }); }
-      catch { await new Promise((r) => setTimeout(r, 2000)); }
-    } else {
-      await new Promise((r) => setTimeout(r, 2000));
-    }
+  async function submitTx(payload: TransactionPayload, _opts?: TxOptions) {
+    await switchChainAsync({ chainId: abstractTestnet.id });
+    await submitEvmTx(wagmiConfig, payload);
   }
 
 
@@ -421,7 +286,7 @@ function Inner({
 
 
   async function onClaim() {
-    if (!wallet.account) return;
+    if (!address) return;
     setBusy("claim");
     try {
       await submitTx({
@@ -491,10 +356,6 @@ function Inner({
     [displayMpFiltered, mpPage, MP_PAGE_SIZE]
   );
 
-  const availableWallets = useMemo(
-    () => wallet.allAvailableWallets.filter((w: WalletOption) => !isMetaMaskWalletOption(w)),
-    [wallet.allAvailableWallets],
-  );
 
   const flGroupsPage = useMemo(
     () => flGroups.slice(rosterPage * ROSTER_PAGE_SIZE, (rosterPage + 1) * ROSTER_PAGE_SIZE),
@@ -503,86 +364,15 @@ function Inner({
 
 
 
-  // ── connect portal handlers ──────────────────────────────────────────────────
-  function clearWalletLocalStorage(addr: string) {
-    try {
-      const prefix = `coindeck_`;
-      const addrLower = addr.toLowerCase();
-      Object.keys(localStorage)
-        .filter(k => k.startsWith(prefix) && k.toLowerCase().includes(addrLower))
-        .forEach(k => localStorage.removeItem(k));
-      localStorage.removeItem("player_nickname");
-    } catch {}
-  }
-
-  async function onCTAClick() {
-    try {
-      setConnectError("");
-      if (wallet.connected) {
-        if (accountAddress) clearWalletLocalStorage(accountAddress);
-        await wallet.disconnect();
-        return;
-      }
-      setConnectOpen(true); setConnectStep("list"); setConnectHint("");
-    } catch (e: unknown) { setConnectError(getErrorMessage(e)); }
-  }
-
-  async function onSelectWallet(name: string) {
-    try {
-      setConnectError(""); setConnectingWalletName(name);
-      if (isMetaMaskWalletOption(name)) {
-        setConnectStep("list");
-        setConnectError(lang === "ru"
-          ? "MetaMask не поддерживает это Abstract/Aptos подключение. Используйте Nightly, Petra, Razor Wallet или OKX."
-          : "MetaMask does not support this Abstract/Aptos connection. Use Nightly, Petra, Razor Wallet, or OKX.");
-        return;
-      }
-      setConnectStep("connecting"); setConnectStartedAt(Date.now());
-      await wallet.select(name);
-      window.setTimeout(() => {
-        if (wallet.status === "disconnected") {
-          setConnectStep("list");
-          setConnectError(lang === "ru"
-            ? `Кошелёк "${name}" не начал подключение.`
-            : `Wallet "${name}" did not start connecting.`);
-        }
-      }, 400);
-    } catch (e: unknown) { setConnectError(getErrorMessage(e)); setConnectStep("list"); }
-    finally { setConnectingWalletName(""); }
-  }
-
-  function onBackFromConnecting() {
-    setConnectStep("list"); setConnectHint(""); setConnectingWalletName(""); setConnectStartedAt(0);
-  }
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <div className="text-zinc-50">
       <ModalKeyframes />
 
-      {/* Wrong network blocker — must switch to Abstract Testnet before anything else */}
-      {wrongNetwork && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm">
-          <div className="mx-4 w-full max-w-sm rounded-2xl border border-red-500/30 bg-[#0a0c18] p-8 text-center shadow-2xl">
-            <div className="mb-4 text-4xl">⚠️</div>
-            <h2 className="mb-2 text-lg font-bold text-white">
-              {lang === "ru" ? "Неправильная сеть" : "Wrong Network"}
-            </h2>
-            <p className="mb-6 text-sm text-zinc-400">
-              {lang === "ru"
-                ? "Подключите кошелёк к сети Abstract Testnet, чтобы продолжить."
-                : "Please switch your wallet to Abstract Testnet to continue."}
-            </p>
-            <button
-              onClick={() => switchChain(ABSTRACT_TESTNET_CHAIN_ID)}
-              className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-violet-500 py-3 text-sm font-bold text-white hover:opacity-90 transition">
-              {lang === "ru" ? "Переключить на Testnet" : "Switch to Testnet"}
-            </button>
-          </div>
-        </div>
-      )}
+      <WrongNetworkBlocker lang={lang} />
 
       {/* Onboarding modal for new users */}
-      {wallet.connected && flInventoryChecked && !flInitialized && (
+      {isConnected && flInventoryChecked && !flInitialized && (
         <OnboardingModal onCreateAccount={onCreateAccountAndStartTour} busy={onboardingBusy} lang={lang} tierMults={tierMults} />
       )}
 
@@ -664,28 +454,7 @@ function Inner({
         />
       )}
 
-      <ConnectPortals
-        lang={lang}
-        ctaHost={ctaHost}
-        wrongNetwork={wrongNetwork}
-        walletConnected={wallet.connected}
-        walletConnecting={!!wallet.connecting}
-        wallets={availableWallets}
-        walletAddress={accountAddress}
-        switchChainToTestnet={() => switchChain(ABSTRACT_TESTNET_CHAIN_ID)}
-        onCTAClick={onCTAClick}
-        onDisconnect={async () => {
-          try { await wallet.disconnect(); } catch (e: unknown) { setConnectError(getErrorMessage(e)); }
-        }}
-        connectOpen={connectOpen}
-        setConnectOpen={setConnectOpen}
-        connectStep={connectStep}
-        connectError={connectError}
-        connectHint={connectHint}
-        connectingWalletName={connectingWalletName}
-        onSelectWallet={onSelectWallet}
-        onBackFromConnecting={onBackFromConnecting}
-      />
+      <ConnectPortals lang={lang} ctaHost={ctaHost} />
 
       <main className="mx-auto w-full max-w-6xl px-6 py-6" data-tour="tour-finish">
 
@@ -693,8 +462,8 @@ function Inner({
         {activeTab === "roster" && (
           <RosterTab
             lang={lang}
-            walletConnected={wallet.connected || !!tourDemoMode}
-            hasWalletAccount={!!wallet.account || !!tourDemoMode}
+            walletConnected={isConnected || !!tourDemoMode}
+            hasWalletAccount={!!address || !!tourDemoMode}
             flCards={displayFlCards}
             flGroups={flGroups}
             flGroupsPage={flGroupsPage}
@@ -750,7 +519,7 @@ function Inner({
             myListingsPage={myListingsPage}
             setMyListingsPage={setMyListingsPage}
             accountAddress={accountAddress}
-            hasWalletAccount={!!wallet.account}
+            hasWalletAccount={!!address}
             busy={busy}
             onBuyCard={onBuyCard}
             onCancelListing={onCancelListing}
@@ -826,7 +595,7 @@ function Inner({
             resultsDaysLoading={resultsDaysLoading}
             flCards={displayFlCards}
             busy={busy}
-            hasWalletAccount={!!wallet.account || !!tourDemoMode}
+            hasWalletAccount={!!address || !!tourDemoMode}
             heroScore={heroScore}
             fetchOracleDays={fetchOracleDays}
             onClaim={onClaim}
@@ -920,8 +689,8 @@ function Inner({
             mkStats={mkStats}
               fetchClaimState={fetchClaimState}
               fetchGovernanceState={fetchGovernanceState}
-              walletAccount={wallet.account}
-              walletSignMessage={wallet.signMessage}
+              walletAccount={walletAccount}
+              walletSignMessage={signMessageAsync as any} // eslint-disable-line @typescript-eslint/no-explicit-any
             />
         )}
 
@@ -943,34 +712,14 @@ export function WalletApp({
   tourDemoMode?: boolean;
   onStartTour?: () => void;
 }) {
-  const kit = useRazorKit();
-
-  const chains = useMemo(() => {
-    if (!kit) return [];
-    return [kit.MovementBardockTestnetChain];
-  }, [kit]);
-
-  // Clear MetaMask before WalletProvider mounts so autoConnect skips it
-  useMemo(() => {
-    try {
-      const last = localStorage.getItem(RAZORKIT_LAST_CONNECT_WALLET_KEY);
-      if (isMetaMaskWalletOption(last)) localStorage.removeItem(RAZORKIT_LAST_CONNECT_WALLET_KEY);
-    } catch {}
-  }, []);
-
-  if (!kit) return null;
-
   return (
-    <kit.WalletProvider chains={chains} autoConnect={true}>
-      <Inner
-        kit={kit}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        onAdminChange={onAdminChange}
-        tourDemoMode={tourDemoMode}
-        onStartTour={onStartTour}
-      />
-    </kit.WalletProvider>
+    <Inner
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      onAdminChange={onAdminChange}
+      tourDemoMode={tourDemoMode}
+      onStartTour={onStartTour}
+    />
   );
 }
 

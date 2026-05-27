@@ -1,6 +1,6 @@
 export type Tab = "roster" | "marketplace" | "tournament" | "rankings" | "admin";
 
-export type TransactionPayload = { function: string; typeArguments: unknown[]; functionArguments: unknown[] };
+export type TransactionPayload = { function: string; typeArguments: unknown[]; functionArguments: unknown[]; value?: bigint };
 export type TxOptions = { maxGasAmount?: number; gasUnitPrice?: number; skipSimulation?: boolean };
 export type HeroStats = { priceChg: number; vol24h: number; high24h: number; low24h: number; tempRatio: number; hype: boolean };
 export type ClaimState = { active: boolean; startTs: number; deadline: number; vaultBalance: number; claimDays: number } | null;

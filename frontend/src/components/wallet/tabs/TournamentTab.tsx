@@ -268,7 +268,7 @@ export function TournamentTab({
                       : "Cancelling removes the lineup and unlocks cards until day end."}
                     {feeMove && (
                       <span className="text-red-300 font-semibold ml-1">
-                        {lang === "ru" ? `Стоимость: ${feeMove} MOVE` : `Fee: ${feeMove} MOVE`}
+                        {lang === "ru" ? `Стоимость: ${feeMove} ETH` : `Fee: ${feeMove} ETH`}
                       </span>
                     )}
                   </div>
@@ -299,7 +299,7 @@ export function TournamentTab({
                         </div>
                         {feeMove && (
                           <div className="mt-2 rounded-xl bg-red-500/10 border border-red-500/20 px-3 py-2 text-sm font-bold text-red-300">
-                            {lang === "ru" ? `Комиссия: ${feeMove} MOVE` : `Fee: ${feeMove} MOVE`}
+                            {lang === "ru" ? `Комиссия: ${feeMove} ETH` : `Fee: ${feeMove} ETH`}
                           </div>
                         )}
                       </div>
@@ -656,7 +656,7 @@ export function TournamentTab({
                   <div>
                     <div className="text-sm font-bold text-amber-300">🎉 {lang === "ru" ? "Ваш приз готов к получению" : "Your prize is ready to claim"}</div>
                     <div className="text-xs text-amber-400/80 mt-0.5">
-                      {(userClaimable / 1e8).toFixed(4)} MOVE
+                      {(userClaimable / 1e8).toFixed(4)} ETH
                       {claimState.deadline > 0 && (
                         <> · {lang === "ru" ? "Дедлайн" : "Deadline"}: {new Date(claimState.deadline * 1000).toLocaleString(lang === "ru" ? "ru-RU" : "en-US", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</>
                       )}

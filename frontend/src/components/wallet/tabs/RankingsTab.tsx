@@ -141,7 +141,7 @@ export function RankingsTab({
     <div className="mt-2 space-y-4">
       {/* ── Stats bar ── */}
       <section className="relative mb-6" data-tour="rankings-info">
-        <div className="relative grid grid-cols-2 gap-3 rounded-3xl p-3 backdrop-blur-xl lg:grid-cols-4" style={{ border: "1px solid var(--info-block-shell-border)", background: "var(--info-block-shell)", boxShadow: "var(--info-block-shell-shadow)" }}>
+        <div className="relative grid grid-cols-2 gap-3 rounded-3xl p-3 lg:grid-cols-4" style={{ border: "1px solid var(--info-block-shell-border)", background: "var(--info-block-shell)", boxShadow: "var(--info-block-shell-shadow)" }}>
 
           {/* Card 1 — Current day */}
           <StatCard
@@ -235,8 +235,16 @@ export function RankingsTab({
           {LEAGUE_LABELS.map((l, i) => (
             <button key={i}
               onClick={() => handleFilterChange(lbLeagueFilter === i ? null : i)}
-              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${lbLeagueFilter === i ? "border border-[#00FF66]/50 bg-[#00FF66]/10 text-[#00FF66]" : "text-gray-400 hover:text-white hover:bg-white/5"}`}
-              style={lbLeagueFilter === i ? { boxShadow: "inset 0 -2px 0 #00FF66, 0 0 12px rgba(0,255,102,0.18)" } : {}}>
+              className={`rounded-md border px-3 py-1.5 text-xs font-semibold transition ${lbLeagueFilter === i ? "nav-tab-active" : ""}`}
+              style={lbLeagueFilter === i ? {
+                background: "var(--filter-chip-active-bg)",
+                color: "var(--filter-chip-active-text)",
+                borderColor: "var(--filter-chip-active-border)",
+              } : {
+                color: "var(--filter-chip-text)",
+                background: "var(--filter-chip-bg)",
+                borderColor: "var(--filter-chip-border)",
+              }}>
               {l.en}
             </button>
           ))}

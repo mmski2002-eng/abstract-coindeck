@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Inter, Lora } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
-import RazorKitStyles from "@/components/RazorKitStyles";
+import { Providers } from "@/components/Providers";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { SuppressExtensionErrors } from "@/components/SuppressExtensionErrors";
 
@@ -62,19 +63,27 @@ const initThemeScript = `
       ? stored
       : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    document.cookie = "cd_theme=" + theme + "; path=/; max-age=31536000; samesite=lax";
   } catch (e) {}
 })();
 `;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const storedTheme = cookieStore.get("cd_theme")?.value;
+  const initialTheme = storedTheme === "dark" || storedTheme === "light" ? storedTheme : "light";
+
   return (
     <html
       lang="en"
       className={`${lora.variable} ${inter.variable} h-full antialiased`}
+      data-theme={initialTheme}
+      style={{ colorScheme: initialTheme }}
       suppressHydrationWarning
     >
       <head>
@@ -87,8 +96,9 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col font-body">
         <SuppressExtensionErrors />
-        <RazorKitStyles />
-        <LanguageProvider>{children}</LanguageProvider>
+        <Providers>
+          <LanguageProvider>{children}</LanguageProvider>
+        </Providers>
       </body>
     </html>
   );

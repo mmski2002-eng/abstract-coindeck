@@ -44,8 +44,15 @@ export const TIER_COLORS = [
 
 export const ALL_TEAMS = Array.from(new Set(PLAYER_TEAMS));
 
-export const MODULE_ADDRESS    = projectAddresses.moduleAddress;
-export const ADMIN_ADDRESS     = projectAddresses.adminAddress;
-export const VAULT_ADDRESS     = projectAddresses.prizeVaultAddress;
+export const MODULE_ADDRESS      = projectAddresses.moduleAddress;
+export const ADMIN_ADDRESS       = projectAddresses.adminAddress;
+export const VAULT_ADDRESS       = projectAddresses.prizeVaultAddress;
 export const CLAIM_VAULT_ADDRESS = projectAddresses.claimVaultAddress;
-export const REST_URL          = projectAddresses.restUrl;
+export const REST_URL            = projectAddresses.restUrl;
+
+export const ADMIN_CONTROL  = projectAddresses.adminControl;
+export const COIN_DECK_NFT  = projectAddresses.coinDeckNFT;
+export const TOURNAMENT     = projectAddresses.tournament;
+export const ORACLE         = projectAddresses.oracle;
+export const CLAIM          = projectAddresses.claim;
+export const MARKETPLACE    = projectAddresses.marketplace;

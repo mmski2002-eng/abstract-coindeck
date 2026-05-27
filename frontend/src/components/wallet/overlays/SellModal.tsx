@@ -31,7 +31,7 @@ export function SellModal({ lang, modal, onClose, sellPrice, setSellPrice, busy,
         </div>
         <div>
           <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
-            {lang === "ru" ? "Цена (MOVE)" : "Price (MOVE)"}
+            {lang === "ru" ? "Цена (ETH)" : "Price (ETH)"}
           </label>
           <input
             type="number" min="0.01" step="0.01" value={sellPrice}
@@ -43,8 +43,8 @@ export function SellModal({ lang, modal, onClose, sellPrice, setSellPrice, busy,
           </div>
           <div className="mt-1 text-xs text-zinc-500">
             {lang === "ru"
-              ? `Вы получите ≈ ${(parseFloat(sellPrice || "0") * 0.95).toFixed(4)} MOVE (5% комиссия платформы)`
-              : `You receive ≈ ${(parseFloat(sellPrice || "0") * 0.95).toFixed(4)} MOVE (5% platform fee)`}
+              ? `Вы получите ≈ ${(parseFloat(sellPrice || "0") * 0.95).toFixed(4)} ETH (5% комиссия платформы)`
+              : `You receive ≈ ${(parseFloat(sellPrice || "0") * 0.95).toFixed(4)} ETH (5% platform fee)`}
           </div>
         </div>
         <div className="flex gap-2">

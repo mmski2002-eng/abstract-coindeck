@@ -1,11 +1,19 @@
 import { useEffect, useRef, useState } from "react";
+import type { Config } from "@wagmi/core";
 import { TIER_MULTS, PLAYER_ROLE_IDS } from "../constants";
 import type { TransactionPayload, TxOptions, TournamentStateData, LineupSlot, LineupEntry } from "../types";
-import { getErrorMessage, parseU8Vec } from "../utils";
+import { getErrorMessage } from "../utils";
+import {
+  readEvmCancelFee,
+  readEvmOracleDayScores,
+  readEvmPlayerLineups,
+  readEvmTournamentState,
+} from "@/lib/evmContracts";
 
 interface Deps {
   restUrl: string;
   moduleAddress: string;
+  wagmiConfig: Config;
   submitTx: (p: TransactionPayload, opts?: TxOptions) => Promise<void>;
   setBusy: (v: string | null) => void;
   flCards: { playerId: number; tier: number; cardAddr: string }[];
@@ -13,7 +21,7 @@ interface Deps {
   lang: string;
 }
 
-export function useTournamentLogic({ restUrl, moduleAddress, submitTx, setBusy, flCards, walletAccount, lang }: Deps) {
+export function useTournamentLogic({ restUrl, moduleAddress, wagmiConfig, submitTx, setBusy, flCards, walletAccount, lang }: Deps) {
   const [tnState, setTnState] = useState<TournamentStateData>(null);
   const [tnLineups, setTnLineups] = useState<LineupEntry[]>([]);
   const [lockedCardAddrs, setLockedCardAddrs] = useState<string[]>([]);
@@ -51,32 +59,9 @@ export function useTournamentLogic({ restUrl, moduleAddress, submitTx, setBusy, 
   const [dayCountdown, setDayCountdown] = useState("");
 
   async function fetchLineupsForEpoch(addr: unknown, epoch: number): Promise<LineupEntry[]> {
-    const resp = await fetch(`${restUrl}/view`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ function: `${moduleAddress}::tournament::get_player_lineups_epoch`, type_arguments: [], arguments: [addr, String(epoch)] }),
-    });
-    if (!resp.ok) return [];
-    const [days, leaguesRaw] = await resp.json() as [string[], unknown];
-    const leagueNums = parseU8Vec(leaguesRaw);
-    const entries = await Promise.all((days as string[]).map(async (d, i) => {
-      const day = Number(d);
-      let slots: LineupSlot[] | undefined;
-      try {
-        const slotsResp = await fetch(`${restUrl}/view`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ function: `${moduleAddress}::tournament::get_lineup_slots_epoch`, type_arguments: [], arguments: [addr, String(day), String(epoch)] }),
-        });
-        if (slotsResp.ok) {
-          const [rawPids, rawTiers] = await slotsResp.json() as [unknown, unknown];
-          const pids = parseU8Vec(rawPids);
-          const tiers = parseU8Vec(rawTiers);
-          if (pids.length > 0) slots = pids.map((pid, j) => ({ playerId: pid, tier: tiers[j] ?? 0 }));
-        }
-      } catch { /* ignore */ }
-      return { day, league: leagueNums[i] ?? 0, slots };
-    }));
+    const player = String(addr ?? "").trim();
+    if (!player.startsWith("0x")) return [];
+    const entries = await readEvmPlayerLineups(wagmiConfig, player as `0x${string}`, epoch);
     setTnLineups(entries);
     return entries;
   }
@@ -88,46 +73,26 @@ export function useTournamentLogic({ restUrl, moduleAddress, submitTx, setBusy, 
       setTnError("");
     }
     try {
-      const stateResp = await fetch(`${restUrl}/view`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ function: `${moduleAddress}::tournament::get_state`, type_arguments: [], arguments: [] }),
+      const state = await readEvmTournamentState(wagmiConfig);
+      const currentEpoch = state.epoch || 1;
+      const currentDay = state.day;
+      const totalDays = 6;
+      setTnState({
+        active: state.running,
+        currentDay,
+        startTimestamp: state.startTimestamp,
+        prizePool: Number(state.prizePool),
+        ended: !state.running,
+        epoch: currentEpoch,
+        totalDays,
       });
-      let currentEpoch = 1;
-      let currentDay = 0;
-      if (stateResp.ok) {
-        const [rawRunning, epoch, day, , startTimestamp, prizePool] = await stateResp.json() as [unknown, string, string, unknown, string, string, string, string];
-        currentEpoch = Number(epoch ?? 1);
-        const active = rawRunning === true || rawRunning === "true";
-        currentDay = Number(day);
-        const totalDays = 6;
-        setTnState({ active, currentDay, startTimestamp: Number(startTimestamp), prizePool: Number(prizePool), ended: !active, epoch: currentEpoch, totalDays });
-        if (!resultsDayInitialized.current) {
-          resultsDayInitialized.current = true;
-          const defaultDay = currentDay === 0 ? totalDays : currentDay > 1 ? currentDay - 1 : 1;
-          setResultsDay(defaultDay);
-        }
+      setEpochRange([state.firstVisibleEpoch || currentEpoch, currentEpoch]);
+      setCancelFee(Number(await readEvmCancelFee(wagmiConfig)));
+      if (!resultsDayInitialized.current) {
+        resultsDayInitialized.current = true;
+        const defaultDay = currentDay === 0 ? totalDays : currentDay > 1 ? currentDay - 1 : 1;
+        setResultsDay(defaultDay);
       }
-      const epochResp = await fetch(`${restUrl}/view`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ function: `${moduleAddress}::tournament::get_epoch_range`, type_arguments: [], arguments: [] }),
-      });
-      if (epochResp.ok) {
-        const [first, current] = await epochResp.json() as [string, string];
-        setEpochRange([Number(first), Number(current)]);
-      }
-      // Fetch cancel fee
-      try {
-        const feeResp = await fetch(`${restUrl}/view`, {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ function: `${moduleAddress}::tournament::get_cancel_fee`, type_arguments: [], arguments: [] }),
-        });
-        if (feeResp.ok) {
-          const [fee] = await feeResp.json() as [string];
-          setCancelFee(Number(fee ?? 0));
-        }
-      } catch { /* ignore */ }
 
       if (walletAccount) {
         const entries = await fetchLineupsForEpoch(walletAccount.address, currentEpoch);
@@ -237,17 +202,11 @@ export function useTournamentLogic({ restUrl, moduleAddress, submitTx, setBusy, 
     try {
       const results = await Promise.all(missing.map(async (day) => {
         try {
-          const resp = await fetch(`${restUrl}/view`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ function: `${moduleAddress}::oracle::get_day_scores`, type_arguments: [], arguments: [String(day)] }),
-          });
-          if (!resp.ok) return null;
-          const [pidRaw, ptsRaw, rawFinalized] = await resp.json() as [unknown, string[], unknown];
-          const posted = rawFinalized === true || rawFinalized === "true";
+          const oracleDay = await readEvmOracleDayScores(wagmiConfig, day);
+          const posted = oracleDay.posted;
           const finalized = posted && day <= closedOracleDay();
-          const pids = parseU8Vec(pidRaw);
           const scores = new Array(50).fill(0) as number[];
-          pids.forEach((pid, i) => { if (pid < 50) scores[pid] = Number(ptsRaw[i] ?? 0); });
+          oracleDay.playerIds.forEach((pid, i) => { if (pid < 50) scores[pid] = Number(oracleDay.points[i] ?? 0n); });
           return [day, { scores, finalized }] as [number, { scores: number[]; finalized: boolean }];
         } catch { return null; }
       }));
@@ -314,18 +273,11 @@ export function useTournamentLogic({ restUrl, moduleAddress, submitTx, setBusy, 
     if (missing.length === 0) return;
     Promise.all(missing.map(async (day) => {
       try {
-        const resp = await fetch(`${restUrl}/view`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ function: `${moduleAddress}::oracle::get_day_scores`, type_arguments: [], arguments: [String(day)] }),
-        });
-        if (!resp.ok) return null;
-        const [pidRaw, ptsRaw, rawFinalized] = await resp.json() as [unknown, string[], unknown];
-        const posted = rawFinalized === true || rawFinalized === "true";
+        const oracleDay = await readEvmOracleDayScores(wagmiConfig, day);
+        const posted = oracleDay.posted;
         const finalized = posted && day <= closedOracleDay();
-        const pids = parseU8Vec(pidRaw);
         const scores = new Array(50).fill(0) as number[];
-        pids.forEach((pid, i) => { if (pid < 50) scores[pid] = Number(ptsRaw[i] ?? 0); });
+        oracleDay.playerIds.forEach((pid, i) => { if (pid < 50) scores[pid] = Number(oracleDay.points[i] ?? 0n); });
         return [day, { scores, finalized }] as [number, { scores: number[]; finalized: boolean }];
       } catch { return null; }
     })).then(results => {

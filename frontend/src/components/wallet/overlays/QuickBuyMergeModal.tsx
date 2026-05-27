@@ -158,7 +158,7 @@ export function QuickBuyMergeModal({
                     </div>
                     <div className="shrink-0 text-right">
                       <div className={`text-sm font-black ${active ? "text-cyan-300" : "text-zinc-400"}`}>
-                        {(listing.price / 1e8).toFixed(2)} MOVE
+                        {(listing.price / 1e8).toFixed(4)} ETH
                       </div>
                     </div>
                   </div>
@@ -174,7 +174,7 @@ export function QuickBuyMergeModal({
               {lang === "ru" ? "Итого" : "Total"}
             </div>
             <div className="mt-0.5 text-base font-black text-white">
-              {(totalPrice / 1e8).toFixed(2)} <span className="text-cyan-300">MOVE</span>
+              {(totalPrice / 1e8).toFixed(4)} <span className="text-cyan-300">ETH</span>
             </div>
           </div>
           <button

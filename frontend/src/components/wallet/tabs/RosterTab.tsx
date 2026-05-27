@@ -68,7 +68,7 @@ export function RosterTab({
       {/* Stats bar */}
       {walletConnected && (
         <section className="relative mb-6" data-tour="roster-info">
-          <div className="relative grid grid-cols-2 gap-3 rounded-3xl p-3 backdrop-blur-xl lg:grid-cols-4" style={{ border: "1px solid var(--info-block-shell-border)", background: "var(--info-block-shell)", boxShadow: "var(--info-block-shell-shadow)" }}>
+          <div className="relative grid grid-cols-2 gap-3 rounded-3xl p-3 lg:grid-cols-4" style={{ border: "1px solid var(--info-block-shell-border)", background: "var(--info-block-shell)", boxShadow: "var(--info-block-shell-shadow)" }}>
             {([
               { label: lang === "ru" ? "НФТ" : "NFTs", value: String(flCards.length + chestCounts.wooden + chestCounts.iron + chestCounts.silver), unit: lang === "ru" ? "шт" : "pcs", accent: "from-violet-400/40 to-violet-600/10", delta: `${new Set(flCards.map((c) => c.playerId)).size} ${lang === "ru" ? "монет" : "coins"}` },
               { label: lang === "ru" ? "Сундуков" : "Chests", value: String(chestCounts.wooden + chestCounts.iron + chestCounts.silver), unit: lang === "ru" ? "шт" : "pcs", accent: "from-amber-400/40 to-amber-600/10", delta: `🪵×${chestCounts.wooden} 🪨×${chestCounts.iron} 🪙×${chestCounts.silver}` },
@@ -240,8 +240,8 @@ export function RosterTab({
                         <div className="flex items-end justify-between gap-3">
                           <div className="min-w-0 self-end translate-y-[6px] sm:translate-y-[7px]">
                             <div className="flex items-baseline gap-1.5">
-                              <span className="font-display text-[1.7rem] font-bold tabular-nums tracking-tight sm:text-[2rem]" style={{ color: accent }}>{(price / 1e8).toFixed(2)}</span>
-                              <span className="font-mono text-[10px] uppercase tracking-widest sm:text-xs" style={{ color: "var(--chest-card-text-muted)" }}>MOVE</span>
+                              <span className="font-display text-[1.7rem] font-bold tabular-nums tracking-tight sm:text-[2rem]" style={{ color: accent }}>{(price / 1e18).toFixed(4)}</span>
+                              <span className="font-mono text-[10px] uppercase tracking-widest sm:text-xs" style={{ color: "var(--chest-card-text-muted)" }}>ETH</span>
                             </div>
                           </div>
 
@@ -302,7 +302,7 @@ export function RosterTab({
             <div>
               <div className="text-sm font-bold text-amber-300">🎉 {lang === "ru" ? "Доступен приз!" : "Prize available!"}</div>
               <div className="text-xs text-amber-400/80 mt-0.5">
-                {(userClaimable / 1e8).toFixed(4)} MOVE
+                {(userClaimable / 1e8).toFixed(4)} ETH
                 {claimState.deadline > 0 && (
                   <> · {lang === "ru" ? "до" : "until"} {new Date(claimState.deadline * 1000).toLocaleDateString(lang === "ru" ? "ru-RU" : "en-US", { day: "numeric", month: "short" })}</>
                 )}
@@ -339,18 +339,23 @@ export function RosterTab({
                   const active = filterTeam === team;
                   return (
                     <button key={team ?? "all"} onClick={() => setFilterTeam(team)}
-                      className={`whitespace-nowrap font-display font-bold uppercase tracking-widest text-[10px] px-3 py-1.5 rounded-md transition-all ${
-                        active
-                          ? "text-[#00FF66] bg-[#00FF66]/10 border border-[#00FF66]/50"
-                          : "text-gray-400 bg-white/[0.02] border border-white/10 hover:text-white hover:border-white/30"
-                      }`}
-                      style={active ? { boxShadow: "inset 0 -2px 0 #00FF66, 0 0 12px rgba(0,255,102,0.22)" } : {}}>
+                      className={`whitespace-nowrap rounded-md border px-3 py-1.5 font-display text-[10px] font-bold uppercase tracking-widest transition-all ${active ? "nav-tab-active" : ""}`}
+                      style={active ? {
+                        background: "var(--filter-chip-active-bg)",
+                        color: "var(--filter-chip-active-text)",
+                        borderColor: "var(--filter-chip-active-border)",
+                      } : {
+                        color: "var(--filter-chip-text)",
+                        background: "var(--filter-chip-bg)",
+                        borderColor: "var(--filter-chip-border)",
+                      }}>
                       {team ?? (lang === "ru" ? "Все" : "All")}
                     </button>
                   );
                 })}
               </div>
-              <div className="flex items-center gap-1 bg-white/[0.04] border border-white/5 rounded-full p-1 text-xs font-medium shrink-0 pb-1">
+              <div className="flex shrink-0 items-center gap-1 rounded-full border p-1 pb-1 text-xs font-medium"
+                style={{ background: "var(--filter-chip-bg)", borderColor: "var(--filter-chip-border)" }}>
                 {([
                   { value: "progress" as const, labelRu: "ПРОГРЕСС", labelEn: "PROGRESS" },
                   { value: "rarity" as const,   labelRu: "РЕДКОСТЬ", labelEn: "RARITY" },
@@ -358,12 +363,16 @@ export function RosterTab({
                   const active = sortBy === value;
                   return (
                     <button key={value} type="button" onClick={() => setSortBy(value)}
-                      className={`whitespace-nowrap font-display font-bold uppercase tracking-widest text-[10px] px-3 py-1.5 rounded-md transition-all ${
-                        active
-                          ? "text-[#00FF66] bg-[#00FF66]/10 border border-[#00FF66]/50"
-                          : "text-gray-400 bg-white/[0.02] border border-white/10 hover:text-white hover:border-white/30"
-                      }`}
-                      style={active ? { boxShadow: "inset 0 -2px 0 #00FF66, 0 0 12px rgba(0,255,102,0.22)" } : {}}
+                      className={`whitespace-nowrap rounded-md border px-3 py-1.5 font-display text-[10px] font-bold uppercase tracking-widest transition-all ${active ? "nav-tab-active" : ""}`}
+                      style={active ? {
+                        background: "var(--filter-chip-active-bg)",
+                        color: "var(--filter-chip-active-text)",
+                        borderColor: "var(--filter-chip-active-border)",
+                      } : {
+                        color: "var(--filter-chip-text)",
+                        background: "var(--filter-chip-bg)",
+                        borderColor: "var(--filter-chip-border)",
+                      }}
                       aria-pressed={active}>
                       {lang === "ru" ? labelRu : labelEn}
                     </button>
@@ -382,12 +391,16 @@ export function RosterTab({
                 const active = filterTier === id;
                 return (
                   <button key={id ?? "all"} onClick={() => setFilterTier(id)}
-                    className={`whitespace-nowrap font-display font-bold uppercase tracking-widest text-[10px] px-3 py-1.5 rounded-md transition-all ${
-                      active
-                        ? "text-[#00FF66] bg-[#00FF66]/10 border border-[#00FF66]/50"
-                        : "text-gray-400 bg-white/[0.02] border border-white/10 hover:text-white hover:border-white/30"
-                    }`}
-                    style={active ? { boxShadow: "inset 0 -2px 0 #00FF66, 0 0 12px rgba(0,255,102,0.22)" } : {}}>
+                    className={`whitespace-nowrap rounded-md border px-3 py-1.5 font-display text-[10px] font-bold uppercase tracking-widest transition-all ${active ? "nav-tab-active" : ""}`}
+                    style={active ? {
+                      background: "var(--filter-chip-active-bg)",
+                      color: "var(--filter-chip-active-text)",
+                      borderColor: "var(--filter-chip-active-border)",
+                    } : {
+                      color: "var(--filter-chip-text)",
+                      background: "var(--filter-chip-bg)",
+                      borderColor: "var(--filter-chip-border)",
+                    }}>
                     {label}
                   </button>
                 );

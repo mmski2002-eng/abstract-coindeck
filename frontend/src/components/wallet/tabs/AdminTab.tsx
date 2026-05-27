@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { parseEther } from "viem";
 import { BOT_CONTROL_ACTION, CLAIM_LIST_PREVIEW_ACTION, LEADERBOARD_CONFIG_ACTION, LEADERBOARD_REFRESH_ACTION, MARKET_DATA_PARSE_ACTION, MARKET_SNAPSHOT_SAVE_ACTION, buildAdminActionMessage, stableStringify } from "@/lib/adminAuth";
 import { buildMarketDataQuery } from "@/lib/oracleWindow";
 import { HEROES, COIN_ICONS, MODULE_ADDRESS, VAULT_ADDRESS, CLAIM_VAULT_ADDRESS } from "../constants";
@@ -41,6 +42,17 @@ function AdminTip({ text }: { text: string }) {
       <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 rounded-xl bg-[#0d0f1c] border border-white/10 p-3 text-[11px] text-white/70 leading-relaxed shadow-2xl z-50 pointer-events-none opacity-0 group-hover/tip:opacity-100 transition-opacity whitespace-normal">{text}</span>
     </span>
   );
+}
+
+function parseChestPriceToWei(value: string): bigint | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  try {
+    const parsed = parseEther(trimmed);
+    return parsed > 0n ? parsed : null;
+  } catch {
+    return null;
+  }
 }
 
 type Props = {
@@ -303,7 +315,7 @@ export function AdminTab({
   }
 
   function formatMove(value: number): string {
-    return (value / 1e8).toFixed(2);
+    return (value / 1e18).toFixed(4);
   }
 
   function actionTypeLabel(actionType: number): string {
@@ -361,8 +373,8 @@ export function AdminTab({
       functionArguments: [
         freeze,
         withdrawEnabled,
-        String(Math.round(perTxLimitMove * 1e8)),
-        String(Math.round(dailyLimitMove * 1e8)),
+        String(BigInt(Math.round(perTxLimitMove * 1e18))),
+        String(BigInt(Math.round(dailyLimitMove * 1e18))),
         delaysSecs,
       ],
     });
@@ -394,7 +406,7 @@ export function AdminTab({
       <div className="font-display font-bold text-2xl text-white tracking-tight">⚙️ {lang === "ru" ? "Панель администратора" : "Admin panel"}</div>
 
       {!isAdmin && (
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">
+        <div className="rounded-2xl border border-red-500/20 bg-red-950 p-4 text-sm text-red-200">
           {lang === "ru" ? "Подключи admin-кошелёк для доступа." : "Connect admin wallet to access."}
         </div>
       )}
@@ -422,7 +434,7 @@ export function AdminTab({
           />
 
 
-          <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/5 p-4 space-y-3">
+          <div className="rounded-2xl border border-cyan-400/20 bg-zinc-900 p-4 space-y-3">
             <div className="flex items-center gap-2">
               <div className="text-xs font-semibold text-cyan-300">{lang === "ru" ? "Автобот турнира" : "Tournament bot"}</div>
             </div>
@@ -477,11 +489,11 @@ export function AdminTab({
                 {lang === "ru" ? "Сбросить ошибку" : "Reset error"}
               </button>
 
-              <AdminTip text={lang === "ru" ? "Приватный ключ не вводится во фронте. На сервере нужно задать BOT_PRIVATE_KEY или BOT_PRIVATE_KEY_FILE. Кошелеку нужны роли Oracle + Treasury + Claim и MOVE на gas." : "The private key never goes through the frontend. Configure BOT_PRIVATE_KEY or BOT_PRIVATE_KEY_FILE on the server. The wallet needs Oracle + Treasury + Claim roles and gas MOVE."} />
+              <AdminTip text={lang === "ru" ? "Приватный ключ не вводится во фронте. На сервере нужно задать BOT_PRIVATE_KEY или BOT_PRIVATE_KEY_FILE. Кошелеку нужны роли Oracle + Treasury + Claim и ETH на gas." : "The private key never goes through the frontend. Configure BOT_PRIVATE_KEY or BOT_PRIVATE_KEY_FILE on the server. The wallet needs Oracle + Treasury + Claim roles and gas ETH."} />
             </div>
           </div>
 
-          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.03] p-4 space-y-4">
+          <div className="rounded-2xl border border-amber-500/20 bg-zinc-900 p-4 space-y-4">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div>
                 <div className="text-xs font-semibold text-amber-300/80">{lang === "ru" ? "Governance и защита админки" : "Governance & admin safeguards"}</div>
@@ -515,11 +527,11 @@ export function AdminTab({
                 </label>
                 <div className="grid gap-3 md:grid-cols-2">
                   <div>
-                    <label className="mb-1 block text-xs text-zinc-400">{lang === "ru" ? "Лимит на 1 вывод, MOVE" : "Per-withdraw limit, MOVE"}</label>
+                    <label className="mb-1 block text-xs text-zinc-400">{lang === "ru" ? "Лимит на 1 вывод, ETH" : "Per-withdraw limit, ETH"}</label>
                     <input id="admin-withdraw-per-tx" type="number" min="0" step="0.01" defaultValue={formatMove(governancePolicy.perTxLimit)} className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/20" />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs text-zinc-400">{lang === "ru" ? "Суточный лимит, MOVE" : "Daily limit, MOVE"}</label>
+                    <label className="mb-1 block text-xs text-zinc-400">{lang === "ru" ? "Суточный лимит, ETH" : "Daily limit, ETH"}</label>
                     <input id="admin-withdraw-daily" type="number" min="0" step="0.01" defaultValue={formatMove(governancePolicy.dailyLimit)} className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/20" />
                   </div>
                 </div>
@@ -662,7 +674,7 @@ export function AdminTab({
           </div>
 
           {/* Oracle — daily scores */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
+          <div className="rounded-2xl border border-white/10 bg-zinc-900 p-4 space-y-3">
             <div className="text-xs font-semibold text-zinc-400">{lang === "ru" ? "Очки оракула (по дням)" : "Oracle day scores"}</div>
 
             <div className="rounded-xl border border-white/5 bg-black/20 p-3 space-y-2">
@@ -894,7 +906,7 @@ export function AdminTab({
           </div>
 
           {/* Oracle + Controls + NFT tools — merged block */}
-          <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/[0.03] p-4 space-y-5">
+          <div className="rounded-2xl border border-cyan-500/20 bg-zinc-900 p-4 space-y-5">
 
           <div className="space-y-3">
             <div className="text-xs font-semibold text-cyan-300/80">{lang === "ru" ? "Инструменты оракула" : "Oracle tools"}</div>
@@ -993,7 +1005,7 @@ export function AdminTab({
               <button onClick={() => {
                 const val = parseFloat((document.getElementById("admin-cancel-fee") as HTMLInputElement)?.value);
                 if (isNaN(val) || val < 0) return;
-                adminTx("set_cancel_fee", { function: `${MODULE_ADDRESS}::tournament::set_cancel_fee`, typeArguments: [], functionArguments: [String(Math.round(val * 1e8))] });
+                adminTx("set_cancel_fee", { function: `${MODULE_ADDRESS}::tournament::set_cancel_fee`, typeArguments: [], functionArguments: [String(BigInt(Math.round(val * 1e18)))] });
               }} disabled={adminBusy !== null}
                 className="rounded-xl bg-violet-700/70 px-3 py-1.5 text-xs font-bold text-white hover:bg-violet-700 disabled:opacity-40 transition">
                 {adminBusy === "set_cancel_fee" ? "…" : (lang === "ru" ? "Установить" : "Set")}
@@ -1109,7 +1121,7 @@ export function AdminTab({
           </div>{/* /merged block */}
 
           {/* Role bonus + Chest prices — merged block */}
-          <div className="rounded-2xl border border-violet-500/20 bg-violet-500/[0.03] p-4 space-y-5">
+          <div className="rounded-2xl border border-violet-500/20 bg-zinc-900 p-4 space-y-5">
 
           <div className="space-y-3">
             <div className="text-xs font-semibold text-violet-300/80">⚡ {lang === "ru" ? "Бонус за правильную роль" : "Role bonus"}</div>
@@ -1156,36 +1168,36 @@ export function AdminTab({
                   <div key={id} className="flex gap-2 items-center">
                     <span className="text-sm w-5">{icon}</span>
                     <label className="text-xs text-zinc-400 w-20 shrink-0">{label}</label>
-                    <input type="number" min="0.01" step="0.01" defaultValue={(val / 1e8).toFixed(2)} id={`admin-chest-price-${id}`}
+                    <input type="number" min="0.0001" step="0.0001" defaultValue={(val / 1e18).toFixed(4)} id={`admin-chest-price-${id}`}
                       className="w-24 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/20" />
-                    <span className="text-xs text-zinc-400">MOVE</span>
+                    <span className="text-xs text-zinc-400">ETH</span>
                   </div>
                 ))}
                 <div className="flex items-center gap-2">
                 <button onClick={() => {
-                  const w  = parseFloat((document.getElementById("admin-chest-price-wooden") as HTMLInputElement)?.value);
-                  const ir = parseFloat((document.getElementById("admin-chest-price-iron")   as HTMLInputElement)?.value);
-                  const s  = parseFloat((document.getElementById("admin-chest-price-silver") as HTMLInputElement)?.value);
-                  if (!w || !ir || !s || w <= 0 || ir <= 0 || s <= 0) return;
+                  const w = parseChestPriceToWei((document.getElementById("admin-chest-price-wooden") as HTMLInputElement)?.value ?? "");
+                  const ir = parseChestPriceToWei((document.getElementById("admin-chest-price-iron") as HTMLInputElement)?.value ?? "");
+                  const s = parseChestPriceToWei((document.getElementById("admin-chest-price-silver") as HTMLInputElement)?.value ?? "");
+                  if (w === null || ir === null || s === null) return;
                   queueAdminTx("queue_set_chest_prices", {
                     function: `${MODULE_ADDRESS}::fantasy_league::queue_set_chest_prices`,
                     typeArguments: [],
-                    functionArguments: [String(Math.round(w * 1e8)), String(Math.round(ir * 1e8)), String(Math.round(s * 1e8))],
+                    functionArguments: [w.toString(), ir.toString(), s.toString()],
                   });
                 }} disabled={adminBusy !== null}
                   className="rounded-xl bg-teal-700/80 px-4 py-2 text-xs font-bold text-white hover:bg-teal-700 disabled:opacity-40 transition">
                   {adminBusy === "queue_set_chest_prices" ? "…" : (lang === "ru" ? "🕒 В очередь" : "🕒 Queue")}
                 </button>
                 <button onClick={() => {
-                  const w  = parseFloat((document.getElementById("admin-chest-price-wooden") as HTMLInputElement)?.value);
-                  const ir = parseFloat((document.getElementById("admin-chest-price-iron")   as HTMLInputElement)?.value);
-                  const s  = parseFloat((document.getElementById("admin-chest-price-silver") as HTMLInputElement)?.value);
-                  if (!w || !ir || !s || w <= 0 || ir <= 0 || s <= 0) return;
+                  const w = parseChestPriceToWei((document.getElementById("admin-chest-price-wooden") as HTMLInputElement)?.value ?? "");
+                  const ir = parseChestPriceToWei((document.getElementById("admin-chest-price-iron") as HTMLInputElement)?.value ?? "");
+                  const s = parseChestPriceToWei((document.getElementById("admin-chest-price-silver") as HTMLInputElement)?.value ?? "");
+                  if (w === null || ir === null || s === null) return;
                   adminTx("set_chest_prices", {
                     function: `${MODULE_ADDRESS}::fantasy_league::set_chest_prices`,
                     typeArguments: [],
-                    functionArguments: [String(Math.round(w * 1e8)), String(Math.round(ir * 1e8)), String(Math.round(s * 1e8))],
-                  }).then(() => setChestPrices({ wooden: Math.round(w * 1e8), iron: Math.round(ir * 1e8), silver: Math.round(s * 1e8) }));
+                    functionArguments: [w.toString(), ir.toString(), s.toString()],
+                  }).then(() => setChestPrices({ wooden: Number(w), iron: Number(ir), silver: Number(s) }));
                 }} disabled={adminBusy !== null}
                   className="rounded-xl bg-teal-600/80 px-4 py-2 text-xs font-bold text-white hover:bg-teal-600 disabled:opacity-40 transition">
                   {adminBusy === "set_chest_prices" ? "…" : (lang === "ru" ? "Установить" : "Set")}
@@ -1220,7 +1232,7 @@ export function AdminTab({
           </div>{/* /role bonus + chest prices block */}
 
           {/* Claim management */}
-          <div className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-4 space-y-4">
+          <div className="rounded-2xl border border-violet-500/20 bg-zinc-900 p-4 space-y-4">
             <div className="flex items-center justify-between">
               <div className="text-xs font-semibold text-violet-300">🏆 {lang === "ru" ? "Выдача призов (Claim)" : "Prize distribution (Claim)"}</div>
               <button onClick={fetchClaimState} className="text-xs text-zinc-500 hover:text-white transition">↻</button>
@@ -1336,7 +1348,7 @@ export function AdminTab({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-400">{lang === "ru" ? "Баланс claim vault" : "Claim vault balance"}</span>
-                  <span className="font-bold text-white">{(claimState.vaultBalance / 1e8).toFixed(2)} MOVE</span>
+                  <span className="font-bold text-white">{(claimState.vaultBalance / 1e8).toFixed(4)} ETH</span>
                 </div>
                 {claimState.active && claimState.deadline > 0 && (
                   <div className="flex justify-between">
@@ -1377,7 +1389,7 @@ export function AdminTab({
                 <input type="number" min="0.01" step="0.01" value={withdrawToClaimAmount}
                   onChange={(e) => setWithdrawToClaimAmount(e.target.value)}
                   className="w-32 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/20" />
-                <span className="text-xs text-zinc-400">MOVE</span>
+                <span className="text-xs text-zinc-400">ETH</span>
                 <button onClick={() => queueAdminTx("queue_withdraw_to_claim", {
                   function: `${MODULE_ADDRESS}::tournament::queue_admin_withdraw_to`,
                   typeArguments: [],
@@ -1394,7 +1406,7 @@ export function AdminTab({
                   className="rounded-xl bg-violet-600/80 px-3 py-1.5 text-xs font-bold text-white hover:bg-violet-600 disabled:opacity-40 transition">
                   {adminBusy === "withdraw_to_claim" ? "…" : (lang === "ru" ? "Перевести" : "Transfer")}
                 </button>
-                <AdminTip text={lang === "ru" ? "Перемещает MOVE из prize vault в claim vault перед открытием клейма." : "Moves MOVE from prize vault to claim vault before opening claim."} />
+                <AdminTip text={lang === "ru" ? "Перемещает ETH из prize vault в claim vault перед открытием клейма." : "Moves ETH from prize vault to claim vault before opening claim."} />
               </div>
             </div>
 
@@ -1479,7 +1491,7 @@ export function AdminTab({
           </div>
 
           {/* Danger zone */}
-          <div className="rounded-2xl border border-red-500/30 bg-red-950/20 p-4 space-y-2">
+          <div className="rounded-2xl border border-red-500/30 bg-red-950 p-4 space-y-2">
             <div className="text-xs font-bold text-red-400 uppercase tracking-wider">⚠️ {lang === "ru" ? "Опасная зона" : "Danger zone"}</div>
             <div className="text-[10px] text-red-400/60 leading-relaxed">
               {lang === "ru"

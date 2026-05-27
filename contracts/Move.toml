@@ -1,0 +1,20 @@
+[package]
+name = "moveinvestor"
+version = "1.0.0"
+authors = []
+upgrade_policy = "compatible"
+
+[addresses]
+moveinvestor = "0x9682243a73270da1443505065b514a2f4c5a867c304df712cad7941a1b920536"
+
+[dependencies.AptosFramework]
+git = "https://github.com/movementlabsxyz/aptos-core.git"
+rev = "339f743"
+subdir = "aptos-move/framework/aptos-framework"
+
+[dependencies.AptosTokenObjects]
+git = "https://github.com/movementlabsxyz/aptos-core.git"
+rev = "339f743"
+subdir = "aptos-move/framework/aptos-token-objects"
+
+[dev-dependencies]

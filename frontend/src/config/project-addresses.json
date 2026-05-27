@@ -1,0 +1,41 @@
+{
+  "activeNetwork": "movementTestnet",
+  "networks": {
+    "movementMainnet": {
+      "label": "Abstract Mainnet",
+      "urls": {
+        "restUrl": "https://mainnet.movementnetwork.xyz/v1",
+        "faucetUrl": "",
+        "explorerUrl": "https://explorer.movementnetwork.xyz"
+      },
+      "contracts": {
+        "moduleAddress": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "adminAddress": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "prizeVaultAddress": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "claimVaultAddress": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "wallets": {
+        "debugWallets": []
+      }
+    },
+    "movementTestnet": {
+      "label": "Abstract Testnet",
+      "urls": {
+        "restUrl": "https://testnet.movementnetwork.xyz/v1",
+        "faucetUrl": "https://faucet.testnet.movementnetwork.xyz",
+        "explorerUrl": "https://explorer.testnet.movementnetwork.xyz"
+      },
+      "contracts": {
+        "moduleAddress": "0x9682243a73270da1443505065b514a2f4c5a867c304df712cad7941a1b920536",
+        "adminAddress": "0x9682243a73270da1443505065b514a2f4c5a867c304df712cad7941a1b920536",
+        "prizeVaultAddress": "0xde20fcd852a7c5e42631fd78d38395f7095cc5596e871d5d5a60588bd4dcd8c6",
+        "claimVaultAddress": "0xf0ae2048d95acc5df91a09beabc5cd9b0f15f428fb81fc93b8918103a52d37d"
+      },
+      "wallets": {
+        "debugWallets": [
+          "0x9682243a73270da1443505065b514a2f4c5a867c304df712cad7941a1b920536"
+        ]
+      }
+    }
+  }
+}

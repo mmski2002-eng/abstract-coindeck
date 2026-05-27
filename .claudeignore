@@ -1,0 +1,61 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Build outputs
+build/
+contracts/build/
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Lock files (large, low signal)
+frontend/package-lock.json
+package-lock.json
+
+# Runtime caches
+frontend/leaderboard-cache/
+frontend/market-data-cache/
+web/leaderboard-cache/
+web/market-data-cache/
+
+# Secrets & local config
+.aptos/
+.movement/
+.env
+.env.*
+.env.local
+.env.*.local
+
+# Audit reports (large markdown, not code)
+SECURITY_AUDIT_RU.md
+WEB_SECURITY_AUDIT_RU.md
+
+# Tooling internals
+.claude/
+.omc/
+**/.omc/
+.codex
+.codexignore
+project_structure.txt
+frontend/lint-report.json
+
+# Git
+.git/
+
+# Assets (binary / not code)
+LOGO.svg
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.webp
+*.svg
+public/
+
+# Temp
+*.bak
+*.tmp
+deploy-tmp/
+scripts/data/

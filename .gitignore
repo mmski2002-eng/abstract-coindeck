@@ -1,0 +1,48 @@
+# Build artifacts
+build/
+contracts/build/
+
+# Secrets & local config
+.aptos/
+.movement/
+ИНФО.md
+Abstract_Builder_Support_Plan_MarketLeague_final.docx
+PROJECT_SCHEME.html
+
+# Runtime caches
+web/leaderboard-cache/
+web/market-data-cache/
+frontend/leaderboard-cache/
+frontend/market-data-cache/
+frontend/bot-state/
+frontend/feedback.jsonl
+frontend/feedback-rate.json
+database/postgres-data/
+
+# Local audit reports
+SECURITY_AUDIT_RU.md
+WEB_SECURITY_AUDIT_RU.md
+PROJECT_SCHEME.html
+
+# Dev tooling
+node_modules/
+aptos-cli/
+*.bak
+*.tmp
+deploy.py
+deploy-tmp/
+SERVER_GIT_DEPLOY_LOCAL.md
+
+# AI assistant internals
+.claude/
+.omc/
+**/.omc/
+project_structure.txt
+
+# Assets originals (only processed versions in public/)
+LOGO.svg
+FonPEPE.png
+
+# Scripts runtime data
+scripts/data/
+АРХ.md

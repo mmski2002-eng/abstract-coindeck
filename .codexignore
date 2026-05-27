@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Build outputs and caches
+build/
+contracts/build/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/lint-report.json
+frontend/leaderboard-cache/
+frontend/market-data-cache/
+web/leaderboard-cache/
+web/market-data-cache/
+
+# Local secrets and machine-specific config
+.aptos/
+.movement/
+.env
+.env.*
+
+# Local audit reports
+SECURITY_AUDIT_RU.md
+WEB_SECURITY_AUDIT_RU.md
+
+# Assistant and tooling internals
+.claude/
+.omc/
+**/.omc/
+project_structure.txt
+
+# Temporary files
+*.bak
+*.tmp
+deploy-tmp/
+scripts/data/

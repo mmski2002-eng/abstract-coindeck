@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gas Report - 0x9682-fantasy_league-open_chest</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <script>
+        function copyTable(btn) {
+            const table = btn.closest('.table-wrapper').querySelector('table');
+            const rows = Array.from(table.rows);
+            const text = rows.map(row =>
+                Array.from(row.cells).map(cell => cell.textContent.trim()).join('\t')
+            ).join('\n');
+            navigator.clipboard.writeText(text).then(() => {
+                const orig = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = orig, 1000);
+            }).catch(() => {
+                const orig = btn.textContent;
+                btn.textContent = 'Failed';
+                setTimeout(() => btn.textContent = orig, 1000);
+            });
+        }
+
+        function exportTableCsv(btn) {
+            const wrapper = btn.closest('.table-wrapper');
+            const table = wrapper.querySelector('table');
+            const rows = Array.from(table.rows);
+            const csv = rows.map(row =>
+                Array.from(row.cells).map(cell => {
+                    let val = cell.textContent.trim();
+                    // Escape quotes and wrap in quotes if contains comma or quote
+                    if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+                        val = '"' + val.replace(/"/g, '""') + '"';
+                    }
+                    return val;
+                }).join(',')
+            ).join('\n');
+
+            // Get table name from data-name attribute
+            const name = table.dataset.name || 'table';
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name + '.csv';
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(url), 100);
+        }
+
+        function sortTable(th, colIndex) {
+            const table = th.closest('table');
+            const tbody = table.tBodies[0] || table;
+            const rows = Array.from(tbody.querySelectorAll('tr')).slice(1); // skip header
+
+            if (rows.length === 0) return;
+
+            const wasAsc = th.classList.contains('sort-asc');
+            const wasDesc = th.classList.contains('sort-desc');
+            const wasSorted = wasAsc || wasDesc;
+
+            // Check if column is marked to default to ascending (text columns)
+            const defaultAsc = th.hasAttribute('data-sort-asc');
+
+            // Clear other sort indicators
+            th.closest('tr').querySelectorAll('th').forEach(h => {
+                h.classList.remove('sort-asc', 'sort-desc');
+            });
+
+            // Determine new sort direction
+            // - If already sorted, toggle direction
+            // - If not sorted: use data-sort-asc attribute to determine default
+            let sortDesc;
+            if (wasSorted) {
+                sortDesc = wasAsc; // toggle: was asc -> now desc
+            } else {
+                sortDesc = !defaultAsc; // default desc unless marked with data-sort-asc
+            }
+
+            th.classList.add(sortDesc ? 'sort-desc' : 'sort-asc');
+
+            // Check if column is marked as numeric
+            const isNumeric = th.hasAttribute('data-sort-num');
+
+            rows.sort((a, b) => {
+                const aVal = a.cells[colIndex]?.textContent.trim() || '';
+                const bVal = b.cells[colIndex]?.textContent.trim() || '';
+
+                if (isNumeric) {
+                    // Handle "/" placeholder and other non-numeric values as 0
+                    const parseNum = (v) => {
+                        const n = parseFloat(v.replace(/[,%]/g, ''));
+                        return isNaN(n) ? 0 : n;
+                    };
+                    const aNum = parseNum(aVal);
+                    const bNum = parseNum(bVal);
+                    return sortDesc ? bNum - aNum : aNum - bNum;
+                }
+                // String comparison
+                return sortDesc ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        function makeTablesSortable() {
+            const tables = document.querySelectorAll('table');
+            tables.forEach((table) => {
+                if (table.id === 'summary-table') return;
+                const headerRow = table.querySelector('tr');
+                if (!headerRow) return;
+                headerRow.querySelectorAll('th').forEach((th, colIndex) => {
+                    th.classList.add('sortable');
+                    th.onclick = () => sortTable(th, colIndex);
+                });
+            });
+        }
+
+        function wrapTablesWithCopyButton() {
+            const tables = document.querySelectorAll('table');
+            tables.forEach((table) => {
+                if (table.id === 'summary-table') return;
+                if (table.parentElement.classList.contains('table-wrapper')) return;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'table-wrapper';
+
+                const footer = document.createElement('div');
+                footer.className = 'table-footer';
+
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.textContent = 'Copy';
+                copyBtn.onclick = function () { copyTable(this); };
+
+                const csvBtn = document.createElement('button');
+                csvBtn.className = 'copy-btn';
+                csvBtn.textContent = 'CSV';
+                csvBtn.style.marginLeft = '4px';
+                csvBtn.onclick = function () { exportTableCsv(this); };
+
+                footer.appendChild(copyBtn);
+                footer.appendChild(csvBtn);
+                table.parentNode.insertBefore(wrapper, table);
+                wrapper.appendChild(table);
+                wrapper.appendChild(footer);
+            });
+        }
+    </script>
+</head>
+
+<body onload="wrapTablesWithCopyButton(); makeTablesSortable();">
+    <header>
+        <h1>Gas Report - 0x9682-fantasy_league-open_chest</h1>
+    </header>
+
+    <details open>
+        <summary>
+            <h2>Summary</h2>
+        </summary>
+        <p>
+            This summary corresponds to the <code>FeeStatement</code> event emitted by the transaction.
+        </p>
+        <table id="summary-table">
+            <tr>
+                <th>Category</th>
+                <th style="text-align: right">Cost</th>
+                <th>Unit</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td class="category-label">Execution Gas</td>
+                <td style="text-align: right">109.68839377</td>
+                <td>gas units</td>
+                <td>Transient resources for execution, like CPU time or memory</td>
+            </tr>
+            <tr>
+                <td class="category-label">IO Gas</td>
+                <td style="text-align: right">122.60357207</td>
+                <td>gas units</td>
+                <td>Storage reads and writes</td>
+            </tr>
+            <tr>
+                <td class="category-label">Storage Fee</td>
+                <td style="text-align: right">0</td>
+                <td>APT</td>
+                <td>Cost for new or expanded storage slots</td>
+            </tr>
+            <tr>
+                <td class="category-label">Storage Refund</td>
+                <td style="text-align: right">0</td>
+                <td>APT</td>
+                <td>Refund for deleted storage slots</td>
+            </tr>
+        </table>
+        <p style="font-size: 0.9em; color: #666;">
+            <b>Note:</b> Values may differ slightly from the <code>FeeStatement</code> due to rounding.
+        </p>
+    </details>
+
+    <details open>
+        <summary>
+            <h2>Flamegraphs</h2>
+        </summary>
+        <object data="assets/exec_io.svg" type="image/svg+xml" class="flamegraph"></object>
+
+        (No storage graph to show.)
+    </details>
+
+    <details open>
+        <summary>
+            <h2>Cost Break-down</h2>
+        </summary>
+        <p>The Aptos network charges a transaction in three parts: (1) execution, (2) IO, and (3) storage.
+            Execution and IO are measured in gas units; storage is measured in APT.</p>
+
+        <details class="subsection" open>
+            <summary>
+                <h3>Execution (109.68839377 gas units)</h3>
+            </summary>
+            <p>Execution costs cover transient resources used for executing the transaction,
+                such as CPU time or memory usage.</p>
+
+            <h4>Intrinsic Cost</h4>
+            55.20110402 gas units, 50.33% of execution gas.
+
+
+
+            <h4>Dependencies</h4>
+            <table data-name="exec_dependencies">
+                <tr>
+                    <th data-sort-asc>Name</th>
+                    <th style="text-align: right" data-sort-num>Size in Bytes</th>
+                    <th style="text-align: right" data-sort-num>Cost in Gas Units</th>
+                    <th style="text-align: right" data-sort-num>Percentage</th>
+                </tr>
+                <tr>
+                    <td>0x9682..::fantasy_league</td>
+                    <td style="text-align: right">12916</td>
+                    <td style="text-align: right">12.33888678</td>
+                    <td style="text-align: right">11.25%</td>
+                </tr>
+                <tr>
+                    <td>0x9682..::tournament</td>
+                    <td style="text-align: right">8558</td>
+                    <td style="text-align: right">8.67809356</td>
+                    <td style="text-align: right">7.91%</td>
+                </tr>
+                <tr>
+                    <td>0x9682..::admin_control</td>
+                    <td style="text-align: right">6216</td>
+                    <td style="text-align: right">6.71077422</td>
+                    <td style="text-align: right">6.12%</td>
+                </tr>
+                <tr>
+                    <td>0x9682..::claim</td>
+                    <td style="text-align: right">4492</td>
+                    <td style="text-align: right">5.26258525</td>
+                    <td style="text-align: right">4.80%</td>
+                </tr>
+                <tr>
+                    <td>0x9682..::marketplace</td>
+                    <td style="text-align: right">4438</td>
+                    <td style="text-align: right">5.21722434</td>
+                    <td style="text-align: right">4.76%</td>
+                </tr>
+                <tr>
+                    <td>0x9682..::oracle</td>
+                    <td style="text-align: right">2108</td>
+                    <td style="text-align: right">3.2599852</td>
+                    <td style="text-align: right">2.97%</td>
+                </tr>
+            </table>
+
+            <h4>Operations</h4>
+            <table data-name="exec_operations">
+                <tr>
+                    <th data-sort-asc>Operation</th>
+                    <th style="text-align: right" data-sort-num>Number of Hits</th>
+                    <th style="text-align: right" data-sort-num>Cost in Gas Units</th>
+                    <th style="text-align: right" data-sort-num>Percentage</th>
+                </tr>
+                <tr>
+                    <td>call_generic</td>
+                    <td style="text-align: right">29</td>
+                    <td style="text-align: right">2.78539571</td>
+                    <td style="text-align: right">2.54%</td>
+                </tr>
+                <tr>
+                    <td>create_ty</td>
+                    <td style="text-align: right">155</td>
+                    <td style="text-align: right">1.93603872</td>
+                    <td style="text-align: right">1.77%</td>
+                </tr>
+                <tr>
+                    <td>call</td>
+                    <td style="text-align: right">14</td>
+                    <td style="text-align: right">1.38896778</td>
+                    <td style="text-align: right">1.27%</td>
+                </tr>
+                <tr>
+                    <td>copy_loc</td>
+                    <td style="text-align: right">57</td>
+                    <td style="text-align: right">0.97357947</td>
+                    <td style="text-align: right">0.89%</td>
+                </tr>
+                <tr>
+                    <td>0x1::event::write_module_event_to_store&lt;0x4::collection::Burn&gt;</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.64413288</td>
+                    <td style="text-align: right">0.59%</td>
+                </tr>
+                <tr>
+                    <td>0x1::object::exists_at&lt;0x4::token::Token&gt;</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.63339267</td>
+                    <td style="text-align: right">0.58%</td>
+                </tr>
+                <tr>
+                    <td>read_ref</td>
+                    <td style="text-align: right">20</td>
+                    <td style="text-align: right">0.51801036</td>
+                    <td style="text-align: right">0.47%</td>
+                </tr>
+                <tr>
+                    <td>move_loc</td>
+                    <td style="text-align: right">53</td>
+                    <td style="text-align: right">0.46746935</td>
+                    <td style="text-align: right">0.43%</td>
+                </tr>
+                <tr>
+                    <td>eq</td>
+                    <td style="text-align: right">12</td>
+                    <td style="text-align: right">0.35688714</td>
+                    <td style="text-align: right">0.33%</td>
+                </tr>
+                <tr>
+                    <td>0x1::object::exists_at&lt;0x9682243a73270da1443505065b514a2f4c5a867c304df712cad7941a1b920536::fantasy_league::ChestToken&gt;</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.29300586</td>
+                    <td style="text-align: right">0.27%</td>
+                </tr>
+                <tr>
+                    <td>br_false</td>
+                    <td style="text-align: right">28</td>
+                    <td style="text-align: right">0.24696494</td>
+                    <td style="text-align: right">0.23%</td>
+                </tr>
+                <tr>
+                    <td>st_loc</td>
+                    <td style="text-align: right">26</td>
+                    <td style="text-align: right">0.22932459</td>
+                    <td style="text-align: right">0.21%</td>
+                </tr>
+                <tr>
+                    <td>ld_const</td>
+                    <td style="text-align: right">2</td>
+                    <td style="text-align: right">0.22100442</td>
+                    <td style="text-align: right">0.20%</td>
+                </tr>
+                <tr>
+                    <td>imm_borrow_field</td>
+                    <td style="text-align: right">15</td>
+                    <td style="text-align: right">0.22050441</td>
+                    <td style="text-align: right">0.20%</td>
+                </tr>
+                <tr>
+                    <td>exists_generic</td>
+                    <td style="text-align: right">11</td>
+                    <td style="text-align: right">0.20218404</td>
+                    <td style="text-align: right">0.18%</td>
+                </tr>
+                <tr>
+                    <td>vec_imm_borrow</td>
+                    <td style="text-align: right">7</td>
+                    <td style="text-align: right">0.1698234</td>
+                    <td style="text-align: right">0.15%</td>
+                </tr>
+                <tr>
+                    <td>unpack</td>
+                    <td style="text-align: right">6</td>
+                    <td style="text-align: right">0.15282306</td>
+                    <td style="text-align: right">0.14%</td>
+                </tr>
+                <tr>
+                    <td>imm_borrow_global</td>
+                    <td style="text-align: right">4</td>
+                    <td style="text-align: right">0.14704294</td>
+                    <td style="text-align: right">0.13%</td>
+                </tr>
+                <tr>
+                    <td>imm_borrow_field_generic</td>
+                    <td style="text-align: right">10</td>
+                    <td style="text-align: right">0.14700294</td>
+                    <td style="text-align: right">0.13%</td>
+                </tr>
+                <tr>
+                    <td>ret</td>
+                    <td style="text-align: right">31</td>
+                    <td style="text-align: right">0.13640273</td>
+                    <td style="text-align: right">0.12%</td>
+                </tr>
+                <tr>
+                    <td>vec_len</td>
+                    <td style="text-align: right">7</td>
+                    <td style="text-align: right">0.11312226</td>
+                    <td style="text-align: right">0.10%</td>
+                </tr>
+                <tr>
+                    <td>move_from_generic</td>
+                    <td style="text-align: right">4</td>
+                    <td style="text-align: right">0.10288206</td>
+                    <td style="text-align: right">0.09%</td>
+                </tr>
+                <tr>
+                    <td>pack</td>
+                    <td style="text-align: right">4</td>
+                    <td style="text-align: right">0.0852217</td>
+                    <td style="text-align: right">0.08%</td>
+                </tr>
+                <tr>
+                    <td>mut_borrow_global</td>
+                    <td style="text-align: right">2</td>
+                    <td style="text-align: right">0.07352147</td>
+                    <td style="text-align: right">0.07%</td>
+                </tr>
+                <tr>
+                    <td>lt</td>
+                    <td style="text-align: right">6</td>
+                    <td style="text-align: right">0.07056141</td>
+                    <td style="text-align: right">0.06%</td>
+                </tr>
+                <tr>
+                    <td>ld_u64</td>
+                    <td style="text-align: right">15</td>
+                    <td style="text-align: right">0.06600132</td>
+                    <td style="text-align: right">0.06%</td>
+                </tr>
+                <tr>
+                    <td>add</td>
+                    <td style="text-align: right">5</td>
+                    <td style="text-align: right">0.05880118</td>
+                    <td style="text-align: right">0.05%</td>
+                </tr>
+                <tr>
+                    <td>branch</td>
+                    <td style="text-align: right">9</td>
+                    <td style="text-align: right">0.05292106</td>
+                    <td style="text-align: right">0.05%</td>
+                </tr>
+                <tr>
+                    <td>imm_borrow_loc</td>
+                    <td style="text-align: right">11</td>
+                    <td style="text-align: right">0.04840097</td>
+                    <td style="text-align: right">0.04%</td>
+                </tr>
+                <tr>
+                    <td>not</td>
+                    <td style="text-align: right">4</td>
+                    <td style="text-align: right">0.04704094</td>
+                    <td style="text-align: right">0.04%</td>
+                </tr>
+                <tr>
+                    <td>0x1::aggregator_v2::read_snapshot&lt;u64&gt;</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.04410088</td>
+                    <td style="text-align: right">0.04%</td>
+                </tr>
+                <tr>
+                    <td>br_true</td>
+                    <td style="text-align: right">5</td>
+                    <td style="text-align: right">0.04410088</td>
+                    <td style="text-align: right">0.04%</td>
+                </tr>
+                <tr>
+                    <td>mut_borrow_field</td>
+                    <td style="text-align: right">3</td>
+                    <td style="text-align: right">0.04410088</td>
+                    <td style="text-align: right">0.04%</td>
+                </tr>
+                <tr>
+                    <td>pop</td>
+                    <td style="text-align: right">15</td>
+                    <td style="text-align: right">0.04410088</td>
+                    <td style="text-align: right">0.04%</td>
+                </tr>
+                <tr>
+                    <td>vec_pack</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.04410088</td>
+                    <td style="text-align: right">0.04%</td>
+                </tr>
+                <tr>
+                    <td>vec_pop_back</td>
+                    <td style="text-align: right">2</td>
+                    <td style="text-align: right">0.03820076</td>
+                    <td style="text-align: right">0.03%</td>
+                </tr>
+                <tr>
+                    <td>0x1::signer::borrow_address</td>
+                    <td style="text-align: right">2</td>
+                    <td style="text-align: right">0.02940059</td>
+                    <td style="text-align: right">0.03%</td>
+                </tr>
+                <tr>
+                    <td>vec_push_back</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.02792056</td>
+                    <td style="text-align: right">0.03%</td>
+                </tr>
+                <tr>
+                    <td>sub</td>
+                    <td style="text-align: right">2</td>
+                    <td style="text-align: right">0.02352047</td>
+                    <td style="text-align: right">0.02%</td>
+                </tr>
+                <tr>
+                    <td>0x1::aggregator_v2::try_sub&lt;u64&gt;</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.02204044</td>
+                    <td style="text-align: right">0.02%</td>
+                </tr>
+                <tr>
+                    <td>vec_swap</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.02204044</td>
+                    <td style="text-align: right">0.02%</td>
+                </tr>
+                <tr>
+                    <td>mut_borrow_field_generic</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.01470029</td>
+                    <td style="text-align: right">0.01%</td>
+                </tr>
+                <tr>
+                    <td>cast_u256</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.00882018</td>
+                    <td style="text-align: right">0.01%</td>
+                </tr>
+                <tr>
+                    <td>ld_u8</td>
+                    <td style="text-align: right">2</td>
+                    <td style="text-align: right">0.00880018</td>
+                    <td style="text-align: right">0.01%</td>
+                </tr>
+                <tr>
+                    <td>mut_borrow_loc</td>
+                    <td style="text-align: right">2</td>
+                    <td style="text-align: right">0.00880018</td>
+                    <td style="text-align: right">0.01%</td>
+                </tr>
+                <tr>
+                    <td>abort</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.00440009</td>
+                    <td style="text-align: right">0.00%</td>
+                </tr>
+                <tr>
+                    <td>freeze_ref</td>
+                    <td style="text-align: right">3</td>
+                    <td style="text-align: right">0.00216004</td>
+                    <td style="text-align: right">0.00%</td>
+                </tr>
+            </table>
+            <br />
+            <table data-name="exec_methods_total">
+                <tr>
+                    <th data-sort-asc>Methods (gas including children)</th>
+                    <th style="text-align: right" data-sort-num>Number of Hits</th>
+                    <th style="text-align: right" data-sort-num>Cost in Gas Units</th>
+                    <th style="text-align: right" data-sort-num>Percentage</th>
+                </tr>
+                <tr>
+                    <td>0x9682..::fantasy_league::open_chest</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">135.62331247</td>
+                    <td style="text-align: right">58.38%</td>
+                </tr>
+                <tr>
+                    <td>0x4::token::burn</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">55.92879858</td>
+                    <td style="text-align: right">24.08%</td>
+                </tr>
+                <tr>
+                    <td>0x9682..::fantasy_league::ensure_user_resources</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">37.23298466</td>
+                    <td style="text-align: right">16.03%</td>
+                </tr>
+                <tr>
+                    <td>0x4::collection::decrement_supply</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">20.77937559</td>
+                    <td style="text-align: right">8.95%</td>
+                </tr>
+                <tr>
+                    <td>0x1::object::address_to_object</td>
+                    <td style="text-align: right">2</td>
+                    <td style="text-align: right">19.80579612</td>
+                    <td style="text-align: right">8.53%</td>
+                </tr>
+                <tr>
+                    <td>0x1::randomness::u8_range</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">19.77695554</td>
+                    <td style="text-align: right">8.51%</td>
+                </tr>
+                <tr>
+                    <td>0x1::randomness::u256_integer_internal</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">19.60211204</td>
+                    <td style="text-align: right">8.44%</td>
+                </tr>
+                <tr>
+                    <td>0x1::randomness::next_32_bytes</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">19.48190964</td>
+                    <td style="text-align: right">8.39%</td>
+                </tr>
+                <tr>
+                    <td>0x1::object::delete</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">6.47208944</td>
+                    <td style="text-align: right">2.79%</td>
+                </tr>
+                <tr>
+                    <td>0x4::royalty::exists_at</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">6.08742175</td>
+                    <td style="text-align: right">2.62%</td>
+                </tr>
+                <tr>
+                    <td>0x1::option::is_some</td>
+                    <td style="text-align: right">4</td>
+                    <td style="text-align: right">1.22698454</td>
+                    <td style="text-align: right">0.53%</td>
+                </tr>
+                <tr>
+                    <td>0x1::option::borrow</td>
+                    <td style="text-align: right">2</td>
+                    <td style="text-align: right">1.07752155</td>
+                    <td style="text-align: right">0.46%</td>
+                </tr>
+                <tr>
+                    <td>0x1::event::emit</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.76155523</td>
+                    <td style="text-align: right">0.33%</td>
+                </tr>
+                <tr>
+                    <td>0x1::option::extract</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.53593072</td>
+                    <td style="text-align: right">0.23%</td>
+                </tr>
+                <tr>
+                    <td>0x1::object::owner</td>
+                    <td style="text-align: right">2</td>
+                    <td style="text-align: right">0.52593052</td>
+                    <td style="text-align: right">0.23%</td>
+                </tr>
+                <tr>
+                    <td>0x1::vector::is_empty</td>
+                    <td style="text-align: right">5</td>
+                    <td style="text-align: right">0.49360987</td>
+                    <td style="text-align: right">0.21%</td>
+                </tr>
+                <tr>
+                    <td>0x1::vector::swap_remove</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.43770875</td>
+                    <td style="text-align: right">0.19%</td>
+                </tr>
+                <tr>
+                    <td>0x1::option::some</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.33048661</td>
+                    <td style="text-align: right">0.14%</td>
+                </tr>
+                <tr>
+                    <td>0x1::signer::address_of</td>
+                    <td style="text-align: right">2</td>
+                    <td style="text-align: right">0.30136603</td>
+                    <td style="text-align: right">0.13%</td>
+                </tr>
+                <tr>
+                    <td>0x1::aggregator_v2::sub</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.18844377</td>
+                    <td style="text-align: right">0.08%</td>
+                </tr>
+                <tr>
+                    <td>0x1::event::destroy_handle</td>
+                    <td style="text-align: right">2</td>
+                    <td style="text-align: right">0.17828357</td>
+                    <td style="text-align: right">0.08%</td>
+                </tr>
+                <tr>
+                    <td>0x1::vector::singleton</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.14728295</td>
+                    <td style="text-align: right">0.06%</td>
+                </tr>
+                <tr>
+                    <td>0x1::object::object_address</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.10182204</td>
+                    <td style="text-align: right">0.04%</td>
+                </tr>
+                <tr>
+                    <td>0x1::object::address_from_delete_ref</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.0698214</td>
+                    <td style="text-align: right">0.03%</td>
+                </tr>
+            </table>
+            <br />
+            <table data-name="exec_methods_self">
+                <tr>
+                    <th data-sort-asc>Methods (only local gas)</th>
+                    <th style="text-align: right" data-sort-num>Number of Hits</th>
+                    <th style="text-align: right" data-sort-num>Cost in Gas Units</th>
+                    <th style="text-align: right" data-sort-num>Percentage</th>
+                </tr>
+                <tr>
+                    <td>0x9682..::fantasy_league::ensure_user_resources</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">37.08230165</td>
+                    <td style="text-align: right">15.96%</td>
+                </tr>
+                <tr>
+                    <td>0x4::token::burn</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">20.14272285</td>
+                    <td style="text-align: right">8.67%</td>
+                </tr>
+                <tr>
+                    <td>0x1::object::address_to_object</td>
+                    <td style="text-align: right">2</td>
+                    <td style="text-align: right">19.80579612</td>
+                    <td style="text-align: right">8.53%</td>
+                </tr>
+                <tr>
+                    <td>0x4::collection::decrement_supply</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">19.18278366</td>
+                    <td style="text-align: right">8.26%</td>
+                </tr>
+                <tr>
+                    <td>0x1::randomness::next_32_bytes</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">18.94915898</td>
+                    <td style="text-align: right">8.16%</td>
+                </tr>
+                <tr>
+                    <td>0x1::object::delete</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">6.38294766</td>
+                    <td style="text-align: right">2.75%</td>
+                </tr>
+                <tr>
+                    <td>0x4::royalty::exists_at</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">6.08742175</td>
+                    <td style="text-align: right">2.62%</td>
+                </tr>
+                <tr>
+                    <td>0x9682..::fantasy_league::open_chest</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">2.89151783</td>
+                    <td style="text-align: right">1.24%</td>
+                </tr>
+                <tr>
+                    <td>0x1::option::is_some</td>
+                    <td style="text-align: right">4</td>
+                    <td style="text-align: right">0.82889658</td>
+                    <td style="text-align: right">0.36%</td>
+                </tr>
+                <tr>
+                    <td>0x1::event::emit</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.76155523</td>
+                    <td style="text-align: right">0.33%</td>
+                </tr>
+                <tr>
+                    <td>0x1::object::owner</td>
+                    <td style="text-align: right">2</td>
+                    <td style="text-align: right">0.52593052</td>
+                    <td style="text-align: right">0.23%</td>
+                </tr>
+                <tr>
+                    <td>0x1::vector::is_empty</td>
+                    <td style="text-align: right">5</td>
+                    <td style="text-align: right">0.49360987</td>
+                    <td style="text-align: right">0.21%</td>
+                </tr>
+                <tr>
+                    <td>0x1::option::borrow</td>
+                    <td style="text-align: right">2</td>
+                    <td style="text-align: right">0.4400288</td>
+                    <td style="text-align: right">0.19%</td>
+                </tr>
+                <tr>
+                    <td>0x1::vector::swap_remove</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.34218684</td>
+                    <td style="text-align: right">0.15%</td>
+                </tr>
+                <tr>
+                    <td>0x1::signer::address_of</td>
+                    <td style="text-align: right">2</td>
+                    <td style="text-align: right">0.30136603</td>
+                    <td style="text-align: right">0.13%</td>
+                </tr>
+                <tr>
+                    <td>0x1::option::extract</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.24118482</td>
+                    <td style="text-align: right">0.10%</td>
+                </tr>
+                <tr>
+                    <td>0x1::aggregator_v2::sub</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.18844377</td>
+                    <td style="text-align: right">0.08%</td>
+                </tr>
+                <tr>
+                    <td>0x1::option::some</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.18320366</td>
+                    <td style="text-align: right">0.08%</td>
+                </tr>
+                <tr>
+                    <td>0x1::event::destroy_handle</td>
+                    <td style="text-align: right">2</td>
+                    <td style="text-align: right">0.17828357</td>
+                    <td style="text-align: right">0.08%</td>
+                </tr>
+                <tr>
+                    <td>0x1::randomness::u8_range</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.1748435</td>
+                    <td style="text-align: right">0.08%</td>
+                </tr>
+                <tr>
+                    <td>0x1::vector::singleton</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.14728295</td>
+                    <td style="text-align: right">0.06%</td>
+                </tr>
+                <tr>
+                    <td>0x1::randomness::u256_integer_internal</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.1202024</td>
+                    <td style="text-align: right">0.05%</td>
+                </tr>
+                <tr>
+                    <td>0x1::object::object_address</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.10182204</td>
+                    <td style="text-align: right">0.04%</td>
+                </tr>
+                <tr>
+                    <td>0x1::object::address_from_delete_ref</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">0.0698214</td>
+                    <td style="text-align: right">0.03%</td>
+                </tr>
+            </table>
+        </details>
+
+        <details class="subsection" open>
+            <summary>
+                <h3>IO (122.60357207 gas units)</h3>
+            </summary>
+            <p>IO costs cover reading and writing data to storage.</p>
+
+            <h4>State Reads</h4>
+            <table data-name="io_state_reads">
+                <tr>
+                    <th data-sort-asc>Resource Name</th>
+                    <th style="text-align: right" data-sort-num>Number of Hits</th>
+                    <th style="text-align: right" data-sort-num>Cost in Gas Units</th>
+                    <th style="text-align: right" data-sort-num>Percentage</th>
+                </tr>
+                <tr>
+                    <td>0x1::object::ObjectCore</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">18.41798836</td>
+                    <td style="text-align: right">15.02%</td>
+                </tr>
+                <tr>
+                    <td>0x1::randomness::PerBlockRandomness</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">18.41798836</td>
+                    <td style="text-align: right">15.02%</td>
+                </tr>
+                <tr>
+                    <td>0x4::collection::ConcurrentSupply</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">18.41798836</td>
+                    <td style="text-align: right">15.02%</td>
+                </tr>
+                <tr>
+                    <td>0x4::token::TokenIdentifiers</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">18.41798836</td>
+                    <td style="text-align: right">15.02%</td>
+                </tr>
+                <tr>
+                    <td>0x9682243a73270da1443505065b514a2f4c5a867c304df712cad7941a1b920536::fantasy_league::UserCards</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">18.41798836</td>
+                    <td style="text-align: right">15.02%</td>
+                </tr>
+                <tr>
+                    <td>0x9682243a73270da1443505065b514a2f4c5a867c304df712cad7941a1b920536::fantasy_league::UserChests</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">18.41798836</td>
+                    <td style="text-align: right">15.02%</td>
+                </tr>
+                <tr>
+                    <td>0x1::object::Untransferable</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">6.04782096</td>
+                    <td style="text-align: right">4.93%</td>
+                </tr>
+                <tr>
+                    <td>0x4::royalty::Royalty</td>
+                    <td style="text-align: right">1</td>
+                    <td style="text-align: right">6.04782096</td>
+                    <td style="text-align: right">4.93%</td>
+                </tr>
+            </table>
+            <h4>Transaction Write <span class="info-tip"
+                    title="Cost of writing the transaction itself (authentication header + payload) to the ledger history">ⓘ</span>
+            </h4>
+            <table data-name="io_transaction_write">
+                <tr>
+                    <th style="text-align: right" data-sort-num>Cost in Gas Units</th>
+                    <th style="text-align: right" data-sort-num>Percentage</th>
+                </tr>
+                <tr>
+                    <td style="text-align: right">0</td>
+                    <td style="text-align: right">0.00%</td>
+                </tr>
+            </table>
+
+            <h4>Event Writes</h4>
+            (No event writes to show.)
+
+            <h4>State Writes</h4>
+            (No state writes to show.)
+        </details>
+
+        <details class="subsection" open>
+            <summary>
+                <h3>Storage (0 APT)</h3>
+            </summary>
+            <p>The storage fees cover the extended-term storage of states and events and are assessed at a fixed price
+                in APT.</p>
+
+            <h4>Transaction</h4>
+            0 APT
+            <h4>States</h4>
+            (No state changes to show.)
+            <h4>Events</h4>
+            (No events to show.)
+        </details>
+    </details>
+
+    <details open>
+        <summary>
+            <h2>Memory Usage</h2>
+        </summary>
+        Peak memory usage during transaction execution: 632.<br><br>
+
+        Note: This is measured in abstract value size, which does not map 1:1 to bytes.
+    </details>
+
+    <details open>
+        <summary>
+            <h2>Full Execution Trace</h2>
+        </summary>
+        <script>
+            var traceDimensions = null;
+            function applyTraceDimensions() {
+                if (!traceDimensions) return;
+                const frame = document.getElementById('trace-frame');
+                if (!frame) return;
+                const maxHeight = Math.max(800, window.innerHeight * 0.8);
+                frame.style.height = Math.min(traceDimensions.height, maxHeight) + 'px';
+                frame.style.width = Math.min(traceDimensions.width, window.innerWidth - 40) + 'px';
+            }
+            window.addEventListener('message', function (event) {
+                // Only accept messages from our trace iframe
+                const frame = document.getElementById('trace-frame');
+                if (!frame || event.source !== frame.contentWindow) return;
+
+                if (event.data && event.data.type === 'trace-dimensions') {
+                    // Validate and sanitize dimensions
+                    const width = Math.max(0, Math.min(Number(event.data.width) || 0, 50000));
+                    const height = Math.max(0, Math.min(Number(event.data.height) || 0, 50000));
+                    traceDimensions = { width: width, height: height };
+                    applyTraceDimensions();
+                }
+            });
+            window.addEventListener('resize', applyTraceDimensions);
+        </script>
+        <p><button onclick="window.open('assets/trace.html', '_blank', 'noopener')">View Raw</button></p>
+        <iframe id="trace-frame" src="assets/trace.html" style="width: 100%; border: 1px solid black;"></iframe>
+    </details>
+
+    <footer>
+        <span>Generated by the Aptos Gas Profiler (dc09d24)</span>
+        <span>2026-05-19 23:36:09 +04:00</span>
+    </footer>
+</body>
+
+</html>

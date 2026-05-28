@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "Write-Output '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"LANGUAGE RULE: Respond in Russian only. Never Ukrainian. Before writing any Cyrillic text verify it is Russian not Ukrainian.\"}}'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

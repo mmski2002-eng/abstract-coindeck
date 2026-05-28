@@ -31,25 +31,30 @@ export async function GET(req: NextRequest) {
   const playerId = playerIdRaw !== null ? Number(playerIdRaw) : undefined;
   const tier = tierRaw !== null ? Number(tierRaw) : undefined;
 
-  const { syncedAt } = await getMarketplaceSyncState();
-  const stale = isMarketplaceSyncStale(syncedAt);
+  try {
+    const { syncedAt } = await getMarketplaceSyncState();
+    const stale = isMarketplaceSyncStale(syncedAt);
 
-  if (stale) {
-    void syncMarketplace().catch(() => {});
+    if (stale) {
+      void syncMarketplace().catch(() => {});
+    }
+
+    const rows = await getMarketplaceListings({
+      ...(playerId !== undefined && Number.isInteger(playerId) ? { player_id: playerId } : {}),
+      ...(tier !== undefined && Number.isInteger(tier) && tier >= 0 && tier <= 3 ? { tier } : {}),
+      ...(seller ? { seller } : {}),
+    });
+
+    return NextResponse.json({
+      listings: rows,
+      total: rows.length,
+      updatedAt: syncedAt,
+      status: stale ? "refreshing" : "done",
+    });
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
-
-  const rows = await getMarketplaceListings({
-    ...(playerId !== undefined && Number.isInteger(playerId) ? { player_id: playerId } : {}),
-    ...(tier !== undefined && Number.isInteger(tier) && tier >= 0 && tier <= 3 ? { tier } : {}),
-    ...(seller ? { seller } : {}),
-  });
-
-  return NextResponse.json({
-    listings: rows,
-    total: rows.length,
-    updatedAt: syncedAt,
-    status: stale ? "refreshing" : "done",
-  });
 }
 
 export async function POST(req: NextRequest) {

@@ -34,7 +34,7 @@ export function QuickBuyMergeModal({
         listing.tier === modal.tier &&
         (!normalizedAccount || listing.seller.toLowerCase() !== normalizedAccount)
       )
-      .sort((a, b) => a.price - b.price || a.id - b.id)
+      .sort((a, b) => Number(a.price) - Number(b.price) || a.id - b.id)
       .slice(0, modal.neededCount);
   }, [accountAddress, modal.neededCount, modal.playerId, modal.tier, mpListings]);
 
@@ -44,7 +44,7 @@ export function QuickBuyMergeModal({
   const selectedQty = manualQty === null ? defaultQty : Math.min(manualQty, maxSelectable);
 
   const selectedListings = matchingListings.slice(0, selectedQty);
-  const totalPrice = selectedListings.reduce((sum, listing) => sum + listing.price, 0);
+  const totalPrice = selectedListings.reduce((sum, listing) => sum + Number(listing.price), 0);
   const enoughForMerge = maxSelectable >= modal.neededCount;
   const projectedOwned = modal.ownedCount + selectedQty;
   const canBuy = selectedQty > 0 && busy === null;
@@ -158,7 +158,7 @@ export function QuickBuyMergeModal({
                     </div>
                     <div className="shrink-0 text-right">
                       <div className={`text-sm font-black ${active ? "text-cyan-300" : "text-zinc-400"}`}>
-                        {(listing.price / 1e8).toFixed(4)} ETH
+                        {(Number(listing.price) / 1e18).toFixed(4)} ETH
                       </div>
                     </div>
                   </div>
@@ -174,7 +174,7 @@ export function QuickBuyMergeModal({
               {lang === "ru" ? "Итого" : "Total"}
             </div>
             <div className="mt-0.5 text-base font-black text-white">
-              {(totalPrice / 1e8).toFixed(4)} <span className="text-cyan-300">ETH</span>
+              {(totalPrice / 1e18).toFixed(4)} <span className="text-cyan-300">ETH</span>
             </div>
           </div>
           <button

@@ -34,7 +34,7 @@ deploy-tmp/
 SERVER_GIT_DEPLOY_LOCAL.md
 
 # AI assistant internals
-.claude/
+
 .omc/
 **/.omc/
 project_structure.txt

@@ -174,6 +174,7 @@ export function useTournamentLogic({ restUrl, moduleAddress, wagmiConfig, submit
         function: `${moduleAddress}::tournament::cancel_lineup`,
         typeArguments: [],
         functionArguments: [],
+        value: BigInt(cancelFee),
       });
       const lsKey = `moveinvestor_locked_${String(walletAccount.address)}_day${tnState.currentDay}_ep${tnState.epoch}`;
       localStorage.removeItem(lsKey);

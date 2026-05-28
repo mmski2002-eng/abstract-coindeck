@@ -175,9 +175,9 @@ export function RankingsTab({
             </div>
             <div className="relative flex items-baseline gap-2">
               <span className="font-display text-3xl font-semibold tracking-tight tabular-nums" style={{ color: "var(--info-block-value)" }}>
-                {tnState ? (tnState.prizePool / 1e8).toFixed(1) : "0.0"}
+                {tnState ? (tnState.prizePool / 1e18).toFixed(4) : "0.0000"}
               </span>
-              <span className="font-mono text-xs uppercase tracking-widest" style={{ color: "var(--info-block-meta)" }}>MOVE</span>
+              <span className="font-mono text-xs uppercase tracking-widest" style={{ color: "var(--info-block-meta)" }}>ETH</span>
             </div>
             <div className="relative mt-2">
               <span className="font-mono text-[11px]" style={{ color: "var(--info-block-delta)" }}>{lang === "ru" ? "для победителей" : "for winners"}</span>

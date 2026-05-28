@@ -302,7 +302,7 @@ export function RosterTab({
             <div>
               <div className="text-sm font-bold text-amber-300">🎉 {lang === "ru" ? "Доступен приз!" : "Prize available!"}</div>
               <div className="text-xs text-amber-400/80 mt-0.5">
-                {(userClaimable / 1e8).toFixed(4)} ETH
+                {(userClaimable / 1e18).toFixed(4)} ETH
                 {claimState.deadline > 0 && (
                   <> · {lang === "ru" ? "до" : "until"} {new Date(claimState.deadline * 1000).toLocaleDateString(lang === "ru" ? "ru-RU" : "en-US", { day: "numeric", month: "short" })}</>
                 )}

@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createPublicClient, http } from "viem";
+import { abstractTestnet } from "viem/chains";
 import { getCached, runJob, isRunning } from "../worker";
 import { hasOracleDataDrift, readRoleBonusPct } from "@/lib/storage/leaderboard";
 import { getRuntimeProjectAddresses } from "@/config/projectAddresses";
+import { TOURNAMENT_VIEW_ABI } from "@/lib/evmContracts";
 
 const CRON_SECRET = process.env.CRON_SECRET ?? "";
 const LEADERBOARD_TOTAL_DAYS = 6;
@@ -15,25 +18,18 @@ function auth(req: NextRequest): boolean {
 }
 
 async function getCurrentState(): Promise<{ epoch: number; currentDay: number } | null> {
-  const { restUrl, moduleAddress } = getRuntimeProjectAddresses();
+  const addrs = getRuntimeProjectAddresses();
   try {
-    const resp = await fetch(`${restUrl}/view`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ function: `${moduleAddress}::tournament::get_state`, type_arguments: [], arguments: [] }),
+    const client = createPublicClient({ chain: abstractTestnet, transport: http(addrs.restUrl) });
+    const state = await client.readContract({
+      address: addrs.tournament as `0x${string}`,
+      abi: TOURNAMENT_VIEW_ABI,
+      functionName: "getState",
     });
-    if (!resp.ok) return null;
-    const json = await resp.json() as unknown;
-    const state = Array.isArray(json)
-      ? json
-      : json && typeof json === "object" && "value" in json && Array.isArray((json as { value: unknown }).value)
-        ? (json as { value: unknown[] }).value
-        : null;
-    if (!state) return null;
-    const [, rawEpoch, rawDay] = state as [unknown, string, string];
-    const epoch = Number(rawEpoch ?? 1);
-    const rawDayNum = Number(rawDay ?? 1);
-    const currentDay = rawDayNum < 1 ? LEADERBOARD_TOTAL_DAYS : Math.min(rawDayNum, LEADERBOARD_TOTAL_DAYS);
+    const epoch = Number(state[1]);
+    const isRest = state[3];
+    const rawDay = Number(state[2]);
+    const currentDay = (isRest || rawDay < 1) ? LEADERBOARD_TOTAL_DAYS : Math.min(rawDay, LEADERBOARD_TOTAL_DAYS);
     if (!Number.isInteger(epoch) || epoch < 1) return null;
     return { epoch, currentDay };
   } catch {
@@ -46,12 +42,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const state = await getCurrentState();
-  if (!state) {
-    return NextResponse.json({ error: "Cannot fetch tournament state" }, { status: 503 });
-  }
+  const overrideEpoch = req.nextUrl.searchParams.get("epoch");
+  const overrideDay = req.nextUrl.searchParams.get("day");
 
-  const { epoch, currentDay } = state;
+  let epoch: number;
+  let currentDay: number;
+
+  if (overrideEpoch !== null && overrideDay !== null) {
+    epoch = Number(overrideEpoch);
+    currentDay = Number(overrideDay);
+    if (!Number.isInteger(epoch) || epoch < 1 || !Number.isInteger(currentDay) || currentDay < 1 || currentDay > LEADERBOARD_TOTAL_DAYS) {
+      return NextResponse.json({ error: "Invalid epoch/day override" }, { status: 400 });
+    }
+  } else {
+    const state = await getCurrentState();
+    if (!state) {
+      return NextResponse.json({ error: "Cannot fetch tournament state" }, { status: 503 });
+    }
+    epoch = state.epoch;
+    currentDay = state.currentDay;
+  }
   const roleBonusPct = await readRoleBonusPct();
   const cache = await getCached(epoch, LEADERBOARD_TOTAL_DAYS, currentDay, roleBonusPct);
   const hasDrift = cache ? await hasOracleDataDrift(epoch, currentDay, cache.updatedAt) : false;

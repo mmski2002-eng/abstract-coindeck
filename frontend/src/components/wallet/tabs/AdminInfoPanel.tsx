@@ -49,8 +49,8 @@ function fmt(ts: number) {
   });
 }
 
-function fmtMove(octas: number) {
-  return (octas / 1e8).toFixed(2);
+function fmtMove(wei: number) {
+  return (wei / 1e18).toFixed(4);
 }
 
 function StatusBadge({ ok, label, pulse }: { ok: boolean; label: string; pulse?: boolean }) {

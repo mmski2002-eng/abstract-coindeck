@@ -226,7 +226,6 @@ export function AdminTab({
       payloadHash,
     });
     const result = await walletSignMessage({ message, nonce: nonceData.nonce });
-    const signed = unwrapSignedMessage(result);
     return {
       action: nonceData.action,
       nonce: nonceData.nonce,
@@ -234,9 +233,9 @@ export function AdminTab({
       domain: nonceData.domain,
       chainId: nonceData.chainId,
       payloadHash,
-      signature: signed.signature ? String(signed.signature) : "",
+      signature: typeof result === "string" ? result : "",
       publicKey: normalizePublicKey(walletAccount?.publicKey),
-      fullMessage: typeof signed.fullMessage === "string" ? signed.fullMessage : "",
+      fullMessage: message,
     };
   }
 
@@ -703,31 +702,35 @@ export function AdminTab({
               {parseStatus === "done" && (
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="text-[10px] text-emerald-400">✓ {lang === "ru" ? "Данные обновлены" : "Data updated"}</div>
-                  {tnState?.startTimestamp && (
+                  {tnState?.startTimestamp && (() => {
+                    const _snapshotWindow = getOracleWindow(oracleDateInput);
+                    const _snapshotAbsDay = _snapshotWindow.day ?? 1;
+                    const _snapshotEpoch = tnState.epoch;
+                    const _snapshotRelDay = _snapshotAbsDay - (_snapshotEpoch - 1) * 7;
+                    const _snapshotDayInvalid = _snapshotRelDay < 1 || _snapshotRelDay > 6;
+                    return (
                     <button
                       onClick={async () => {
                         setSnapshotSaveStatus("saving");
                         setSnapshotSaveError("");
                         try {
-                          const window = getOracleWindow(oracleDateInput);
-                          const absoluteDay = window.day ?? 1;
-                          const epoch = tnState.epoch;
-                          const relativeDay = absoluteDay - (epoch - 1) * 7;
-                          const auth = await buildSignedAdminAction(MARKET_SNAPSHOT_SAVE_ACTION, { epoch, day: relativeDay });
+                          const auth = await buildSignedAdminAction(MARKET_SNAPSHOT_SAVE_ACTION, { epoch: _snapshotEpoch, day: _snapshotRelDay });
                           const resp = await fetch("/api/market-snapshot", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ epoch, day: relativeDay, startTimestamp: tnState.startTimestamp, auth }),
+                            body: JSON.stringify({ epoch: _snapshotEpoch, day: _snapshotRelDay, startTimestamp: tnState.startTimestamp, auth }),
                           });
                           if (resp.ok) { setSnapshotSaveStatus("done"); }
                           else { const e = await resp.json().catch(() => ({})) as { error?: string }; setSnapshotSaveStatus("error"); setSnapshotSaveError(e.error ?? "error"); }
                         } catch (e) { setSnapshotSaveStatus("error"); setSnapshotSaveError(String(e)); }
                       }}
-                      disabled={snapshotSaveStatus === "saving"}
+                      disabled={snapshotSaveStatus === "saving" || _snapshotDayInvalid}
+                      title={_snapshotDayInvalid ? `День ${_snapshotRelDay} вне диапазона (1-6)` : undefined}
                       className="rounded-lg bg-cyan-600/20 border border-cyan-500/30 px-3 py-1 text-[10px] font-bold text-cyan-300 hover:bg-cyan-600/30 disabled:opacity-50 transition">
                       {snapshotSaveStatus === "saving" ? "⏳" : "💾"} {lang === "ru" ? "Сохранить снапшот" : "Save snapshot"}
                     </button>
-                  )}
+                    );
+                  })()}
                   {snapshotSaveStatus === "done" && <span className="text-[10px] text-cyan-400">✓ snapshot сохранён</span>}
                   {snapshotSaveStatus === "error" && <span className="text-[10px] text-red-400">{snapshotSaveError}</span>}
                 </div>
@@ -1348,7 +1351,7 @@ export function AdminTab({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-400">{lang === "ru" ? "Баланс claim vault" : "Claim vault balance"}</span>
-                  <span className="font-bold text-white">{(claimState.vaultBalance / 1e8).toFixed(4)} ETH</span>
+                  <span className="font-bold text-white">{(claimState.vaultBalance / 1e18).toFixed(4)} ETH</span>
                 </div>
                 {claimState.active && claimState.deadline > 0 && (
                   <div className="flex justify-between">
@@ -1393,7 +1396,7 @@ export function AdminTab({
                 <button onClick={() => queueAdminTx("queue_withdraw_to_claim", {
                   function: `${MODULE_ADDRESS}::tournament::queue_admin_withdraw_to`,
                   typeArguments: [],
-                  functionArguments: [CLAIM_VAULT_ADDRESS, String(Math.round(parseFloat(withdrawToClaimAmount) * 1e8))],
+                  functionArguments: [CLAIM_VAULT_ADDRESS, parseEther(withdrawToClaimAmount || "0").toString()],
                 })} disabled={adminBusy !== null || parseFloat(withdrawToClaimAmount) <= 0}
                   className="rounded-xl bg-violet-700/80 px-3 py-1.5 text-xs font-bold text-white hover:bg-violet-700 disabled:opacity-40 transition">
                   {adminBusy === "queue_withdraw_to_claim" ? "…" : (lang === "ru" ? "🕒 В очередь" : "🕒 Queue")}
@@ -1401,7 +1404,7 @@ export function AdminTab({
                 <button onClick={() => adminTx("withdraw_to_claim", {
                   function: `${MODULE_ADDRESS}::tournament::admin_withdraw_to`,
                   typeArguments: [],
-                  functionArguments: [CLAIM_VAULT_ADDRESS, String(Math.round(parseFloat(withdrawToClaimAmount) * 1e8))],
+                  functionArguments: [CLAIM_VAULT_ADDRESS, parseEther(withdrawToClaimAmount || "0").toString()],
                 })} disabled={adminBusy !== null || parseFloat(withdrawToClaimAmount) <= 0}
                   className="rounded-xl bg-violet-600/80 px-3 py-1.5 text-xs font-bold text-white hover:bg-violet-600 disabled:opacity-40 transition">
                   {adminBusy === "withdraw_to_claim" ? "…" : (lang === "ru" ? "Перевести" : "Transfer")}
@@ -1418,12 +1421,12 @@ export function AdminTab({
               <div className="flex gap-2 items-center">
               <button onClick={() => {
                 const norm = (a: string) => "0x" + (a.startsWith("0x") ? a.slice(2) : a).padStart(64, "0");
-                const merged = new Map<string, number>();
+                const merged = new Map<string, bigint>();
                 for (const line of claimListText.trim().split("\n")) {
                   const t = line.trim(); if (!t || t.startsWith("#")) continue;
                   const [addr, amt] = t.split(/\s+/); if (!addr || !amt) continue;
                   const key = norm(addr);
-                  merged.set(key, (merged.get(key) ?? 0) + Math.round(parseFloat(amt) * 1e8));
+                  try { merged.set(key, (merged.get(key) ?? 0n) + parseEther(amt)); } catch { /* skip invalid */ }
                 }
                 if (merged.size === 0) return;
                 queueAdminTx("queue_set_claim_list", { function: `${MODULE_ADDRESS}::claim::queue_set_claim_list`, typeArguments: [], functionArguments: [[...merged.keys()], [...merged.values()].map(String)] });
@@ -1433,12 +1436,12 @@ export function AdminTab({
               </button>
               <button onClick={() => {
                 const norm = (a: string) => "0x" + (a.startsWith("0x") ? a.slice(2) : a).padStart(64, "0");
-                const merged = new Map<string, number>();
+                const merged = new Map<string, bigint>();
                 for (const line of claimListText.trim().split("\n")) {
                   const t = line.trim(); if (!t || t.startsWith("#")) continue;
                   const [addr, amt] = t.split(/\s+/); if (!addr || !amt) continue;
                   const key = norm(addr);
-                  merged.set(key, (merged.get(key) ?? 0) + Math.round(parseFloat(amt) * 1e8));
+                  try { merged.set(key, (merged.get(key) ?? 0n) + parseEther(amt)); } catch { /* skip invalid */ }
                 }
                 if (merged.size === 0) return;
                 adminTx("set_claim_list", { function: `${MODULE_ADDRESS}::claim::set_claim_list`, typeArguments: [], functionArguments: [[...merged.keys()], [...merged.values()].map(String)] });

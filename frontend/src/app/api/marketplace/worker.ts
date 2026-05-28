@@ -48,7 +48,7 @@ export async function syncMarketplace(): Promise<{ count: number }> {
           card_addr: String(cardIds[i] ?? ""),
           player_id: Math.min(Math.max(pids[i] ?? 0, 0), 49),
           tier: Math.min(Math.max(tiers[i] ?? 0, 0), 3),
-          price: Number(prices[i] ?? 0n),
+          price: (prices[i] ?? 0n).toString(),
         });
       }
 

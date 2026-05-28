@@ -34,15 +34,15 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json().catch(() => ({})) as Record<string, unknown>;
 
+  const epoch = Number(body.epoch);
+  const day = Number(body.day);
+
   const secretAuth = checkSecretAuth(req);
-  const walletAuth = !secretAuth.ok ? await verifyAdminAction(req, body, MARKET_SNAPSHOT_SAVE_ACTION, {}) : null;
+  const walletAuth = !secretAuth.ok ? await verifyAdminAction(req, body, MARKET_SNAPSHOT_SAVE_ACTION, { epoch, day }) : null;
 
   if (!secretAuth.ok && !walletAuth?.ok) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
-  const epoch = Number(body.epoch);
-  const day = Number(body.day);
   const startTimestamp = Number(body.startTimestamp);
   const baseEpoch = Number(body.baseEpoch ?? 1);
 

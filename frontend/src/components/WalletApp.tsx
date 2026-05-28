@@ -57,11 +57,11 @@ const TOUR_DEMO_CARDS: CardData[] = [
 ];
 
 const TOUR_DEMO_LISTINGS: Listing[] = [
-  { id: 9001, seller: "0x1111111111111111111111111111111111111111111111111111111111111111", playerId: 0, tier: 0, price: 12_000_000 },
-  { id: 9002, seller: "0x2222222222222222222222222222222222222222222222222222222222222222", playerId: 1, tier: 1, price: 38_000_000 },
-  { id: 9003, seller: "0x3333333333333333333333333333333333333333333333333333333333333333", playerId: 4, tier: 2, price: 95_000_000 },
-  { id: 9004, seller: "0x4444444444444444444444444444444444444444444444444444444444444444", playerId: 8, tier: 0, price: 10_500_000 },
-  { id: 9005, seller: "0x5555555555555555555555555555555555555555555555555555555555555555", playerId: 10, tier: 3, price: 240_000_000 },
+  { id: 9001, seller: "0x1111111111111111111111111111111111111111111111111111111111111111", playerId: 0, tier: 0, price: "50000000000000000" },
+  { id: 9002, seller: "0x2222222222222222222222222222222222222222222222222222222222222222", playerId: 1, tier: 1, price: "100000000000000000" },
+  { id: 9003, seller: "0x3333333333333333333333333333333333333333333333333333333333333333", playerId: 4, tier: 2, price: "250000000000000000" },
+  { id: 9004, seller: "0x4444444444444444444444444444444444444444444444444444444444444444", playerId: 8, tier: 0, price: "30000000000000000" },
+  { id: 9005, seller: "0x5555555555555555555555555555555555555555555555555555555555555555", playerId: 10, tier: 3, price: "500000000000000000" },
 ];
 
 const TOUR_DEMO_RANKS: RankRow[] = [
@@ -92,9 +92,10 @@ function Inner({
   const restUrl = REST_URL;
   const moduleAddress = MODULE_ADDRESS;
   const accountAddress = address ?? null;
-  const walletAccount = accountAddress
-    ? { address: accountAddress, publicKey: accountAddress }
-    : null;
+  const walletAccount = useMemo(
+    () => accountAddress ? { address: accountAddress, publicKey: accountAddress } : null,
+    [accountAddress],
+  );
 
   const wrongNetwork = isConnected && chainId !== abstractTestnet.id;
 
@@ -343,7 +344,7 @@ function Inner({
       (mpFilterTier === null || l.tier === mpFilterTier) &&
       (mpFilterTeam === null || PLAYER_TEAMS[l.playerId] === mpFilterTeam) &&
       (!mpSearchTicker || COIN_TICKERS[l.playerId].toLowerCase().includes(mpSearchTicker.toLowerCase()) || HEROES[l.playerId].toLowerCase().includes(mpSearchTicker.toLowerCase()))
-    ).sort((a, b) => a.price - b.price || a.id - b.id),
+    ).sort((a, b) => Number(a.price) - Number(b.price) || a.id - b.id),
     [mpListings, mpFilterTier, mpFilterTeam, mpSearchTicker]
   );
   const displayMpListings = tourDemoMode && mpListings.length === 0 ? TOUR_DEMO_LISTINGS : mpListings;
@@ -558,7 +559,7 @@ function Inner({
               active: true,
               currentDay: 1,
               startTimestamp: Math.floor(Date.now() / 1000) - 3600,
-              prizePool: 1_000_000_000,
+              prizePool: 100_000_000_000_000_000,
               ended: false,
               epoch: epochRange[1] ?? 1,
               totalDays: 6,

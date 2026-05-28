@@ -44,6 +44,6 @@ export function buildAdminActionMessage(args: {
   ].join("\n");
 }
 
-export function buildWalletFullMessage(message: string, nonce: string): string {
-  return `APTOS\nmessage: ${message}\nnonce: ${nonce}`;
+export function buildWalletFullMessage(message: string, _nonce: string): string {
+  return message;
 }

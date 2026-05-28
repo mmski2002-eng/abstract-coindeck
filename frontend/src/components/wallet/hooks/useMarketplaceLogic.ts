@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { parseEther } from "viem";
 import type { TransactionPayload, TxOptions, Listing } from "../types";
 import { getErrorMessage, parseU8Vec } from "../utils";
 
@@ -56,13 +57,13 @@ export function useMarketplaceLogic({
     try {
       const resp = await fetch("/api/marketplace");
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const json = await resp.json() as { listings: Array<{ listing_id: number; seller: string; player_id: number; tier: number; price: number }> };
+      const json = await resp.json() as { listings: Array<{ listing_id: number; seller: string; player_id: number; tier: number; price: string }> };
       setMpListings((json.listings ?? []).map((row) => ({
         id: Number(row.listing_id),
         seller: row.seller,
         playerId: Number(row.player_id),
         tier: Number(row.tier),
-        price: Number(row.price),
+        price: String(row.price),
       })));
     } catch (e: unknown) {
       setMpError(getErrorMessage(e));
@@ -81,11 +82,11 @@ export function useMarketplaceLogic({
     try {
       const cardEntry = flCards.find((c) => c.playerId === playerId && c.tier === tier && !lockedCardAddrs.includes(c.cardAddr));
       if (!cardEntry) { setFlError("Card not found in inventory"); setBusy(null); return; }
-      const priceOctas = Math.round(priceMove * 100_000_000);
+      const priceWei = parseEther(priceMove.toString());
       await submitTx({
         function: `${moduleAddress}::marketplace::list_card`,
         typeArguments: [],
-        functionArguments: [cardEntry.cardAddr, priceOctas],
+        functionArguments: [cardEntry.cardAddr, priceWei],
       });
       setSellModal(null);
       const prevCount = flCards.length;

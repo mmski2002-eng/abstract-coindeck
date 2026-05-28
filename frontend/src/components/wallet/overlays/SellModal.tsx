@@ -39,7 +39,7 @@ export function SellModal({ lang, modal, onClose, sellPrice, setSellPrice, busy,
             className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/20"
           />
           <div className="mt-1 text-xs text-zinc-500">
-            ≈ {Math.round(parseFloat(sellPrice || "0") * 100_000_000).toLocaleString()} octas
+            ≈ {(parseFloat(sellPrice || "0") * 1e18).toLocaleString(undefined, { maximumFractionDigits: 0 })} wei
           </div>
           <div className="mt-1 text-xs text-zinc-500">
             {lang === "ru"

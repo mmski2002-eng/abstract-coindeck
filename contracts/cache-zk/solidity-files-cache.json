@@ -301,8 +301,8 @@
       ]
     },
     "C:\\ABSTRACT_COINDECK\\contracts\\contracts\\CoinDeckNFT.sol": {
-      "lastModificationDate": 1779899828683,
-      "contentHash": "1ad0d15839d6a7a81b071cc5a23a39f9",
+      "lastModificationDate": 1779962321323,
+      "contentHash": "1f39b4fcf7e95ff8b5379e06a30396d7",
       "sourceName": "contracts/CoinDeckNFT.sol",
       "solcConfig": {
         "version": "0.8.24",

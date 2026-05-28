@@ -216,7 +216,7 @@ export function TournamentTab({
           const lockedCards = lockedCardAddrs
             .map(addr => flCards.find(c => c.cardAddr === addr))
             .filter((c): c is (typeof flCards)[number] => !!c && !seenKeys.has(c.cardAddr) && (seenKeys.add(c.cardAddr), true));
-          const feeMove = cancelFee > 0 ? (cancelFee / 1e8).toFixed(2) : null;
+          const feeMove = cancelFee > 0 ? (cancelFee / 1e18).toFixed(4) : null;
           return (
             <div className="rounded-2xl border border-white/10 bg-[#0a0c18]/80 backdrop-blur-xl overflow-hidden">
               {/* Header */}
@@ -656,7 +656,7 @@ export function TournamentTab({
                   <div>
                     <div className="text-sm font-bold text-amber-300">🎉 {lang === "ru" ? "Ваш приз готов к получению" : "Your prize is ready to claim"}</div>
                     <div className="text-xs text-amber-400/80 mt-0.5">
-                      {(userClaimable / 1e8).toFixed(4)} ETH
+                      {(userClaimable / 1e18).toFixed(4)} ETH
                       {claimState.deadline > 0 && (
                         <> · {lang === "ru" ? "Дедлайн" : "Deadline"}: {new Date(claimState.deadline * 1000).toLocaleString(lang === "ru" ? "ru-RU" : "en-US", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</>
                       )}

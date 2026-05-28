@@ -64,7 +64,7 @@ export function MarketplaceTab({
       {(() => {
         const myListings = mpListings
           .filter((l) => accountAddress && l.seller.toLowerCase() === accountAddress.toLowerCase())
-          .sort((a, b) => a.price - b.price || a.id - b.id);
+          .sort((a, b) => Number(a.price) - Number(b.price) || a.id - b.id);
         if (myListings.length === 0) return null;
         return (
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -90,7 +90,7 @@ export function MarketplaceTab({
                         className="h-8 w-8 rounded-lg object-cover opacity-80 shrink-0" referrerPolicy="no-referrer" />
                       <div className="min-w-0">
                         <div className="text-xs font-semibold truncate">{HEROES[l.playerId]}</div>
-                        <div className="text-[10px] text-zinc-500 truncate">{TIER_NAMES[l.tier]} · {(l.price / 100_000_000).toFixed(4)} ETH</div>
+                        <div className="text-[10px] text-zinc-500 truncate">{TIER_NAMES[l.tier]} · {(Number(l.price) / 1e18).toFixed(4)} ETH</div>
                       </div>
                     </div>
                     <button onClick={() => onCancelListing(l.id)} disabled={busy !== null}
@@ -223,7 +223,7 @@ export function MarketplaceTab({
                             <h4 className="font-bold text-white text-sm tracking-tight truncate">{HEROES[l.playerId]}</h4>
                             <span className="text-[10px] uppercase tracking-[0.2em] text-white/40">{ticker}</span>
                           </div>
-                          <div className="shrink-0 font-black text-xs" style={{ color: ts.color }}>{(l.price / 1e8).toFixed(2)}</div>
+                          <div className="shrink-0 font-black text-xs" style={{ color: ts.color }}>{(Number(l.price) / 1e18).toFixed(4)} ETH</div>
                         </div>
                         {isOwn ? (
                           <button onClick={() => onCancelListing(l.id)} disabled={busy !== null}
@@ -237,7 +237,7 @@ export function MarketplaceTab({
                               {busy === buyKey ? "…" : (lang === "ru" ? "Купить" : "Buy")}
                             </button>
                             <div className="mt-1 text-[10px] text-white/30 text-center">
-                              {lang === "ru" ? "Комиссия платформы" : "Platform fee"}: 5% ({(l.price * 0.05 / 1e8).toFixed(4)} ETH)
+                              {lang === "ru" ? "Комиссия платформы" : "Platform fee"}: 5% ({(Number(l.price) * 0.05 / 1e18).toFixed(4)} ETH)
                             </div>
                           </>
                         )}

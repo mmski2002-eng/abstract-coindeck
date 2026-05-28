@@ -67,7 +67,7 @@ export type RankRow = { addr: string; score: number; league: number; days: numbe
 
 export type CardData = { playerId: number; tier: number; cardAddr: string };
 
-export type Listing = { id: number; seller: string; playerId: number; tier: number; price: number };
+export type Listing = { id: number; seller: string; playerId: number; tier: number; price: string };
 
 export type QuickBuyMergeData = {
   playerId: number;

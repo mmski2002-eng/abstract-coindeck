@@ -169,12 +169,11 @@ export function useAdminLogic({ submitTx, refreshTournament, restUrl, moduleAddr
     const timestamp = Date.now();
     const message = `moveinvestor-admin:${timestamp}`;
     const result = await walletSignMessage({ message, nonce: message });
-    const signed = unwrapSignedMessage(result);
     const publicKey = normalizePublicKey(walletAccount?.publicKey);
     return {
-      signature: signed.signature ? String(signed.signature) : "",
+      signature: typeof result === "string" ? result : "",
       publicKey,
-      fullMessage: typeof signed.fullMessage === "string" ? signed.fullMessage : "",
+      fullMessage: message,
     };
   }
 
@@ -196,13 +195,12 @@ export function useAdminLogic({ submitTx, refreshTournament, restUrl, moduleAddr
       nonce: nonceData.nonce, payloadHash: payloadHashHex,
     });
     const result = await walletSignMessage({ message, nonce: nonceData.nonce });
-    const signed = unwrapSignedMessage(result);
     return {
       action: nonceData.action, nonce: nonceData.nonce, timestamp: nonceData.issuedAt,
       domain: nonceData.domain, chainId: nonceData.chainId, payloadHash: payloadHashHex,
-      signature: signed.signature ? String(signed.signature) : "",
+      signature: typeof result === "string" ? result : "",
       publicKey: normalizePublicKey(walletAccount?.publicKey),
-      fullMessage: typeof signed.fullMessage === "string" ? signed.fullMessage : "",
+      fullMessage: message,
     };
   }
 

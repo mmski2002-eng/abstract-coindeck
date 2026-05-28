@@ -1,4 +1,4 @@
-import { writeContract, readContract, waitForTransactionReceipt } from "@wagmi/core";
+import { writeContract, readContract, waitForTransactionReceipt, getAccount } from "@wagmi/core";
 import type { Config, WriteContractParameters } from "@wagmi/core";
 import { abstractTestnet } from "viem/chains";
 import { getRuntimeProjectAddresses } from "@/config/projectAddresses";
@@ -59,6 +59,31 @@ export const TOURNAMENT_VIEW_ABI = [
   { name: "getCancelFee", type: "function", stateMutability: "view", inputs: [], outputs: [
     { name: "", type: "uint256" },
   ]},
+  { name: "getDayLineupsPaginated", type: "function", stateMutability: "view",
+    inputs: [
+      { name: "epoch", type: "uint256" },
+      { name: "day", type: "uint256" },
+      { name: "offset", type: "uint256" },
+      { name: "limit", type: "uint256" },
+    ],
+    outputs: [
+      { name: "addrs", type: "address[]" },
+      { name: "playerIds", type: "uint8[]" },
+      { name: "tiers", type: "uint8[]" },
+      { name: "total", type: "uint256" },
+    ],
+  },
+  { name: "participantsCount", type: "function", stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+] as const;
+
+export const NFT_NICKNAME_ABI = [
+  { name: "nicknames", type: "function", stateMutability: "view",
+    inputs: [{ name: "", type: "address" }],
+    outputs: [{ name: "", type: "string" }],
+  },
 ] as const;
 
 export const MARKETPLACE_ABI = [
@@ -92,7 +117,9 @@ export const COIN_DECK_NFT_ABI = [
   { name: "setBaseUris",    type: "function", stateMutability: "nonpayable", inputs: [{ name: "cardUri", type: "string" }, { name: "chestUri", type: "string" }], outputs: [] },
   { name: "adminMintCard",  type: "function", stateMutability: "nonpayable", inputs: [{ name: "recipient", type: "address" }, { name: "playerId", type: "uint8" }, { name: "tier", type: "uint8" }, { name: "count", type: "uint256" }], outputs: [] },
   { name: "adminReissueCard", type: "function", stateMutability: "nonpayable", inputs: [{ name: "tokenId", type: "uint256" }], outputs: [] },
-  { name: "setChestPrices",  type: "function", stateMutability: "nonpayable", inputs: [{ name: "wooden", type: "uint256" }, { name: "iron", type: "uint256" }, { name: "silver", type: "uint256" }], outputs: [] },
+  { name: "setChestPrices",       type: "function", stateMutability: "nonpayable", inputs: [{ name: "wooden", type: "uint256" }, { name: "iron", type: "uint256" }, { name: "silver", type: "uint256" }], outputs: [] },
+  { name: "setApprovalForAll",    type: "function", stateMutability: "nonpayable", inputs: [{ name: "operator", type: "address" }, { name: "approved", type: "bool" }], outputs: [] },
+  { name: "isApprovedForAll",     type: "function", stateMutability: "view",       inputs: [{ name: "owner", type: "address" }, { name: "operator", type: "address" }], outputs: [{ name: "", type: "bool" }] },
 ] as const;
 
 export const CLAIM_ABI = [
@@ -321,6 +348,7 @@ export async function submitEvmTx(
       abi: TOURNAMENT_ABI,
       functionName: "cancelLineup",
       args: [],
+      value: payload.value ?? 0n,
     });
   } else if (fn.includes("::tournament::set_cancel_fee")) {
     hash = await wc(config, {
@@ -408,6 +436,21 @@ export async function submitEvmTx(
       args: [args[1] as `0x${string}`, BigInt(args[0] as string | number | bigint)],
     });
   } else if (fn.includes("::marketplace::list_card")) {
+    const isApproved = await readContract(config, {
+      address: addrs.coinDeckNFT as `0x${string}`,
+      abi: COIN_DECK_NFT_ABI,
+      functionName: "isApprovedForAll",
+      args: [getAccount(config).address as `0x${string}`, addrs.marketplace as `0x${string}`],
+    });
+    if (!isApproved) {
+      const approveHash = await wc(config, {
+        address: addrs.coinDeckNFT as `0x${string}`,
+        abi: COIN_DECK_NFT_ABI,
+        functionName: "setApprovalForAll",
+        args: [addrs.marketplace as `0x${string}`, true],
+      });
+      await waitForTransactionReceipt(config, { hash: approveHash });
+    }
     hash = await wc(config, {
       address: addrs.marketplace as `0x${string}`,
       abi: MARKETPLACE_ABI,

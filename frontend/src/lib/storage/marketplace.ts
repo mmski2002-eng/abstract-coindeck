@@ -6,7 +6,7 @@ export type MarketplaceListing = {
   card_addr: string;
   player_id: number;
   tier: number;
-  price: number;
+  price: string;
 };
 
 function normalizeMarketplaceListing(row: MarketplaceListing): MarketplaceListing {
@@ -16,7 +16,7 @@ function normalizeMarketplaceListing(row: MarketplaceListing): MarketplaceListin
     card_addr: row.card_addr,
     player_id: Number(row.player_id),
     tier: Number(row.tier),
-    price: Number(row.price),
+    price: row.price.toString(),
   };
 }
 

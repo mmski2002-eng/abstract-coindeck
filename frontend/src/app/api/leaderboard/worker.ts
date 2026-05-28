@@ -1,3 +1,5 @@
+import { createPublicClient, http } from "viem";
+import { abstractTestnet } from "viem/chains";
 import { readHistory, saveDay } from "../oracle-history/lib";
 import {
   getBestCached as loadBestCached,
@@ -22,10 +24,18 @@ import { readMarketJobState } from "@/lib/storage/marketData";
 import { saveMarketSnapshot, readMarketSnapshot } from "@/lib/storage/marketSnapshot";
 import { formatUtcDateKey } from "@/lib/oracleWindow";
 import { dbQuery } from "@/lib/db/client";
+import { TOURNAMENT_VIEW_ABI, ORACLE_ABI, NFT_NICKNAME_ABI } from "@/lib/evmContracts";
 
 const runtimeAddresses = getRuntimeProjectAddresses();
 const MODULE = runtimeAddresses.moduleAddress;
-const REST = runtimeAddresses.restUrl;
+
+function createEvmClient() {
+  return createPublicClient({
+    chain: abstractTestnet,
+    transport: http(runtimeAddresses.restUrl),
+  });
+}
+
 const STALE_MS = Number(process.env.LEADERBOARD_REFRESH_INTERVAL_MS ?? String(60 * 60 * 1000));
 const ORACLE_STALE_MS = 4 * 60 * 60 * 1000;
 const LEAGUE_ALGORITHM_VERSION = 2;
@@ -59,38 +69,6 @@ function cacheId(key: CacheKey): string {
   return `epoch-${key.epoch}-days-${key.totalDays}-day-${key.currentDay}-rb-${key.roleBonusPct}`;
 }
 
-function parseU8Vec(raw: unknown): number[] {
-  if (Array.isArray(raw)) return (raw as (string | number)[]).map(Number);
-  if (typeof raw === "string") {
-    const h = raw.startsWith("0x") ? raw.slice(2) : raw;
-    if (!h) return [];
-    const out: number[] = [];
-    for (let i = 0; i < h.length; i += 2) out.push(parseInt(h.slice(i, i + 2), 16));
-    return out;
-  }
-  return [];
-}
-
-function sanitizeNickname(raw: string): string {
-  return raw.replace(/[\u0000-\u001F\u007F]/g, "").trim();
-}
-
-function decodeNickname(raw: unknown): string {
-  if (typeof raw !== "string") return "";
-  if (!raw) return "";
-
-  if (!raw.startsWith("0x")) return sanitizeNickname(raw);
-
-  const hex = raw.slice(2);
-  if (!hex || hex.length % 2 !== 0 || !/^[0-9a-fA-F]+$/.test(hex)) {
-    return sanitizeNickname(raw);
-  }
-
-  const bytes = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < bytes.length; i++) bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
-  return sanitizeNickname(new TextDecoder("utf-8").decode(bytes));
-}
-
 async function heroScore(playerId: number, tier: number, slotIdx: number, dayScores: number[], roleBonusPct: number): Promise<number> {
   const base = dayScores[playerId] ?? 0;
   const mult = (await getTierMults())[tier] ?? 100;
@@ -111,44 +89,27 @@ async function withConcurrency<T, R>(items: T[], limit: number, fn: (item: T) =>
   return results;
 }
 
-async function viewFn(fn: string, args: string[], signal: AbortSignal): Promise<unknown[] | null> {
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      const response = await fetch(`${REST}/view`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ function: `${MODULE}::${fn}`, type_arguments: [], arguments: args }),
-        signal,
-      });
-      if (response.ok) {
-        const json = await response.json() as unknown;
-        if (Array.isArray(json)) return json;
-        if (json && typeof json === "object" && "value" in json && Array.isArray((json as { value: unknown }).value)) {
-          return (json as { value: unknown[] }).value;
-        }
-        return null;
-      }
-      if (response.status === 404) return null;
-    } catch {
-      if (signal.aborted) return null;
-    }
-    if (attempt < 2) await new Promise<void>((resolve) => setTimeout(resolve, 400 * (attempt + 1)));
-  }
-  return null;
-}
-
 async function getLiveState(signal: AbortSignal): Promise<{ epoch: number; closedDay: number; startTimestamp: number; baseEpoch: number } | null> {
-  const state = await viewFn("tournament::get_state", [], signal);
-  if (!state) return null;
-  const epoch = Number(state[1] ?? 0);
-  const currentDay = Number(state[2] ?? 0);
-  const isRest = state[3] === true || state[3] === "true";
-  const startTimestamp = Number(state[4] ?? 0);
-  if (!Number.isInteger(epoch) || epoch < 1) return null;
-  const closedDay = isRest ? 6 : Math.max(0, Math.min(6, currentDay - 1));
-  const weeksElapsed = startTimestamp > 0 ? Math.floor((Math.floor(Date.now() / 1000) - startTimestamp) / (7 * 86400)) : 0;
-  const baseEpoch = Math.max(1, epoch - weeksElapsed);
-  return { epoch, closedDay, startTimestamp, baseEpoch };
+  if (signal.aborted) return null;
+  try {
+    const client = createEvmClient();
+    const state = await client.readContract({
+      address: runtimeAddresses.tournament as `0x${string}`,
+      abi: TOURNAMENT_VIEW_ABI,
+      functionName: "getState",
+    });
+    const epoch = Number(state[1]);
+    const currentDay = Number(state[2]);
+    const isRest = state[3];
+    const startTimestamp = Number(state[4]);
+    if (!Number.isInteger(epoch) || epoch < 1) return null;
+    const closedDay = isRest ? 6 : Math.max(0, Math.min(6, currentDay - 1));
+    const weeksElapsed = startTimestamp > 0 ? Math.floor((Math.floor(Date.now() / 1000) - startTimestamp) / (7 * 86400)) : 0;
+    const baseEpoch = Math.max(1, epoch - weeksElapsed);
+    return { epoch, closedDay, startTimestamp, baseEpoch };
+  } catch {
+    return null;
+  }
 }
 
 const INDEXER_URL = process.env.INDEXER_URL ?? "";
@@ -221,16 +182,22 @@ async function fetchLineupSlotsForAddresses(
   signal: AbortSignal,
 ): Promise<Map<string, DayLineupEntry>> {
   const result = new Map<string, DayLineupEntry>();
+  const client = createEvmClient();
   await withConcurrency(addrs, LINEUP_CONCURRENCY, async (addr) => {
-    const response = await viewFn(
-      "tournament::get_lineup_slots_epoch",
-      [addr, String(day), String(epoch)],
-      signal,
-    );
-    if (!response) return;
-    const pids = parseU8Vec(response[0]);
-    const tiers = parseU8Vec(response[1]);
-    if (pids.length > 0) result.set(addr, { pids, tiers });
+    if (signal.aborted) return;
+    try {
+      const [playerIds, tiers] = await client.readContract({
+        address: runtimeAddresses.tournament as `0x${string}`,
+        abi: TOURNAMENT_VIEW_ABI,
+        functionName: "getLineupSlots",
+        args: [addr as `0x${string}`, BigInt(epoch), BigInt(day)],
+      });
+      const pids = Array.from(playerIds as readonly number[]);
+      const tiersArr = Array.from(tiers as readonly number[]);
+      if (pids.some((p) => p !== 0)) result.set(addr, { pids, tiers: tiersArr });
+    } catch {
+      // skip on error
+    }
   });
   return result;
 }
@@ -243,31 +210,38 @@ async function fetchDayLineupsBulk(
   signal: AbortSignal,
 ): Promise<{ data: Map<string, DayLineupEntry>; complete: boolean } | null> {
   const result = new Map<string, DayLineupEntry>();
+  const client = createEvmClient();
   let offset = 0;
   let firstCall = true;
+  const SLOTS = 5;
 
   while (true) {
-    const response = await viewFn(
-      "tournament::get_day_lineups_paginated",
-      [String(day), String(epoch), String(offset), String(BULK_PAGE_SIZE)],
-      signal,
-    );
-    if (!response) {
+    if (signal.aborted) return firstCall ? null : { data: result, complete: false };
+    let addrsArr: readonly `0x${string}`[];
+    let pidsFlat: readonly number[];
+    let tiersFlat: readonly number[];
+    let total: number;
+    try {
+      const res = await client.readContract({
+        address: runtimeAddresses.tournament as `0x${string}`,
+        abi: TOURNAMENT_VIEW_ABI,
+        functionName: "getDayLineupsPaginated",
+        args: [BigInt(epoch), BigInt(day), BigInt(offset), BigInt(BULK_PAGE_SIZE)],
+      });
+      addrsArr = res[0] as readonly `0x${string}`[];
+      pidsFlat = res[1] as readonly number[];
+      tiersFlat = res[2] as readonly number[];
+      total = Number(res[3]);
+    } catch {
       if (firstCall) return null;
       return { data: result, complete: false };
     }
     firstCall = false;
 
-    const [rawAddrs, rawPids, rawTiers, rawTotal] = response as [string[], unknown, unknown, string];
-    const total = Number(rawTotal);
-    const pids = parseU8Vec(rawPids);
-    const tiers = parseU8Vec(rawTiers);
-
-    (rawAddrs ?? []).forEach((addr: string, i: number) => {
-      result.set(addr, {
-        pids: pids.slice(i * 5, i * 5 + 5),
-        tiers: tiers.slice(i * 5, i * 5 + 5),
-      });
+    addrsArr.forEach((addr, i) => {
+      const pids = Array.from(pidsFlat.slice(i * SLOTS, i * SLOTS + SLOTS));
+      const tiersList = Array.from(tiersFlat.slice(i * SLOTS, i * SLOTS + SLOTS));
+      result.set(addr.toLowerCase(), { pids, tiers: tiersList });
     });
 
     offset += BULK_PAGE_SIZE;
@@ -361,20 +335,25 @@ export async function runJob(epoch: number, totalDays: number, currentDay: numbe
         return;
       }
 
-      const response = await viewFn("oracle::get_day_scores", [String(day)], abort.signal);
-      if (!response) {
+      let scores: number[];
+      let finalized: boolean;
+      try {
+        const evmClient = createEvmClient();
+        const [pidsArr, ptsArr, isFinalized] = await evmClient.readContract({
+          address: runtimeAddresses.oracle as `0x${string}`,
+          abi: ORACLE_ABI,
+          functionName: "getDayScores",
+          args: [BigInt(day)],
+        });
+        scores = new Array(50).fill(0) as number[];
+        (pidsArr as readonly number[]).forEach((pid, i) => {
+          if (pid < 50) scores[pid] = Number((ptsArr as readonly bigint[])[i] ?? 0n);
+        });
+        finalized = isFinalized as boolean;
+      } catch {
         if (existing) scoreCache.set(day, existing.scores);
         return;
       }
-
-      const [pidRaw, ptsRaw, rawFinalized] = response as [unknown, string[], unknown];
-      const pids = parseU8Vec(pidRaw);
-      const scores = new Array(50).fill(0) as number[];
-      pids.forEach((pid, i) => {
-        if (pid < 50) scores[pid] = Number(ptsRaw[i] ?? 0);
-      });
-      scoreCache.set(day, scores);
-      const finalized = rawFinalized === true || rawFinalized === "true";
       if (finalized) finalizedDays.add(day);
       await saveOracleCache(key.epoch, day, { scores, finalized, cachedAt: Date.now() });
       if (finalized && scores.length === 50) {
@@ -510,10 +489,17 @@ export async function runJob(epoch: number, totalDays: number, currentDay: numbe
 
     const scored = rows.filter((row) => row.days > 0).sort((a, b) => b.score - a.score);
 
+    const nicknameClient = createEvmClient();
     const nicknames = await withConcurrency(scored, LINEUP_CONCURRENCY, async (row) => {
+      if (abort.signal.aborted) return "";
       try {
-        const response = await viewFn("fantasy_league::get_nickname", [row.addr], abort.signal);
-        return decodeNickname(response?.[0]);
+        const nickname = await nicknameClient.readContract({
+          address: runtimeAddresses.coinDeckNFT as `0x${string}`,
+          abi: NFT_NICKNAME_ABI,
+          functionName: "nicknames",
+          args: [row.addr as `0x${string}`],
+        }) as string;
+        return nickname || "";
       } catch {
         return "";
       }

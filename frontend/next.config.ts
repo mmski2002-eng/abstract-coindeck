@@ -29,6 +29,7 @@ function buildContentSecurityPolicy() {
 }
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   experimental: {},
   async headers() {
     return [

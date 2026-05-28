@@ -105,8 +105,22 @@ export const MARKETPLACE_ABI = [
 ] as const;
 
 export const ADMIN_CONTROL_ABI = [
-  { name: "grantRole",  type: "function", stateMutability: "nonpayable", inputs: [{ name: "addr", type: "address" }, { name: "roleMask", type: "uint8" }], outputs: [] },
-  { name: "revokeRole", type: "function", stateMutability: "nonpayable", inputs: [{ name: "addr", type: "address" }, { name: "roleMask", type: "uint8" }], outputs: [] },
+  { name: "grantRole",    type: "function", stateMutability: "nonpayable", inputs: [{ name: "addr", type: "address" }, { name: "roleMask", type: "uint8" }], outputs: [] },
+  { name: "revokeRole",   type: "function", stateMutability: "nonpayable", inputs: [{ name: "addr", type: "address" }, { name: "roleMask", type: "uint8" }], outputs: [] },
+  { name: "queueAction",  type: "function", stateMutability: "nonpayable", inputs: [{ name: "actionType", type: "uint8" }, { name: "payloadHash", type: "bytes32" }], outputs: [] },
+  { name: "getActionDelay", type: "function", stateMutability: "view",     inputs: [{ name: "actionType", type: "uint8" }], outputs: [{ name: "", type: "uint256" }] },
+  { name: "getPendingActions", type: "function", stateMutability: "view",  inputs: [], outputs: [
+    { name: "actionTypes",   type: "uint8[]" },
+    { name: "executeAfters", type: "uint256[]" },
+    { name: "hashes",        type: "bytes32[]" },
+  ]},
+] as const;
+
+export const ORACLE_VIEW_ABI = [
+  { name: "isDayPosted", type: "function", stateMutability: "view",
+    inputs: [{ name: "day", type: "uint256" }],
+    outputs: [{ name: "", type: "bool" }],
+  },
 ] as const;
 
 export const COIN_DECK_NFT_ABI = [
@@ -128,6 +142,13 @@ export const CLAIM_ABI = [
   { name: "closeClaim",    type: "function", stateMutability: "nonpayable", inputs: [], outputs: [] },
   { name: "setClaimDays",  type: "function", stateMutability: "nonpayable", inputs: [{ name: "numDays", type: "uint256" }], outputs: [] },
   { name: "setClaimList",  type: "function", stateMutability: "nonpayable", inputs: [{ name: "addrs", type: "address[]" }, { name: "amounts", type: "uint256[]" }], outputs: [] },
+  { name: "getClaimState", type: "function", stateMutability: "view", inputs: [], outputs: [
+    { name: "_active",            type: "bool" },
+    { name: "_startTimestamp",    type: "uint256" },
+    { name: "_deadlineTimestamp", type: "uint256" },
+    { name: "vaultBalance",       type: "uint256" },
+    { name: "_claimDays",         type: "uint256" },
+  ]},
 ] as const;
 
 const COIN_DECK_NFT_VIEW_ABI = [

@@ -78,7 +78,8 @@ function getRenderableAssetBase(assetBase?: string): string {
   if (normalized && /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/i.test(normalized)) {
     return normalized;
   }
-  return "http://127.0.0.1:3000";
+  const port = process.env.PORT ?? "3000";
+  return `http://127.0.0.1:${port}`;
 }
 
 export function buildCardImageResponse(playerId: number, tier: number): Response {

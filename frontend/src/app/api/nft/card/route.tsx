@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { buildCardImageResponse, getPlayerIdFromCardPath } from "../shared";
 
-export const runtime = "edge";
+
 
 export async function GET(req: NextRequest) {
   // URL: /api/nft/card?pid=0&tier=0  (called from web app)

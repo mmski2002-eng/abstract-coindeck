@@ -14,11 +14,11 @@
 
 ## Project Context
 
-Blockchain game (fantasy crypto league) — мигрируем с Movement (Move) на Abstract Network (Solidity/EVM).
+**Abstract CoinDeck** — blockchain-игра (fantasy crypto league) на Abstract Network (Solidity/EVM).
 
 Focus areas:
 
-* smart contract logic (Solidity, Hardhat)
+* smart contract logic (Solidity, Hardhat, zkSync Era)
 * frontend integration (wagmi, viem, Abstract Global Wallet)
 * game mechanics and state handling
 * performance and UX
@@ -152,51 +152,56 @@ When debugging:
 - **DB**: PostgreSQL (адреса кошельков — EVM формат `0x...`)
 - **Wallet**: Abstract Global Wallet (AGW) — native AA, смарт-контракт кошельки
 
-## Migration: Movement → Abstract
-| Было (Movement) | Стало (Abstract) |
-|---|---|
-| Move lang | Solidity |
-| `movement aptos` CLI | Hardhat / Foundry |
-| Aptos wallet adapter | wagmi + AGW (`@abstract-foundation/agw-react`) |
-| `AccountAddress` (hex 32 bytes) | EVM address (20 bytes) |
-| Resources / Tables | mappings, structs в Solidity |
-| `aptos_framework::coin` | ERC-20 / native ETH |
-| Move NFT (token v2) | ERC-721 / ERC-1155 |
-
 ## Structure
 ```
 contracts/
-  Move.toml              (устаревший — будет hardhat проект)
-  sources/               Move контракты (референс для миграции)
+  contracts/             Solidity контракты (AdminControl, Claim, CoinDeckNFT, Marketplace, Oracle, Tournament)
+  scripts/deploy.ts      Hardhat deployment script
+  hardhat.config.ts      Конфиг для Abstract (zkSync Era)
+  sources/               Move контракты (референс, не трогать)
 frontend/
   src/
     app/                 Next.js pages + API routes
     components/          React components
     components/wallet/   Wallet logic (hooks, constants)
+    lib/evmContracts.ts  ABI + адреса контрактов
+    config/assetUniverse.ts  50 игровых активов
 database/
   schema.sql             PostgreSQL схема
-scripts/                 Deployment & testing utilities
+scripts/                 Утилиты (oracle_post.js, daily_lineup_bot.js, etc.)
 ```
 
 ## Commands
-- Contracts dev: `cd contracts && npx hardhat compile`
+- Contracts compile: `cd contracts && npx hardhat compile`
 - Deploy testnet: `cd contracts && npx hardhat run scripts/deploy.ts --network abstractTestnet`
 - Frontend dev: `cd frontend && npm run dev`
 - Frontend build: `cd frontend && npm run build`
 
 ## Key Files
-- `contracts/sources/tournament.move` — референс: турнирные эпохи, lineup, prize pool
-- `contracts/sources/fantasy_league.move` — референс: NFT карты, сундуки, инвентарь
+- `contracts/contracts/Tournament.sol` — турнирные эпохи, lineup, prize pool
+- `contracts/contracts/CoinDeckNFT.sol` — ERC-721 NFT карты и сундуки
+- `contracts/contracts/Oracle.sol` — on-chain цены активов
+- `contracts/contracts/AdminControl.sol` — timelock, access control
+- `contracts/contracts/Claim.sol` — клейм призов
 - `frontend/src/components/WalletApp.tsx` — wallet UI entry
-- `frontend/src/components/wallet/constants.ts` — адреса контрактов (обновлять после деплоя)
+- `frontend/src/lib/evmContracts.ts` — ABI + адреса контрактов (обновлять после деплоя)
+- `frontend/src/components/wallet/constants.ts` — адреса контрактов
 - `frontend/src/app/api/leaderboard/worker.ts` — off-chain leaderboard scoring
+- `frontend/src/app/api/bot/runner.ts` — daily oracle bot (viem)
 - `database/schema.sql` — PostgreSQL схема
+
+## Deployment
+- Server: `216.173.70.241`, domain: `https://escape.isgood.host`
+- PM2 process: `abstract-coindeck` (id=49), port `3003`
+- DB: PostgreSQL `abstract`, user `abstract_app`
+- Deploy: build standalone locally → rsync → pm2 restart
 
 ## Notes
 - AGW (Abstract Global Wallet) — смарт-контракт кошельки с native AA; используй `useAbstractClient` для транзакций
-- После деплоя: обновить адреса в `constants.ts` и ENV переменные
+- После деплоя: обновить адреса в `constants.ts` и `evmContracts.ts`
 - EVM адреса lowercase: `0x` + 40 hex символов
 - zkSync Era специфика: `paymaster`, `factoryDeps` в транзакциях при AA
+- NFT tokenURI → JSON metadata → `image` поле → `/cards/{id}_0.png` или `/chests/*.png`
 
 <!-- rtk-instructions v2 -->
 # RTK (Rust Token Killer) - Token-Optimized Commands

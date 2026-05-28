@@ -1,10 +1,18 @@
 # Build artifacts
 build/
 contracts/build/
+contracts/artifacts-zk/
+contracts/cache-zk/
+frontend/.next/
+frontend/tsconfig.tsbuildinfo
 
-# Secrets & local config
-.aptos/
-.movement/
+# Secrets & env files
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+**/.env.*.local
 ИНФО.md
 Abstract_Builder_Support_Plan_MarketLeague_final.docx
 PROJECT_SCHEME.html
@@ -26,7 +34,6 @@ PROJECT_SCHEME.html
 
 # Dev tooling
 node_modules/
-aptos-cli/
 *.bak
 *.tmp
 deploy.py

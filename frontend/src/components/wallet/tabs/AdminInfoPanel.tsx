@@ -66,7 +66,7 @@ function StatusBadge({ ok, label, pulse }: { ok: boolean; label: string; pulse?:
 
 function CardShell({ accent, children }: { accent: string; children: React.ReactNode }) {
   return (
-    <div className={`rounded-2xl border bg-zinc-900 p-4 h-full flex flex-col ${accent}`}>
+    <div className={`rounded-2xl border p-4 h-full flex flex-col ${accent}`} style={{ background: "var(--card)" }}>
       {children}
     </div>
   );
@@ -87,7 +87,7 @@ function CardHeader({ icon, title, badge }: { icon: string; title: string; badge
 function Stat({ label, value, sub, color }: { label: string; value: React.ReactNode; sub?: string; color?: string }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <div className={`text-lg font-black leading-none ${color ?? "text-white"}`}>{value}</div>
+      <div className={`text-lg font-black leading-none`} style={{ color: color ? undefined : "var(--panel-text)" }}>{value}</div>
       <div className="text-[10px] text-zinc-500">{label}</div>
       {sub && <div className="text-[9px] text-zinc-600">{sub}</div>}
     </div>
@@ -156,7 +156,7 @@ export function AdminInfoPanel({
     : (ru ? "Отключён" : "Disabled");
 
   return (
-    <div className="rounded-2xl border border-indigo-500/30 bg-zinc-900 p-4 space-y-3 mb-4">
+    <div className="rounded-2xl border border-indigo-500/30 p-4 space-y-3 mb-4" style={{ background: "var(--card)" }}>
       <div className="flex items-center gap-2">
         <div className="h-px flex-1 bg-indigo-500/20" />
         <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-400/70">
@@ -191,7 +191,7 @@ export function AdminInfoPanel({
           <Stat
             label={ru ? "День бота" : "Bot day"}
             value={botStatus?.state.currentDay ?? "—"}
-            color="text-white"
+            color="text-[var(--panel-text)]"
           />
           <Stat
             label={ru ? "Кошелёк" : "Wallet"}
@@ -235,7 +235,7 @@ export function AdminInfoPanel({
               <div className="text-[10px] font-semibold text-amber-400 mb-1">
                 ⏳ {ru ? "Ожидает таймлок" : "Pending timelock"}
               </div>
-              <div className="text-sm font-bold text-white">{pendingTL.directLabel || pendingTL.action}</div>
+              <div className="text-sm font-bold" style={{ color: "var(--panel-text)" }}>{pendingTL.directLabel || pendingTL.action}</div>
               <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-zinc-400">
                 {ru ? "Через" : "In"}: <TimerUntil ts={pendingTL.executeAfter} />
               </div>
@@ -280,11 +280,11 @@ export function AdminInfoPanel({
 
             <div className="grid grid-cols-3 gap-3 mb-4">
               <div className="rounded-xl bg-white/[0.03] border border-white/5 p-3 text-center">
-                <div className="text-base font-black text-white font-mono">{fmtMove(governancePolicy.perTxLimit)}</div>
+                <div className="text-base font-black font-mono" style={{ color: "var(--panel-text)" }}>{fmtMove(governancePolicy.perTxLimit)}</div>
                 <div className="text-[9px] text-zinc-500 mt-0.5">{ru ? "лимит / tx" : "limit / tx"} ETH</div>
               </div>
               <div className="rounded-xl bg-white/[0.03] border border-white/5 p-3 text-center">
-                <div className="text-base font-black text-white font-mono">{fmtMove(governancePolicy.dailyLimit)}</div>
+                <div className="text-base font-black font-mono" style={{ color: "var(--panel-text)" }}>{fmtMove(governancePolicy.dailyLimit)}</div>
                 <div className="text-[9px] text-zinc-500 mt-0.5">{ru ? "лимит / день" : "limit / day"} ETH</div>
               </div>
               <div className="rounded-xl bg-amber-500/5 border border-amber-500/15 p-3 text-center">
@@ -404,7 +404,7 @@ export function AdminInfoPanel({
           <div className="rounded-xl bg-white/[0.03] border border-white/5 p-3 flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] text-zinc-500">{ru ? "Участников в лидерборде" : "Leaderboard"}</span>
-              <span className="text-lg font-black text-white">{lbRows.length}</span>
+              <span className="text-lg font-black" style={{ color: "var(--panel-text)" }}>{lbRows.length}</span>
             </div>
             <div className="h-px bg-white/5" />
             <div className="flex items-center justify-between">
@@ -480,7 +480,7 @@ export function AdminInfoPanel({
               ] as const).map(({ icon, label, val }) => (
                 <div key={label} className="rounded-lg bg-black/30 border border-white/5 p-2 text-center">
                   <div className="text-lg leading-none">{icon}</div>
-                  <div className="mt-1 font-mono text-[11px] font-bold text-white">{(val / 1e18).toFixed(4)}</div>
+                  <div className="mt-1 font-mono text-[11px] font-bold" style={{ color: "var(--panel-text)" }}>{(val / 1e18).toFixed(4)}</div>
                   <div className="text-[9px] text-zinc-600">{label}</div>
                 </div>
               ))}
@@ -493,7 +493,7 @@ export function AdminInfoPanel({
               <div className="flex flex-wrap gap-1.5">
                 {tierMults.map((m, i) => (
                   <div key={i} className="rounded-lg bg-black/30 border border-white/5 px-2.5 py-1.5 text-center min-w-[44px]">
-                    <div className="font-mono text-sm font-black text-white">{m}<span className="text-[10px] text-zinc-500">×</span></div>
+                    <div className="font-mono text-sm font-black" style={{ color: "var(--panel-text)" }}>{m}<span className="text-[10px]" style={{ color: "var(--nft-muted)" }}>×</span></div>
                     <div className="text-[9px] text-zinc-600">T{i + 1}</div>
                   </div>
                 ))}

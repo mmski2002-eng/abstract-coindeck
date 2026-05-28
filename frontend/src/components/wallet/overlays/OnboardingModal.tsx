@@ -53,8 +53,8 @@ export function OnboardingModal({
       icon: "🏆",
       title: ru ? "Турниры" : "Tournaments",
       body: ru
-        ? "Каждый день выбирай 5 карточек в состав.\nОчки начисляются по реальным данным рынка:\n\n📈 Изменение цены (до ±300 очков)\n📊 Объём торгов (до +100)\n⚡ Волатильность (до +100)\n💻 Активность GitHub (до +100)\n\nТоп инвесторы получают ABS в конце турнира."
-        : "Each day pick 5 cards for your lineup.\nPoints are scored from real market data:\n\n📈 Price change (up to ±300 pts)\n📊 Trading volume (up to +100)\n⚡ Volatility (up to +100)\n💻 GitHub activity (up to +100)\n\nTop investors earn ABS at tournament end.",
+        ? "Каждый день выбирай 5 карточек в состав.\nОчки начисляются по реальным данным рынка:\n\n📈 Изменение цены (до ±300 очков)\n📊 Объём торгов (до +100)\n⚡ Волатильность (до +100)\n💻 Активность GitHub (до +100)\n\nТоп инвесторы получают ETH в конце турнира."
+        : "Each day pick 5 cards for your lineup.\nPoints are scored from real market data:\n\n📈 Price change (up to ±300 pts)\n📊 Trading volume (up to +100)\n⚡ Volatility (up to +100)\n💻 GitHub activity (up to +100)\n\nTop investors earn ETH at tournament end.",
     },
     {
       icon: "👤",
@@ -83,8 +83,8 @@ export function OnboardingModal({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-      <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-zinc-950 shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center backdrop-blur-md p-4" style={{ background: "var(--overlay-backdrop)" }}>
+      <div className="relative w-full max-w-md rounded-3xl overflow-hidden" style={{ background: "var(--modal-bg)", border: "1px solid var(--panel-border)", boxShadow: "var(--modal-shadow)" }}>
         <div className="h-1 w-full bg-white/5">
           <div className="h-full bg-gradient-to-r from-cyan-500 to-sky-200 transition-all duration-300"
             style={{ width: `${((step + 1) / total) * 100}%` }} />
@@ -93,10 +93,10 @@ export function OnboardingModal({
         <div className="p-6 space-y-4">
           <div className="text-center space-y-2">
             <div className="text-5xl">{current.icon}</div>
-            <div className="text-xl font-black text-white">{current.title}</div>
+            <div className="text-xl font-black" style={{ color: "var(--panel-text)" }}>{current.title}</div>
           </div>
 
-          <div className="rounded-2xl border border-white/5 bg-white/5 p-4 text-sm text-zinc-300 whitespace-pre-line leading-relaxed">
+          <div className="rounded-2xl p-4 text-sm whitespace-pre-line leading-relaxed" style={{ border: "1px solid var(--panel-border)", background: "var(--panel-bg)", color: "var(--panel-text-muted)" }}>
             {current.body}
           </div>
 
@@ -111,7 +111,8 @@ export function OnboardingModal({
                 }}
                 placeholder={ru ? "Твой никнейм…" : "Your nickname…"}
                 maxLength={14}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                style={{ border: "1px solid var(--panel-border)", background: "var(--panel-bg)", color: "var(--panel-text)" }}
                 onKeyDown={e => e.key === "Enter" && handleCreate()}
                 autoFocus
               />
@@ -148,7 +149,8 @@ export function OnboardingModal({
             <div className="flex gap-2">
               {step > 0 && (
                 <button onClick={() => setStep(s => s - 1)}
-                  className="rounded-xl border border-white/10 px-4 py-2 text-sm text-zinc-400 hover:text-white transition">
+                  className="rounded-xl px-4 py-2 text-sm transition"
+                  style={{ border: "1px solid var(--panel-border)", background: "var(--button-secondary-bg)", color: "var(--button-secondary-text)" }}>
                   {ru ? "Назад" : "Back"}
                 </button>
               )}

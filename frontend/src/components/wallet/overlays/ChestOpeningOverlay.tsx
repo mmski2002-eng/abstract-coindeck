@@ -49,20 +49,20 @@ export function ChestOpeningOverlay({
   }, [cardFound, phase]);
 
   return createPortal(
-    <div className="fixed inset-0 z-[180] flex items-center justify-center bg-black/90 backdrop-blur-md">
+    <div className="fixed inset-0 z-[180] flex items-center justify-center backdrop-blur-md" style={{ background: "var(--overlay-backdrop)" }}>
 
       {txConfirmed && onSkip && (
         <button
           onClick={onSkip}
           className="absolute top-5 right-5 w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
           style={{
-            background: "linear-gradient(#0d0f22, #08091a) padding-box, linear-gradient(135deg, rgba(0,240,255,0.3), rgba(176,38,255,0.3)) border-box",
+            background: "linear-gradient(var(--modal-bg), var(--modal-bg)) padding-box, linear-gradient(135deg, rgba(0,240,255,0.3), rgba(176,38,255,0.3)) border-box",
             border: "1px solid transparent",
             boxShadow: "0 0 14px rgba(0,240,255,0.12)",
           }}
           aria-label={lang === "ru" ? "Пропустить" : "Skip"}
         >
-          <svg className="w-4 h-4 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg className="w-4 h-4" style={{ color: "var(--panel-text-muted)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 6L6 18M6 6l12 12"/>
           </svg>
         </button>
@@ -212,7 +212,7 @@ export function ChestOpeningOverlay({
                 width: 46, height: 63,
                 borderRadius: 7,
                 border: `1px solid ${chest.particle}60`,
-                background: "#0a0c18",
+                background: "var(--card)",
                 overflow: "hidden",
                 boxShadow: `0 0 10px ${chest.particle}40`,
                 "--tx": `${tx}px`,
@@ -226,7 +226,7 @@ export function ChestOpeningOverlay({
           );
         })}
 
-        <div className="text-sm tracking-wide" style={{ color: "rgba(255,255,255,0.45)" }}>
+        <div className="text-sm tracking-wide" style={{ color: "var(--panel-text-muted)" }}>
           {phase === "waiting"
             ? (lang === "ru" ? "Подтвердите транзакцию в кошельке…" : "Confirm transaction in wallet…")
             : phase === "shaking"

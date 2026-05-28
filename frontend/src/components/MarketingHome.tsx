@@ -100,13 +100,13 @@ export function MarketingHome() {
     { icon: "🎁", title: "Открой сундуки", desc: "Купи сундук и получи случайную карточку криптоактива: Bitcoin, Ethereum, Solana и других монет." },
     { icon: "🔮", title: "Объединяй карты", desc: "5 одинаковых карточек одного тира превращаются в 1 карту следующего уровня: Common → Rare → Epic → Legendary." },
     { icon: "💼", title: "Собери портфель", desc: "Выбери 5 карточек на день. Лига зависит от редкости твоего состава: Bronze, Silver или Gold." },
-    { icon: "📈", title: "Зарабатывай очки", desc: "Очки начисляются по реальным движениям рынка. Лучшие игроки получают призы в ABS." },
+    { icon: "📈", title: "Зарабатывай очки", desc: "Очки начисляются по реальным движениям рынка. Лучшие игроки получают призы в ETH." },
   ];
   const stepsEn = [
     { icon: "🎁", title: "Open chests", desc: "Buy a chest and get a random crypto asset card: Bitcoin, Ethereum, Solana and more." },
     { icon: "🔮", title: "Merge cards", desc: "5 identical cards of one tier become 1 card of the next tier: Common → Rare → Epic → Legendary." },
     { icon: "💼", title: "Build portfolio", desc: "Pick 5 cards for the day. Your league depends on rarity: Bronze, Silver or Gold." },
-    { icon: "📈", title: "Earn prizes", desc: "Points come from real market moves. Top players earn ABS prizes." },
+    { icon: "📈", title: "Earn prizes", desc: "Points come from real market moves. Top players earn ETH prizes." },
   ];
   const steps = lang === "ru" ? stepsRu : stepsEn;
 
@@ -204,21 +204,16 @@ export function MarketingHome() {
 
       <header className="sticky top-0 z-20 border-b backdrop-blur-xl" style={{ borderColor: "var(--header-border)", background: "var(--header-bg)" }}>
         <div className="mx-auto flex min-h-16 max-w-[1440px] items-center gap-4 px-6 py-2 lg:px-10">
-          <div className="hidden shrink-0 xl:flex items-end gap-2.5">
+          <div className="hidden shrink-0 xl:flex items-center gap-2.5">
             <div
               className="font-abs-brand relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-base font-bold"
               style={{ background: "linear-gradient(135deg, #00CFFF, #00FF47)", boxShadow: "0 0 16px rgba(0,207,255,0.25), inset 0 1px 0 rgba(255,255,255,0.3)" }}
             >
               <span className="select-none text-black drop-shadow">CD</span>
             </div>
-            <div className="flex flex-col justify-between" style={{ height: "2rem" }}>
-              <span className="font-abs-brand text-base leading-none font-bold tracking-[0.08em]" style={{ color: "var(--foreground)" }}>
-                COINDECK
-              </span>
-              <div className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: "var(--header-muted)" }}>
-                markets · decks · rewards
-              </div>
-            </div>
+            <span className="font-abs-brand text-3xl leading-none font-bold tracking-[0.06em]" style={{ color: "var(--foreground)" }}>
+              CoinDeck
+            </span>
           </div>
 
           <div className="flex shrink-0 items-center gap-2.5 xl:hidden">
@@ -228,8 +223,8 @@ export function MarketingHome() {
             >
               <span className="select-none text-black drop-shadow">CD</span>
             </div>
-            <span className="font-abs-brand text-base leading-none font-bold tracking-[0.08em]" style={{ color: "var(--foreground)" }}>
-              COINDECK
+            <span className="font-abs-brand text-3xl leading-none font-bold tracking-[0.06em]" style={{ color: "var(--foreground)" }}>
+              CoinDeck
             </span>
           </div>
 
@@ -571,7 +566,7 @@ export function MarketingHome() {
               {[
                 { icon: "⚡", title: lang === "ru" ? "Быстрые транзакции" : "Fast transactions", desc: "Abstract Mainnet-ready stack" },
                 { icon: "🔒", title: lang === "ru" ? "NFT-объекты" : "NFT objects", desc: "aptos_token_objects" },
-                { icon: "💎", title: lang === "ru" ? "ABS токен" : "ABS token", desc: lang === "ru" ? "Призы в нативном токене" : "Native token prizes" },
+                { icon: "💎", title: "ETH", desc: lang === "ru" ? "Призы в ETH" : "ETH prizes" },
               ].map(({ icon, title, desc }) => (
                 <div key={title} className="rounded-xl border p-3" style={{ borderColor: "var(--soft-border)", background: "var(--soft-surface)" }}>
                   <div className="mb-1.5 text-xl">{icon}</div>
@@ -595,6 +590,7 @@ export function MarketingHome() {
       </Modal>
 
       <TourOverlay active={tourActive} onFinish={finishTour} lang={lang} setActiveTab={setActiveTab} setDemoMode={setTourDemoMode} />
+
 
       <Modal open={feedbackOpen} onClose={closeFeedback} title={lang === "ru" ? "Оставить отзыв" : "Leave a review"}>
         {feedbackStatus === "done" ? (

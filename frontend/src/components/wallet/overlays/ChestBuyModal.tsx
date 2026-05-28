@@ -33,15 +33,16 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[150] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[150] flex items-center justify-center backdrop-blur-sm p-4"
+      style={{ background: "var(--overlay-backdrop)" }}
       onClick={onClose}
     >
       <div
         className="relative w-full max-w-sm rounded-2xl overflow-hidden"
         style={{
-          background: `linear-gradient(#0d0f22, #08091a) padding-box, linear-gradient(135deg, ${t.b1}, ${t.b2}) border-box`,
+          background: `linear-gradient(var(--modal-bg), var(--modal-bg)) padding-box, linear-gradient(135deg, ${t.b1}, ${t.b2}) border-box`,
           border: "1.5px solid transparent",
-          boxShadow: `0 0 60px ${t.glow}, 0 25px 50px rgba(0,0,0,0.7)`,
+          boxShadow: `0 0 60px ${t.glow}, var(--modal-shadow)`,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -72,7 +73,7 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
             />
           </div>
           <div className="relative text-center">
-            <div className="font-display font-black text-xl text-white tracking-tight">{modal.label}</div>
+            <div className="font-display font-black text-xl tracking-tight" style={{ color: "var(--panel-text)" }}>{modal.label}</div>
             <div
               className="mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-[11px] font-bold uppercase tracking-widest"
               style={{ background: t.accent + "18", border: `1px solid ${t.accent}40`, color: t.accent }}
@@ -83,31 +84,28 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
         </div>
 
         {/* ── Divider ── */}
-        <div
-          className="mx-6 h-px"
-          style={{ background: `linear-gradient(to right, transparent, ${t.accent}35, transparent)` }}
-        />
+        <div className="mx-6 h-px" style={{ background: `linear-gradient(to right, transparent, ${t.accent}35, transparent)` }} />
 
         {/* ── Body ── */}
         <div className="p-6 space-y-4">
-          <p className="text-sm text-white/45 leading-relaxed">{modal.desc}</p>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--panel-text-muted)" }}>{modal.desc}</p>
 
           {/* Qty stepper */}
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-white/30">
+            <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--nft-muted)" }}>
               {lang === "ru" ? "Количество" : "Quantity"}
             </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleQtyChange(-1)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-base transition active:scale-90"
-                style={{ background: t.accent + "14", border: `1px solid ${t.accent}30` }}
+                className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90"
+                style={{ background: t.accent + "14", border: `1px solid ${t.accent}30`, color: "var(--panel-text)" }}
               >−</button>
-              <span className="w-10 text-center text-white font-bold text-base tabular-nums">{chestBuyQty}</span>
+              <span className="w-10 text-center font-bold text-base tabular-nums" style={{ color: "var(--panel-text)" }}>{chestBuyQty}</span>
               <button
                 onClick={() => handleQtyChange(1)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-base transition active:scale-90"
-                style={{ background: t.accent + "14", border: `1px solid ${t.accent}30` }}
+                className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90"
+                style={{ background: t.accent + "14", border: `1px solid ${t.accent}30`, color: "var(--panel-text)" }}
               >+</button>
             </div>
           </div>
@@ -117,10 +115,10 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
             className="flex items-center justify-between rounded-xl px-4 py-3"
             style={{ background: t.accent + "0a", border: `1px solid ${t.accent}22` }}
           >
-            <span className="text-[11px] font-bold uppercase tracking-widest text-white/30">
+            <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--nft-muted)" }}>
               {lang === "ru" ? "Итого" : "Total"}
             </span>
-            <span className="text-base font-black text-white">
+            <span className="text-base font-black" style={{ color: "var(--panel-text)" }}>
               {((modal.price * chestBuyQty) / 1e18).toFixed(4)}
               <span className="ml-1.5 text-sm font-semibold" style={{ color: t.accent }}>ETH</span>
             </span>
@@ -130,8 +128,8 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
           <div className="flex gap-3 pt-1">
             <button
               onClick={onClose}
-              className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white/45 hover:text-white/70 transition"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+              className="flex-1 rounded-xl py-2.5 text-sm font-semibold transition"
+              style={{ background: "var(--button-secondary-bg)", border: "1px solid var(--panel-border)", color: "var(--button-secondary-text)" }}
             >
               {lang === "ru" ? "Отмена" : "Cancel"}
             </button>

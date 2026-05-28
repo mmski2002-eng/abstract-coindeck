@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-function isMetaMaskConnectNoise(value: unknown): boolean {
+function isNoise(value: unknown): boolean {
   const text = value instanceof Error
     ? `${value.message}\n${value.stack ?? ""}`
     : typeof value === "string"
@@ -11,21 +11,27 @@ function isMetaMaskConnectNoise(value: unknown): boolean {
         ? String((value as { message?: unknown }).message ?? "")
         : "";
 
-  return text.includes("Failed to connect to MetaMask") ||
-    text.includes("chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/");
+  return (
+    text.includes("Failed to connect to MetaMask") ||
+    text.includes("chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/") ||
+    // AGW/Privy connector eagerly fetches provider details on init; non-critical in dev
+    (text.includes("Failed to fetch") && text.includes("loadProviderDetails")) ||
+    (text.includes("Failed to fetch") && text.includes("privy")) ||
+    (text.includes("Failed to fetch") && text.includes("auth.privy.io"))
+  );
 }
 
 export function SuppressExtensionErrors() {
   useEffect(() => {
     const onError = (event: ErrorEvent) => {
-      if (isMetaMaskConnectNoise(event.error) || isMetaMaskConnectNoise(event.message) || isMetaMaskConnectNoise(event.filename)) {
+      if (isNoise(event.error) || isNoise(event.message) || isNoise(event.filename)) {
         event.preventDefault();
         event.stopImmediatePropagation();
       }
     };
 
     const onRejection = (event: PromiseRejectionEvent) => {
-      if (isMetaMaskConnectNoise(event.reason)) {
+      if (isNoise(event.reason)) {
         event.preventDefault();
         event.stopImmediatePropagation();
       }

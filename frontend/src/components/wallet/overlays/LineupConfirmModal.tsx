@@ -20,15 +20,15 @@ type Props = {
 
 export function LineupConfirmModal({ lang, tnState, epochRange, roleBonusPct, tnSelectedCards, flCards, busy, setLineupConfirmOpen, onSubmitLineup }: Props) {
   return createPortal(
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-      <div className="w-full max-w-sm rounded-3xl border border-white/15 bg-zinc-900/95 p-5 space-y-4">
-        <div className="text-base font-black">{lang === "ru" ? "Подтвердить состав" : "Confirm lineup"}</div>
-        <div className="text-xs text-zinc-500">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center backdrop-blur-md p-4" style={{ background: "var(--overlay-backdrop)" }}>
+      <div className="w-full max-w-sm rounded-3xl p-5 space-y-4" style={{ background: "var(--modal-bg)", border: "1px solid var(--panel-border)", boxShadow: "var(--modal-shadow)" }}>
+        <div className="text-base font-black" style={{ color: "var(--panel-text)" }}>{lang === "ru" ? "Подтвердить состав" : "Confirm lineup"}</div>
+        <div className="text-xs" style={{ color: "var(--panel-text-muted)" }}>
           {lang === "ru"
             ? `День ${tnState.currentDay} · Неделя ${epochRange ? tnState.epoch - epochRange[0] + 1 : tnState.epoch}`
             : `Day ${tnState.currentDay} · Week ${epochRange ? tnState.epoch - epochRange[0] + 1 : tnState.epoch}`}
         </div>
-        <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-[11px] text-amber-200">
+        <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-[11px]" style={{ color: "var(--amber-text, #92400e)" }}>
           ⚡ {lang === "ru"
             ? `Монета в своей категории даёт +${roleBonusPct}% к очкам слота`
             : `Coin in its category gives +${roleBonusPct}% to slot score`}
@@ -41,10 +41,10 @@ export function LineupConfirmModal({ lang, tnState, epochRange, roleBonusPct, tn
             const isRoleMatch = PLAYER_ROLE_IDS[card.playerId] === si;
             const tc = TIER_COLORS[card.tier];
             return (
-              <div key={si} className={`flex items-center gap-3 rounded-xl border p-2.5 ${isRoleMatch ? "border-amber-500/30 bg-amber-500/5" : "border-white/8 bg-white/3"}`}>
+              <div key={si} className={`flex items-center gap-3 rounded-xl border p-2.5 ${isRoleMatch ? "border-amber-500/30 bg-amber-500/5" : ""}`} style={!isRoleMatch ? { borderColor: "var(--panel-border)", background: "var(--panel-bg)" } : undefined}>
                 <img src={COIN_ICONS[card.playerId]} alt="" className="h-9 w-9 rounded-lg object-cover opacity-85 shrink-0" referrerPolicy="no-referrer" />
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs font-semibold text-white truncate">{HEROES[card.playerId]}</div>
+                  <div className="text-xs font-semibold truncate" style={{ color: "var(--panel-text)" }}>{HEROES[card.playerId]}</div>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className={`text-[9px] rounded px-1 py-0.5 font-bold ${tc.badge}`}>{TIER_NAMES[card.tier]}</span>
                     <span className="text-[9px] text-zinc-500">{role}</span>
@@ -60,7 +60,8 @@ export function LineupConfirmModal({ lang, tnState, epochRange, roleBonusPct, tn
         <div className="flex gap-2 pt-1">
           <button
             onClick={() => setLineupConfirmOpen(false)}
-            className="flex-1 rounded-xl border border-white/10 py-2.5 text-xs font-semibold text-zinc-300 hover:bg-white/5 transition">
+            className="flex-1 rounded-xl py-2.5 text-xs font-semibold transition"
+            style={{ border: "1px solid var(--panel-border)", background: "var(--button-secondary-bg)", color: "var(--button-secondary-text)" }}>
             {lang === "ru" ? "Назад" : "Back"}
           </button>
           <button

@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 
 const suppressMetaMaskConnectNoise = `
 (function () {
-  function isMetaMaskConnectNoise(value) {
+  function isNoise(value) {
     var text = "";
     if (value instanceof Error) {
       text = value.message + "\\n" + (value.stack || "");
@@ -36,18 +36,23 @@ const suppressMetaMaskConnectNoise = `
       text = String(value.message || "");
     }
     return text.indexOf("Failed to connect to MetaMask") !== -1 ||
-      text.indexOf("chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/") !== -1;
+      text.indexOf("chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/") !== -1 ||
+      (text.indexOf("Failed to fetch") !== -1 && (
+        text.indexOf("loadProviderDetails") !== -1 ||
+        text.indexOf("privy") !== -1 ||
+        text.indexOf("auth.privy.io") !== -1
+      ));
   }
 
   window.addEventListener("error", function (event) {
-    if (isMetaMaskConnectNoise(event.error) || isMetaMaskConnectNoise(event.message) || isMetaMaskConnectNoise(event.filename)) {
+    if (isNoise(event.error) || isNoise(event.message) || isNoise(event.filename)) {
       event.preventDefault();
       event.stopImmediatePropagation();
     }
   }, true);
 
   window.addEventListener("unhandledrejection", function (event) {
-    if (isMetaMaskConnectNoise(event.reason)) {
+    if (isNoise(event.reason)) {
       event.preventDefault();
       event.stopImmediatePropagation();
     }

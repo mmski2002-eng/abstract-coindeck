@@ -30,7 +30,7 @@
   --background: #f4f5f7;
   --foreground: #16181d;
 
-  --card:      #ffffff;
+  --card:      rgba(255,255,255,0.95);
   --card-2:    #f4f5f7;
 
   --surface:   rgba(255,255,255,0.84);
@@ -63,7 +63,7 @@
   --control-shadow: 0 0 10px rgba(0,255,102,0.08);
   --control-shadow-active: 0 0 16px rgba(0,255,102,0.18);
   --control-text: #16181d;
-  --overlay-backdrop: rgba(22,24,29,0.18);
+  --overlay-backdrop: rgba(244,245,247,0.88);
   --modal-bg: rgba(250,251,252,0.98);
   --modal-header-bg: #f4f5f7;
   --modal-shadow: 0 30px 80px rgba(22,24,29,0.18);
@@ -76,10 +76,10 @@
   --button-ghost-bg: transparent;
   --button-ghost-hover: rgba(22,24,29,0.05);
   --button-ghost-text: #16181d;
-  --floating-bg: rgba(10,12,18,0.82);
-  --floating-border: rgba(255,255,255,0.10);
-  --floating-text: #ffffff;
-  --floating-muted: rgba(255,255,255,0.58);
+  --floating-bg: rgba(255,255,255,0.95);
+  --floating-border: rgba(22,24,29,0.14);
+  --floating-text: #16181d;
+  --floating-muted: rgba(22,24,29,0.50);
   --soft-surface: rgba(22,24,29,0.04);
   --soft-surface-2: rgba(22,24,29,0.07);
   --soft-border: rgba(22,24,29,0.10);
@@ -102,7 +102,7 @@
   --info-block-icon-bg: rgba(22,24,29,0.06);
   --info-block-icon-border: rgba(22,24,29,0.16);
   --info-block-icon-text: rgba(22,24,29,0.70);
-  --chest-card-bg: rgba(245,246,248,0.85);
+  --chest-card-bg: rgba(255,255,255,0.95);
   --chest-card-border: rgba(22,24,29,0.26);
   --chest-card-text-muted: rgba(22,24,29,0.52);
   --chest-card-text-subtle: rgba(22,24,29,0.38);
@@ -111,8 +111,20 @@
   --chest-card-shadow: 0 18px 26px -18px rgba(22,24,29,0.22);
   --chest-open-disabled-text: rgba(22,24,29,0.68);
   --chest-open-disabled-border: rgba(22,24,29,0.28);
-  --section-label: rgba(22,24,29,0.55);
-  --section-rule: rgba(22,24,29,0.35);
+  --nft-badge-bg: rgba(22,24,29,0.09);
+  --nft-badge-text: rgba(22,24,29,0.85);
+  --nft-lock-bg: rgba(255,255,255,0.82);
+  --nft-muted: rgba(22,24,29,0.45);
+  --nft-semi: rgba(22,24,29,0.65);
+  --nft-progress-track: rgba(22,24,29,0.10);
+  --nft-btn-border: rgba(22,24,29,0.22);
+  --nft-btn-text: rgba(22,24,29,0.72);
+  --nft-btn-bg: rgba(22,24,29,0.05);
+  --nft-btn-hover-bg: rgba(22,24,29,0.09);
+  --amber-text: #92400e;
+  --red-text: #b91c1c;
+  --section-label: #000000;
+  --section-rule: #000000;
   --filter-chip-bg: #ffffff;
   --filter-chip-border: rgba(22,24,29,0.24);
   --filter-chip-text: rgba(22,24,29,0.72);
@@ -134,7 +146,7 @@ html[data-theme="dark"] {
 
   --background: #171718;
   --foreground: #ffffff;
-  --card: #212124;
+  --card: rgba(33,33,36,0.95);
   --card-2: #1f1f1f;
   --surface: rgba(20,20,21,0.9);
   --surface-2: rgba(23,23,24,0.96);
@@ -163,7 +175,7 @@ html[data-theme="dark"] {
   --control-shadow: 0 8px 24px rgba(0,0,0,0.22);
   --control-shadow-active: 0 10px 28px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,222,115,0.2);
   --control-text: #ffffff;
-  --overlay-backdrop: rgba(0,0,0,0.8);
+  --overlay-backdrop: rgba(0,0,0,0.75);
   --modal-bg: #2a2a2a;
   --modal-header-bg: #1f1f1f;
   --modal-shadow: 0 34px 90px rgba(0,0,0,0.42);
@@ -202,7 +214,7 @@ html[data-theme="dark"] {
   --info-block-icon-bg: rgba(255,255,255,0.06);
   --info-block-icon-border: rgba(237,239,243,0.14);
   --info-block-icon-text: #d7dce4;
-  --chest-card-bg: rgba(32,33,36,0.85);
+  --chest-card-bg: rgba(33,33,36,0.95);
   --chest-card-border: rgba(237,239,243,0.12);
   --chest-card-text-muted: rgba(237,239,243,0.58);
   --chest-card-text-subtle: rgba(237,239,243,0.34);
@@ -210,8 +222,20 @@ html[data-theme="dark"] {
   --chest-card-pill-border: rgba(237,239,243,0.12);
   --chest-open-disabled-text: rgba(237,239,243,0.50);
   --chest-open-disabled-border: rgba(237,239,243,0.20);
-  --section-label: rgba(237,239,243,0.62);
-  --section-rule: rgba(237,239,243,0.32);
+  --nft-badge-bg: rgba(0,0,0,0.50);
+  --nft-badge-text: rgba(255,255,255,0.90);
+  --nft-lock-bg: rgba(0,0,0,0.55);
+  --nft-muted: rgba(237,239,243,0.40);
+  --nft-semi: rgba(237,239,243,0.70);
+  --nft-progress-track: rgba(0,0,0,0.60);
+  --nft-btn-border: rgba(255,255,255,0.12);
+  --nft-btn-text: rgba(255,255,255,0.55);
+  --nft-btn-bg: rgba(255,255,255,0.03);
+  --nft-btn-hover-bg: rgba(255,255,255,0.07);
+  --amber-text: #fde68a;
+  --red-text: #fca5a5;
+  --section-label: #ffffff;
+  --section-rule: #ffffff;
   --filter-chip-bg: rgba(21,21,23,0.92);
   --filter-chip-border: rgba(237,239,243,0.24);
   --filter-chip-text: rgba(237,239,243,0.82);
@@ -487,6 +511,64 @@ body {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+
+/* ── Light theme: nav-tab-active solid bg ────────────────────────────── */
+html[data-theme="light"] .nav-tab-active {
+  background: rgba(236,254,255,0.95) !important;
+  animation: activeTabColorWave 10s ease-in-out infinite !important;
+}
+
+/* ── Light theme: adapt dark-optimised transparent utilities ─────────── */
+html[data-theme="light"] .bg-white\/5,
+html[data-theme="light"] .bg-white\/\[0\.02\],
+html[data-theme="light"] .bg-white\/\[0\.03\],
+html[data-theme="light"] .bg-white\/\[0\.04\],
+html[data-theme="light"] .bg-white\/\[0\.06\] { background-color: rgba(22,24,29,0.04) !important; }
+
+html[data-theme="light"] .bg-white\/10 { background-color: rgba(22,24,29,0.07) !important; }
+
+html[data-theme="light"] .hover\:bg-white\/5:hover,
+html[data-theme="light"] .hover\:bg-white\/10:hover { background-color: rgba(22,24,29,0.07) !important; }
+
+html[data-theme="light"] .border-white\/5  { border-color: rgba(22,24,29,0.07) !important; }
+html[data-theme="light"] .border-white\/10 { border-color: rgba(22,24,29,0.11) !important; }
+
+html[data-theme="light"] .bg-black\/20 { background-color: rgba(22,24,29,0.05) !important; }
+html[data-theme="light"] .bg-black\/60 { background-color: rgba(22,24,29,0.08) !important; }
+html[data-theme="light"] .bg-black\/30 { background-color: rgba(22,24,29,0.05) !important; }
+html[data-theme="light"] .bg-red-950   { background-color: rgba(239,68,68,0.08) !important; }
+html[data-theme="light"] .text-zinc-200 { color: rgba(22,24,29,0.85) !important; }
+
+html[data-theme="light"] .bg-zinc-800\/20,
+html[data-theme="light"] .bg-zinc-800\/40,
+html[data-theme="light"] .bg-zinc-900\/40 { background-color: rgba(22,24,29,0.04) !important; }
+
+html[data-theme="light"] input.text-white,
+html[data-theme="light"] select.text-white,
+html[data-theme="light"] textarea.text-white { color: var(--panel-text) !important; }
+
+html[data-theme="light"] .text-zinc-200   { color: rgba(22,24,29,0.85) !important; }
+html[data-theme="light"] .bg-violet-900\/15 { background-color: rgba(109,40,217,0.06) !important; }
+html[data-theme="light"] .text-zinc-300 { color: rgba(22,24,29,0.80) !important; }
+html[data-theme="light"] .text-zinc-400 { color: rgba(22,24,29,0.60) !important; }
+html[data-theme="light"] .text-zinc-500 { color: rgba(22,24,29,0.50) !important; }
+html[data-theme="light"] .text-zinc-600 { color: rgba(22,24,29,0.40) !important; }
+
+html[data-theme="light"] .border-zinc-500\/40  { border-color: rgba(113,113,122,0.65) !important; }
+html[data-theme="light"] .border-blue-500\/40  { border-color: rgba(59,130,246,0.65) !important; }
+html[data-theme="light"] .border-purple-500\/40 { border-color: rgba(168,85,247,0.65) !important; }
+html[data-theme="light"] .border-amber-500\/40  { border-color: rgba(245,158,11,0.65) !important; }
+
+html[data-theme="light"] .bg-zinc-800\/80  { background-color: rgba(22,24,29,0.07) !important; }
+html[data-theme="light"] .bg-blue-900\/80  { background-color: rgba(59,130,246,0.12) !important; }
+html[data-theme="light"] .bg-purple-900\/80 { background-color: rgba(168,85,247,0.12) !important; }
+html[data-theme="light"] .bg-amber-900\/80  { background-color: rgba(245,158,11,0.12) !important; }
+
+html[data-theme="light"] .text-white\/30 { color: rgba(22,24,29,0.30) !important; }
+html[data-theme="light"] .text-white\/40 { color: rgba(22,24,29,0.40) !important; }
+html[data-theme="light"] .text-white\/50 { color: rgba(22,24,29,0.50) !important; }
+html[data-theme="light"] .text-white\/60 { color: rgba(22,24,29,0.60) !important; }
+html[data-theme="light"] .text-white\/70 { color: rgba(22,24,29,0.70) !important; }
 
 .ticker-marquee {
   animation: ticker-marquee 26s linear infinite;

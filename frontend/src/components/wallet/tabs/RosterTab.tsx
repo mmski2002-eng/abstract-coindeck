@@ -106,16 +106,28 @@ export function RosterTab({
             0%   { opacity: 1; transform: translateY(0); }
             100% { opacity: 0; transform: translateY(-40px); }
           }
-          .chest-buy-flash { animation: chestBuyPop 2s ease-out forwards; }
-          .chest-float-up  { animation: floatUp 1.8s ease-out forwards; }
+          @keyframes chestBuyBounce {
+            0%   { transform: scale(1)    translateX(0); }
+            12%  { transform: scale(1.10) translateX(0); }
+            25%  { transform: scale(0.95) translateX(0); }
+            36%  { transform: scale(1.04) translateX(-5px); }
+            48%  { transform: scale(1.01) translateX(5px); }
+            60%  { transform: scale(1)    translateX(-3px); }
+            72%  { transform: scale(1)    translateX(3px); }
+            84%  { transform: scale(1)    translateX(-1px); }
+            100% { transform: scale(1)    translateX(0); }
+          }
+          .chest-buy-flash  { animation: chestBuyPop 2s ease-out forwards; }
+          .chest-float-up   { animation: floatUp 1.8s ease-out forwards; }
+          .chest-buy-bounce { animation: chestBuyBounce 0.65s cubic-bezier(.17,.67,.35,1.3) both; }
         `}</style>
         <div className="space-y-6" data-tour="roster-chests">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="h-px w-8 bg-gradient-to-r to-transparent" style={{ ["--tw-gradient-from" as string]: "var(--section-rule)", ["--tw-gradient-to" as string]: "rgba(255,255,255,0)" }} />
-              <span className="font-mono text-[11px] uppercase tracking-[0.3em]" style={{ color: "var(--section-label)" }}>{lang === "ru" ? "Магазин сундуков" : "Chest Shop"}</span>
+              <span className="block h-0.5 w-6 rounded-full" style={{ background: "var(--section-rule)" }} />
+              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.3em]" style={{ color: "var(--section-label)" }}>{lang === "ru" ? "Магазин сундуков" : "Chest Shop"}</span>
             </div>
-            <div className="hidden items-center gap-2 font-mono text-xs uppercase tracking-widest md:flex" style={{ color: "var(--section-label)" }}>
+            <div className="hidden items-center gap-2 font-mono text-xs font-bold uppercase tracking-widest md:flex" style={{ color: "var(--section-label)" }}>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Drop rate · Live
             </div>
@@ -176,7 +188,7 @@ export function RosterTab({
                 2: { emoji: "🐂", ru: "Гарантированная карточка Tier 3. Максимальная сила — лучший выбор для топ-составов.", en: "Guaranteed Tier 3 card. Maximum power — best choice for top lineups." },
               };
               return (
-                <article key={type} className="group relative aspect-square rounded-[28px] p-px overflow-hidden select-none"
+                <article key={type} className={`group relative aspect-square rounded-[28px] p-px overflow-hidden select-none${justBought ? " chest-buy-bounce" : ""}`}
                   style={{ background: "var(--chest-card-border)" }}>
                   <div
                     className="relative h-full rounded-[27px] overflow-hidden"
@@ -192,7 +204,7 @@ export function RosterTab({
                           >
                             {tierLabel}
                           </span>
-                          <h3 className="min-w-0 pt-0.5 font-display text-sm font-semibold uppercase tracking-tight sm:text-base" style={{ color: accent }}>
+                          <h3 className="min-w-0 pt-0.5 font-display text-xs font-semibold uppercase tracking-tight sm:text-sm" style={{ color: accent }}>
                             {label}
                           </h3>
                         </div>
@@ -341,7 +353,6 @@ export function RosterTab({
                     <button key={team ?? "all"} onClick={() => setFilterTeam(team)}
                       className={`whitespace-nowrap rounded-md border px-3 py-1.5 font-display text-[10px] font-bold uppercase tracking-widest transition-all ${active ? "nav-tab-active" : ""}`}
                       style={active ? {
-                        background: "var(--filter-chip-active-bg)",
                         color: "var(--filter-chip-active-text)",
                         borderColor: "var(--filter-chip-active-border)",
                       } : {
@@ -455,7 +466,7 @@ export function RosterTab({
                 <article key={`chest_${type}`} className="group relative anim-card-entry select-none flex flex-col">
                   <div aria-hidden className="absolute -inset-1 rounded-[22px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl" style={{ background: chestGlow }} />
                   <div className="relative rounded-[20px] overflow-hidden h-full" style={{ padding: "1.5px", background: `linear-gradient(180deg, ${chestBorder}, rgba(255,255,255,0.04) 60%, rgba(255,255,255,0.01))` }}>
-                    <div className="relative rounded-[18px] overflow-hidden flex flex-col h-full transition-transform duration-500 group-hover:-translate-y-1.5" style={{ background: "rgba(0,0,0,0.18)", boxShadow: `0 12px 40px -12px ${chestGlow}` }}>
+                    <div className="relative rounded-[18px] overflow-hidden flex flex-col h-full transition-transform duration-500 group-hover:-translate-y-1.5" style={{ background: "var(--card)", boxShadow: `0 12px 40px -12px ${chestGlow}` }}>
                       <div className="relative aspect-[4/5] overflow-hidden grain" style={{ background: `linear-gradient(180deg, ${chestAccent}14 0%, rgba(0,0,0,0.04) 60%)` }}>
                         <div aria-hidden className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] aspect-square rounded-full" style={{ background: `radial-gradient(closest-side, ${chestGlow}, transparent 70%)`, filter: "blur(24px)" }} />
                         <div className="relative flex items-center justify-center w-full h-full">
@@ -465,15 +476,15 @@ export function RosterTab({
                             style={{ filter: `drop-shadow(0 0 14px ${chestGlow})` }} />
                         </div>
                         <div className="absolute top-2.5 left-2.5 z-10">
-                          <span className="text-[9px] font-bold uppercase tracking-[0.22em] px-2 py-1 rounded-md border backdrop-blur-md" style={{ color: chestAccent, borderColor: chestBorder, background: "rgba(0,0,0,0.4)" }}>
+                          <span className="text-[9px] font-bold uppercase tracking-[0.22em] px-2 py-1 rounded-md border backdrop-blur-md" style={{ color: chestAccent, borderColor: chestBorder, background: "var(--nft-badge-bg)" }}>
                             {type === 0 ? "Common" : type === 1 ? "Rare" : "Epic"}
                           </span>
                         </div>
                         <div className="absolute top-2.5 right-2.5 z-10">
-                          <span className="text-[11px] font-bold px-2.5 py-1 rounded-md border backdrop-blur-md" style={{ color: "#fff", borderColor: "rgba(255,255,255,0.15)", background: "rgba(0,0,0,0.6)" }}>×{count}</span>
+                          <span className="text-[11px] font-bold px-2.5 py-1 rounded-md border backdrop-blur-md" style={{ color: "var(--nft-badge-text)", borderColor: "var(--nft-btn-border)", background: "var(--nft-badge-bg)" }}>×{count}</span>
                         </div>
                       </div>
-                      <div className="relative p-3.5 flex flex-col flex-1 border-t" style={{ background: "rgba(0,0,0,0.12)", borderColor: `${chestAccent}18` }}>
+                      <div className="relative p-3.5 flex flex-col flex-1 border-t" style={{ background: "var(--card)", borderColor: `${chestAccent}18` }}>
                         <div className="mb-3">
                           <h4 className="font-bold text-sm tracking-tight truncate uppercase" style={{ color: chestAccent }}>{label}</h4>
                           <span className="text-[10px] text-zinc-500 leading-tight">
@@ -493,7 +504,7 @@ export function RosterTab({
                             setChestOpenModal({ type, label, emoji, tier, available: count, grad, ring, buyBg });
                           }}
                           className="w-full py-2 rounded-lg border text-xs font-semibold tracking-tight transition-colors disabled:opacity-40"
-                          style={{ borderColor: chestBorder, color: chestAccent, background: "rgba(255,255,255,0.02)" }}>
+                          style={{ borderColor: chestBorder, color: chestAccent, background: "var(--nft-btn-bg)" }}>
                           {isOpening ? "…" : (lang === "ru" ? "Открыть" : "Open")}
                         </button>
                         <button
@@ -503,7 +514,8 @@ export function RosterTab({
                             setChestBuyModal({ type, label, emoji: d.emoji, rarity: type === 0 ? "Common" : type === 1 ? "Rare" : "Epic", desc: lang === "ru" ? d.ru : d.en, price: type === 0 ? chestPrices.wooden : type === 1 ? chestPrices.iron : chestPrices.silver, buyBg });
                           }}
                           disabled={!hasWalletAccount || busy !== null}
-                          className="w-full mt-1 py-2 rounded-lg border border-white/10 bg-white/[0.02] text-xs font-medium text-white/50 hover:bg-white/[0.05] disabled:opacity-40 transition">
+                          className="w-full mt-1 py-2 rounded-lg border text-xs font-medium disabled:opacity-40 transition"
+                          style={{ borderColor: "var(--nft-btn-border)", background: "var(--nft-btn-bg)", color: "var(--nft-btn-text)" }}>
                           {lang === "ru" ? "Купить ещё" : "Buy more"}
                         </button>
                       </div>
@@ -570,7 +582,7 @@ export function RosterTab({
                   <div aria-hidden className="absolute -inset-1 rounded-[22px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl" style={{ background: ts.glow }} />
                   {isLegendary && <div aria-hidden className="absolute -inset-[2px] rounded-[22px] foil-perpetual" />}
                   <div className="relative rounded-[20px] overflow-hidden" style={{ padding: "1.5px", background: `linear-gradient(180deg, ${ts.border}, rgba(255,255,255,0.04) 60%, rgba(255,255,255,0.01))` }}>
-                    <div className="relative rounded-[18px] overflow-hidden bg-[#0a0c18] flex flex-col transition-transform duration-500 group-hover:-translate-y-1.5" style={{ boxShadow: `0 12px 40px -12px ${ts.glow}` }}>
+                    <div className="relative rounded-[18px] overflow-hidden flex flex-col transition-transform duration-500 group-hover:-translate-y-1.5" style={{ background: "var(--card)", boxShadow: `0 12px 40px -12px ${ts.glow}` }}>
                       <div className="relative aspect-[4/5] overflow-hidden grain" style={{ background: ts.gradient }}>
                         <div className="relative flex items-center justify-center w-full h-full">
                           <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 55%, ${brand}22, transparent 70%)` }} />
@@ -582,22 +594,22 @@ export function RosterTab({
                           <span className="relative z-10 font-black leading-none tracking-tighter select-none" style={{ fontSize: tickerFontSize, color: brand, textShadow: `0 0 30px ${brand}80, 0 4px 20px rgba(0,0,0,0.6)` }}>{ticker}</span>
                         </div>
                         <div className="absolute top-2.5 left-2.5 z-10">
-                          <span className="text-[9px] font-bold uppercase tracking-[0.22em] px-2 py-1 rounded-md border backdrop-blur-md" style={{ color: ts.color, borderColor: ts.border, background: "rgba(0,0,0,0.4)" }}>{ts.label}</span>
+                          <span className="text-[9px] font-bold uppercase tracking-[0.22em] px-2 py-1 rounded-md border backdrop-blur-md" style={{ color: ts.color, borderColor: ts.border, background: "var(--nft-badge-bg)" }}>{ts.label}</span>
                         </div>
                         <div className="absolute top-2.5 right-2.5 z-10">
-                          <span className="text-[11px] font-bold px-2.5 py-1 rounded-md border backdrop-blur-md" style={{ color: "#fff", borderColor: "rgba(255,255,255,0.15)", background: "rgba(0,0,0,0.6)" }}>×{count}</span>
+                          <span className="text-[11px] font-bold px-2.5 py-1 rounded-md border backdrop-blur-md" style={{ color: "var(--nft-badge-text)", borderColor: "var(--nft-btn-border)", background: "var(--nft-badge-bg)" }}>×{count}</span>
                         </div>
                         <div className="absolute bottom-2.5 left-2.5 z-10">
-                          <span className="text-[9px] uppercase tracking-[0.22em] text-white/60">{PLAYER_ROLES[playerId]}</span>
+                          <span className="text-[9px] uppercase tracking-[0.22em]" style={{ color: "var(--nft-semi)" }}>{PLAYER_ROLES[playerId]}</span>
                         </div>
                         {isAllLocked && (
-                          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-none" style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(1px)" }}>
+                          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-none" style={{ background: "var(--nft-lock-bg)", backdropFilter: "blur(1px)" }}>
                             <span className="text-2xl">🔒</span>
-                            <span className="text-[8px] font-bold uppercase tracking-widest text-white/70 mt-0.5">{lang === "ru" ? "В игре" : "In play"}</span>
+                            <span className="text-[8px] font-bold uppercase tracking-widest mt-0.5" style={{ color: "var(--nft-semi)" }}>{lang === "ru" ? "В игре" : "In play"}</span>
                           </div>
                         )}
                         {isPartialLocked && (
-                          <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center gap-1 px-2 py-1 rounded-md" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
+                          <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center gap-1 px-2 py-1 rounded-md" style={{ background: "var(--nft-badge-bg)", backdropFilter: "blur(4px)" }}>
                             <span className="text-[10px]">🔒</span>
                             <span className="text-[9px] font-bold text-red-400">{lockedCount}</span>
                           </div>
@@ -606,7 +618,7 @@ export function RosterTab({
                         {(isRare || isEpic || isLegendary) && <div aria-hidden className="absolute inset-0 holo-sheen overflow-hidden" />}
                         <div aria-hidden className="absolute bottom-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${ts.color}, transparent)` }} />
                       </div>
-                      <div className="relative p-3.5 bg-[#0a0c18]/90">
+                      <div className="relative p-3.5" style={{ background: "var(--card)" }}>
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <div className="min-w-0">
                             <h4 className="font-bold text-sm tracking-tight truncate" style={{ color: ts.color }}>{HEROES[playerId]}</h4>
@@ -616,12 +628,12 @@ export function RosterTab({
                         {tier < 3 ? (
                           <div className="mb-1">
                             <div className="flex items-center justify-between mb-1.5">
-                              <span className="text-[9px] uppercase tracking-[0.2em] text-white/40">
+                              <span className="text-[9px] uppercase tracking-[0.2em]" style={{ color: "var(--nft-muted)" }}>
                                 {availableCount >= 5 ? (lang === "ru" ? "Готов к мерджу" : "Ready") : (lang === "ru" ? "До апгрейда" : "Upgrade")}
                               </span>
-                              <span className="text-[10px] font-semibold tabular-nums text-white/70">{Math.min(availableCount, 5)}/5{isPartialLocked && <span className="text-red-400/70 ml-1">🔒{lockedCount}</span>}</span>
+                              <span className="text-[10px] font-semibold tabular-nums" style={{ color: "var(--nft-semi)" }}>{Math.min(availableCount, 5)}/5{isPartialLocked && <span className="text-red-400/70 ml-1">🔒{lockedCount}</span>}</span>
                             </div>
-                            <div className="relative h-1.5 rounded-full bg-black/60 overflow-hidden">
+                            <div className="relative h-1.5 rounded-full overflow-hidden" style={{ background: "var(--nft-progress-track)" }}>
                               <div className="absolute inset-y-0 left-0 rounded-full transition-all" style={{
                                 width: `${Math.min(100, (availableCount / 5) * 100)}%`,
                                 background: `linear-gradient(90deg, ${ts.color}, ${ts.color}aa)`,
@@ -648,11 +660,9 @@ export function RosterTab({
                             disabled={busy !== null}
                             className="w-full mb-0.5 py-2 rounded-lg border text-xs font-semibold tracking-tight transition-all duration-150 hover:brightness-125 hover:scale-[1.03] active:scale-95 disabled:opacity-40"
                             style={{
-                              borderColor: tier === 0 ? "rgba(255,255,255,0.65)" : ts.border,
-                              color: tier === 0 ? "rgba(255,255,255,0.96)" : ts.color,
-                              background: tier === 0 ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.02)",
-                              boxShadow: tier === 0 ? "0 0 18px rgba(255,255,255,0.16), inset 0 0 10px rgba(255,255,255,0.05)" : undefined,
-                              textShadow: tier === 0 ? "0 0 12px rgba(255,255,255,0.35)" : undefined,
+                              borderColor: tier === 0 ? "var(--nft-btn-border)" : ts.border,
+                              color: tier === 0 ? "var(--nft-btn-text)" : ts.color,
+                              background: "var(--nft-btn-bg)",
                             }}
                           >
                             {lang === "ru" ? "Быстрая покупка" : "Quick buy"}
@@ -663,17 +673,16 @@ export function RosterTab({
                         <button onClick={() => { setSellModal({ playerId, tier }); setSellPrice("0.1"); }} disabled={busy !== null || availableCount === 0}
                           className="w-full py-2 rounded-lg border text-xs font-semibold tracking-tight transition-all duration-150 hover:brightness-125 hover:scale-[1.03] active:scale-95 disabled:opacity-40"
                           style={{
-                            borderColor: isAllLocked ? "rgba(239,68,68,0.3)" : tier === 0 ? "rgba(255,255,255,0.65)" : ts.border,
-                            color: isAllLocked ? "rgb(248,113,113)" : tier === 0 ? "rgba(255,255,255,0.96)" : ts.color,
-                            background: tier === 0 ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.02)",
-                            boxShadow: tier === 0 && !isAllLocked ? "0 0 18px rgba(255,255,255,0.16), inset 0 0 10px rgba(255,255,255,0.05)" : undefined,
-                            textShadow: tier === 0 && !isAllLocked ? "0 0 12px rgba(255,255,255,0.35)" : undefined,
+                            borderColor: isAllLocked ? "rgba(239,68,68,0.3)" : tier === 0 ? "var(--nft-btn-border)" : ts.border,
+                            color: isAllLocked ? "rgb(248,113,113)" : tier === 0 ? "var(--nft-btn-text)" : ts.color,
+                            background: "var(--nft-btn-bg)",
                           }}
                           title={isAllLocked ? (lang === "ru" ? "Все карточки в лайнапе" : "All cards in lineup") : undefined}>
                           {isAllLocked ? "🔒" : (lang === "ru" ? "Продать" : "Sell")}
                         </button>
                         <button onClick={() => { setTransferModal({ playerId, tier, cardAddr: unlockedCardAddr }); setTransferRecipient(""); }} disabled={busy !== null || !unlockedCardAddr}
-                          className="w-full mt-1 py-2 rounded-lg border border-white/10 bg-white/[0.02] text-xs font-medium text-white/50 hover:bg-white/[0.05] hover:scale-[1.03] active:scale-95 disabled:opacity-40 transition"
+                          className="w-full mt-1 py-2 rounded-lg border text-xs font-medium hover:scale-[1.03] active:scale-95 disabled:opacity-40 transition"
+                          style={{ borderColor: "var(--nft-btn-border)", background: "var(--nft-btn-bg)", color: "var(--nft-btn-text)" }}
                           title={isAllLocked ? (lang === "ru" ? "Все карточки в лайнапе" : "All cards in lineup") : undefined}>
                           {isAllLocked ? "🔒" : (lang === "ru" ? "Отправить" : "Send")}
                         </button>

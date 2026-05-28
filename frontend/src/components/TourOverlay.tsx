@@ -12,6 +12,8 @@ type TourStep = {
   descRu: string;
   descEn: string;
   demo?: boolean;
+  pad?: number;
+  fullWidth?: boolean;
 };
 
 const STEPS: TourStep[] = [
@@ -60,6 +62,7 @@ const STEPS: TourStep[] = [
   {
     target: "[data-tour='invest-portfolio']",
     tab: "tournament",
+    fullWidth: true,
     titleRu: "Инвестирование: портфель",
     titleEn: "Investing: portfolio",
     descRu: "Здесь выставляется дневной портфель. Выбери 5 карточек монет, которые, по твоему мнению, покажут лучший результат. После отправки портфель участвует в расчёте очков за торговый день. Будь внимателен: заменить состав может быть только платно.",
@@ -181,13 +184,23 @@ export function TourOverlay({
   }, [onFinish, setDemoMode]);
 
   const spot = useMemo(() => {
-    const fallbackW = typeof window !== "undefined" ? Math.min(420, window.innerWidth - 32) : 320;
-    const fallbackLeft = typeof window !== "undefined" ? (window.innerWidth - fallbackW) / 2 : 16;
+    const p = current?.pad ?? PAD;
+    const vw = typeof window !== "undefined" ? window.innerWidth : 1200;
+    const fallbackW = Math.min(420, vw - 32);
+    const fallbackLeft = (vw - fallbackW) / 2;
+    if (current?.fullWidth) {
+      return {
+        top: (rect?.top ?? 110) - p,
+        left: (rect?.left ?? fallbackLeft) - p,
+        width: (rect?.width ?? fallbackW) + p * 2,
+        height: ((rect?.height ?? 96) + p * 2) * 2,
+      };
+    }
     return {
-      top: (rect?.top ?? 110) - PAD,
-      left: (rect?.left ?? fallbackLeft) - PAD,
-      width: (rect?.width ?? fallbackW) + PAD * 2,
-      height: (rect?.height ?? 96) + PAD * 2,
+      top: (rect?.top ?? 110) - p,
+      left: (rect?.left ?? fallbackLeft) - p,
+      width: (rect?.width ?? fallbackW) + p * 2,
+      height: (rect?.height ?? 96) + p * 2,
     };
   }, [rect]);
 
@@ -236,12 +249,12 @@ export function TourOverlay({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="rounded-2xl border border-white/15 bg-[rgba(6,7,20,0.96)] p-5 shadow-2xl backdrop-blur-xl">
+        <div className="rounded-2xl p-5 shadow-2xl backdrop-blur-xl" style={{ border: "1px solid var(--panel-border)", background: "var(--modal-bg)" }}>
           <div className="mb-3 flex items-center justify-between gap-3">
-            <div className="text-[10px] font-black uppercase tracking-[0.22em] text-cyan-300">
+            <div className="text-[10px] font-black uppercase tracking-[0.22em] text-cyan-500">
               {lang === "ru" ? "Обучение" : "Tutorial"} {step + 1}/{total}
             </div>
-            <div className="h-1.5 min-w-24 flex-1 overflow-hidden rounded-full bg-white/10">
+            <div className="h-1.5 min-w-24 flex-1 overflow-hidden rounded-full" style={{ background: "var(--panel-border)" }}>
               <div
                 className="h-full rounded-full bg-cyan-300 transition-all"
                 style={{ width: `${((step + 1) / total) * 100}%` }}
@@ -249,15 +262,15 @@ export function TourOverlay({
             </div>
           </div>
 
-          <div className="mb-1.5 text-sm font-black text-white">
+          <div className="mb-1.5 text-sm font-black" style={{ color: "var(--panel-text)" }}>
             {lang === "ru" ? current.titleRu : current.titleEn}
           </div>
-          <p className="mb-4 text-xs leading-relaxed text-white/64">
+          <p className="mb-4 text-xs leading-relaxed" style={{ color: "var(--panel-text-muted)" }}>
             {lang === "ru" ? current.descRu : current.descEn}
           </p>
 
           <div className="flex items-center justify-between gap-3">
-            <button type="button" onClick={finish} className="text-xs text-white/35 transition hover:text-white/65">
+            <button type="button" onClick={finish} className="text-xs transition" style={{ color: "var(--nft-muted)" }}>
               {lang === "ru" ? "Пропустить" : "Skip"}
             </button>
             <div className="flex gap-2">
@@ -265,7 +278,8 @@ export function TourOverlay({
                 <button
                   type="button"
                   onClick={() => setStep((s) => Math.max(0, s - 1))}
-                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/70 transition hover:bg-white/10"
+                  className="rounded-lg px-3 py-1.5 text-xs font-semibold transition"
+                  style={{ border: "1px solid var(--panel-border)", background: "var(--button-secondary-bg)", color: "var(--button-secondary-text)" }}
                 >
                   ←
                 </button>

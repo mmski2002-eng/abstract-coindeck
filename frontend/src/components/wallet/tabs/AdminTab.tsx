@@ -39,7 +39,7 @@ function AdminTip({ text }: { text: string }) {
   return (
     <span className="relative group/tip inline-flex shrink-0 self-center">
       <span className="w-4 h-4 rounded-full border border-white/20 bg-white/10 text-white/50 text-[9px] font-bold inline-flex items-center justify-center cursor-default select-none hover:bg-white/20 hover:text-white/80 transition">i</span>
-      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 rounded-xl bg-[#0d0f1c] border border-white/10 p-3 text-[11px] text-white/70 leading-relaxed shadow-2xl z-50 pointer-events-none opacity-0 group-hover/tip:opacity-100 transition-opacity whitespace-normal">{text}</span>
+      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 rounded-xl p-3 text-[11px] leading-relaxed shadow-2xl z-50 pointer-events-none opacity-0 group-hover/tip:opacity-100 transition-opacity whitespace-normal" style={{ background: "var(--modal-bg)", border: "1px solid var(--panel-border)", color: "var(--panel-text-muted)" }}>{text}</span>
     </span>
   );
 }
@@ -402,7 +402,7 @@ export function AdminTab({
 
   return (
     <div className="mt-2 space-y-4">
-      <div className="font-display font-bold text-2xl text-white tracking-tight">⚙️ {lang === "ru" ? "Панель администратора" : "Admin panel"}</div>
+      <div className="font-display font-bold text-2xl tracking-tight" style={{ color: "var(--panel-text)" }}>⚙️ {lang === "ru" ? "Панель администратора" : "Admin panel"}</div>
 
       {!isAdmin && (
         <div className="rounded-2xl border border-red-500/20 bg-red-950 p-4 text-sm text-red-200">
@@ -433,7 +433,7 @@ export function AdminTab({
           />
 
 
-          <div className="rounded-2xl border border-cyan-400/20 bg-zinc-900 p-4 space-y-3">
+          <div className="rounded-2xl border border-cyan-400/20 p-4 space-y-3" style={{ background: "var(--card)" }}>
             <div className="flex items-center gap-2">
               <div className="text-xs font-semibold text-cyan-300">{lang === "ru" ? "Автобот турнира" : "Tournament bot"}</div>
             </div>
@@ -492,7 +492,7 @@ export function AdminTab({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-amber-500/20 bg-zinc-900 p-4 space-y-4">
+          <div className="rounded-2xl border border-amber-500/20 p-4 space-y-4" style={{ background: "var(--card)" }}>
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div>
                 <div className="text-xs font-semibold text-amber-300/80">{lang === "ru" ? "Governance и защита админки" : "Governance & admin safeguards"}</div>
@@ -586,7 +586,7 @@ export function AdminTab({
                   <div className="text-[11px] text-zinc-500">{lang === "ru" ? "Очередь пуста." : "Queue is empty."}</div>
                 ) : pendingAdminActions.map((item) => (
                   <div key={`${item.actionType}-${item.payloadHashHex}`} className="rounded-lg border border-white/5 bg-white/[0.03] px-3 py-2">
-                    <div className="text-[11px] font-semibold text-white">{actionTypeLabel(item.actionType)}</div>
+                    <div className="text-[11px] font-semibold" style={{ color: "var(--panel-text)" }}>{actionTypeLabel(item.actionType)}</div>
                     <div className="mt-1 text-[10px] text-zinc-500">
                       {lang === "ru" ? "Можно исполнить после" : "Ready after"}: {new Date(item.executeAfter * 1000).toLocaleString(lang === "ru" ? "ru-RU" : "en-US")}
                     </div>
@@ -673,7 +673,7 @@ export function AdminTab({
           </div>
 
           {/* Oracle — daily scores */}
-          <div className="rounded-2xl border border-white/10 bg-zinc-900 p-4 space-y-3">
+          <div className="rounded-2xl border border-white/10 p-4 space-y-3" style={{ background: "var(--card)" }}>
             <div className="text-xs font-semibold text-zinc-400">{lang === "ru" ? "Очки оракула (по дням)" : "Oracle day scores"}</div>
 
             <div className="rounded-xl border border-white/5 bg-black/20 p-3 space-y-2">
@@ -777,9 +777,9 @@ export function AdminTab({
                   return (
                     <span className="text-xs text-zinc-400 flex flex-col gap-0.5">
                       <span>
-                        → Epoch <span className="font-black text-white">{tnState.epoch}</span>{" "}
+                        → Epoch <span className="font-black" style={{ color: "var(--panel-text)" }}>{tnState.epoch}</span>{" "}
                         {lang === "ru" ? "День" : "Day"}{" "}
-                        <span className={relDay < 1 || relDay > 6 ? "font-black text-red-400" : "font-black text-white"}>{relDay}</span>
+                        <span className={`font-black${relDay < 1 || relDay > 6 ? " text-red-400" : ""}`} style={relDay < 1 || relDay > 6 ? {} : { color: "var(--panel-text)" }}>{relDay}</span>
                       </span>
                       {fromTs && toTs && (
                         <span className="text-[9px] text-zinc-600 font-mono">{fmtUtc(fromTs)} → {fmtUtc(toTs)}</span>
@@ -909,7 +909,7 @@ export function AdminTab({
           </div>
 
           {/* Oracle + Controls + NFT tools — merged block */}
-          <div className="rounded-2xl border border-cyan-500/20 bg-zinc-900 p-4 space-y-5">
+          <div className="rounded-2xl border border-cyan-500/20 p-4 space-y-5" style={{ background: "var(--card)" }}>
 
           <div className="space-y-3">
             <div className="text-xs font-semibold text-cyan-300/80">{lang === "ru" ? "Инструменты оракула" : "Oracle tools"}</div>
@@ -1124,7 +1124,7 @@ export function AdminTab({
           </div>{/* /merged block */}
 
           {/* Role bonus + Chest prices — merged block */}
-          <div className="rounded-2xl border border-violet-500/20 bg-zinc-900 p-4 space-y-5">
+          <div className="rounded-2xl border border-violet-500/20 p-4 space-y-5" style={{ background: "var(--card)" }}>
 
           <div className="space-y-3">
             <div className="text-xs font-semibold text-violet-300/80">⚡ {lang === "ru" ? "Бонус за правильную роль" : "Role bonus"}</div>
@@ -1235,10 +1235,10 @@ export function AdminTab({
           </div>{/* /role bonus + chest prices block */}
 
           {/* Claim management */}
-          <div className="rounded-2xl border border-violet-500/20 bg-zinc-900 p-4 space-y-4">
+          <div className="rounded-2xl border border-violet-500/20 p-4 space-y-4" style={{ background: "var(--card)" }}>
             <div className="flex items-center justify-between">
               <div className="text-xs font-semibold text-violet-300">🏆 {lang === "ru" ? "Выдача призов (Claim)" : "Prize distribution (Claim)"}</div>
-              <button onClick={fetchClaimState} className="text-xs text-zinc-500 hover:text-white transition">↻</button>
+              <button onClick={fetchClaimState} className="text-xs transition" style={{ color: "var(--nft-muted)" }}>↻</button>
             </div>
 
             <div className="text-xs font-semibold text-zinc-300">🏆 {lang === "ru" ? "Распределение призов" : "Prize distribution"}</div>
@@ -1351,7 +1351,7 @@ export function AdminTab({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-400">{lang === "ru" ? "Баланс claim vault" : "Claim vault balance"}</span>
-                  <span className="font-bold text-white">{(claimState.vaultBalance / 1e18).toFixed(4)} ETH</span>
+                  <span className="font-bold" style={{ color: "var(--panel-text)" }}>{(claimState.vaultBalance / 1e18).toFixed(4)} ETH</span>
                 </div>
                 {claimState.active && claimState.deadline > 0 && (
                   <div className="flex justify-between">
@@ -1494,9 +1494,9 @@ export function AdminTab({
           </div>
 
           {/* Danger zone */}
-          <div className="rounded-2xl border border-red-500/30 bg-red-950 p-4 space-y-2">
-            <div className="text-xs font-bold text-red-400 uppercase tracking-wider">⚠️ {lang === "ru" ? "Опасная зона" : "Danger zone"}</div>
-            <div className="text-[10px] text-red-400/60 leading-relaxed">
+          <div className="rounded-2xl border border-red-500/30 p-4 space-y-2" style={{ background: "rgba(254,226,226,0.95)" }}>
+            <div className="text-xs font-bold uppercase tracking-wider" style={{ color: "#991b1b" }}>⚠️ {lang === "ru" ? "Опасная зона" : "Danger zone"}</div>
+            <div className="text-[10px] leading-relaxed" style={{ color: "#b91c1c" }}>
               {lang === "ru"
                 ? "Сбрасывает турнир: очищает данные оракула, эпоху, скоры и лиги. Карточки игроков сохраняются. Необратимо."
                 : "Resets tournament: clears oracle data, epoch, scores and leagues. Player cards are kept. Irreversible."}

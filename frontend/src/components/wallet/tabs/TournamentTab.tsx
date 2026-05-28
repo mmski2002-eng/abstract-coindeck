@@ -158,7 +158,7 @@ export function TournamentTab({
         return (
           <div className="flex items-end justify-end gap-3 flex-wrap sm:flex-nowrap">
             <div className="flex items-center gap-[10px] shrink-0">
-              <div className="rounded-xl border border-white/8 bg-black/40 backdrop-blur px-4 py-2.5 flex items-center gap-3" style={{ width: 210 }}>
+              <div className="rounded-xl backdrop-blur px-4 py-2.5 flex items-center gap-3" style={{ width: 210, border: "1px solid var(--panel-border)", background: "var(--card)" }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-cyan-400 shrink-0">
                   <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                 </svg>
@@ -186,8 +186,8 @@ export function TournamentTab({
       {/* Lineup builder */}
       <style>{`
         @keyframes eligiblePulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); border-color: rgba(255,255,255,0.25); }
-          50% { box-shadow: 0 0 14px 3px rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.65); }
+          0%, 100% { box-shadow: inset 0 0 0 0 rgba(234,179,8,0); }
+          50% { box-shadow: inset 0 0 14px 4px rgba(234,179,8,0.50), inset 0 0 4px 1px rgba(234,179,8,0.30); }
         }
         .eligible-glow { animation: eligiblePulse 1.8s ease-in-out infinite; }
       `}</style>
@@ -218,7 +218,7 @@ export function TournamentTab({
             .filter((c): c is (typeof flCards)[number] => !!c && !seenKeys.has(c.cardAddr) && (seenKeys.add(c.cardAddr), true));
           const feeMove = cancelFee > 0 ? (cancelFee / 1e18).toFixed(4) : null;
           return (
-            <div className="rounded-2xl border border-white/10 bg-[#0a0c18]/80 backdrop-blur-xl overflow-hidden">
+            <div className="rounded-2xl backdrop-blur-xl overflow-hidden" style={{ border: "1px solid var(--panel-border)", background: "var(--card)" }}>
               {/* Header */}
               <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.06]">
                 <div className="w-8 h-8 rounded-xl bg-violet-500/15 border border-violet-500/30 flex items-center justify-center text-violet-300 text-sm shrink-0">
@@ -267,7 +267,7 @@ export function TournamentTab({
                       ? "Отмена снимет лайнап и разблокирует карточки до конца дня."
                       : "Cancelling removes the lineup and unlocks cards until day end."}
                     {feeMove && (
-                      <span className="text-red-300 font-semibold ml-1">
+                      <span className="font-bold ml-1" style={{ color: "var(--red-text, #b91c1c)" }}>
                         {lang === "ru" ? `Стоимость: ${feeMove} ETH` : `Fee: ${feeMove} ETH`}
                       </span>
                     )}
@@ -298,7 +298,7 @@ export function TournamentTab({
                             : "Points for this day will not be counted. This cannot be undone."}
                         </div>
                         {feeMove && (
-                          <div className="mt-2 rounded-xl bg-red-500/10 border border-red-500/20 px-3 py-2 text-sm font-bold text-red-300">
+                          <div className="mt-2 rounded-xl bg-red-500/10 border border-red-500/20 px-3 py-2 text-sm font-bold" style={{ color: "var(--red-text, #b91c1c)" }}>
                             {lang === "ru" ? `Комиссия: ${feeMove} ETH` : `Fee: ${feeMove} ETH`}
                           </div>
                         )}
@@ -325,7 +325,7 @@ export function TournamentTab({
           );
         }
         return (
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-4" data-tour="invest-portfolio">
+          <div className="rounded-2xl p-4 space-y-4" style={{ border: "1px solid var(--panel-border)", background: "var(--card)" }} data-tour="invest-portfolio">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm font-semibold">
@@ -350,13 +350,13 @@ export function TournamentTab({
                 return (
                   <button key={role}
                     onClick={() => { setLineupPickerSlot(isOpen ? null : slotIdx); setLineupPickerSearch(""); }}
-                    className={`relative flex flex-col items-center gap-1.5 rounded-xl border p-2 text-center transition ${
-                      isOpen
-                        ? "border-white/30 bg-white/10 ring-1 ring-white/20"
-                        : card
-                          ? `${tc!.border} bg-black/30 hover:bg-black/50`
-                          : "border-dashed border-white/15 bg-white/3 hover:bg-white/8 hover:border-white/30"
-                    }`}
+                    className={`relative flex flex-col items-center gap-1.5 rounded-xl border p-2 text-center transition ${card ? tc!.border : ""}`}
+                    style={isOpen
+                      ? { borderColor: "var(--panel-border)", background: "var(--panel-bg)" }
+                      : card
+                        ? { background: "var(--card)" }
+                        : { borderStyle: "dashed", borderColor: "var(--panel-border)", background: "var(--panel-bg)" }
+                    }
                   >
                     {card ? (
                       <>
@@ -400,11 +400,11 @@ export function TournamentTab({
               });
               return createPortal(
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => { setLineupPickerSlot(null); setLineupPickerSearch(""); }} />
-                  <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-3xl border border-white/10 shadow-2xl" style={{ background: "rgba(8,10,22,0.97)" }}>
-                    <div className="flex items-center justify-between px-5 py-4 border-b border-white/8">
+                  <div className="absolute inset-0 backdrop-blur-sm" style={{ background: "var(--overlay-backdrop)" }} onClick={() => { setLineupPickerSlot(null); setLineupPickerSearch(""); }} />
+                  <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-3xl shadow-2xl" style={{ background: "var(--modal-bg)", border: "1px solid var(--panel-border)", boxShadow: "var(--modal-shadow)" }}>
+                    <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid var(--panel-border)" }}>
                       <div>
-                        <div className="font-display font-bold text-sm uppercase tracking-widest text-white">
+                        <div className="font-display font-bold text-sm uppercase tracking-widest" style={{ color: "var(--panel-text)" }}>
                           {lang === "ru" ? `Слот ${si + 1}` : `Slot ${si + 1}`}
                           <span className="ml-2 text-cyan-400">{SLOT_ROLES[si]}</span>
                         </div>
@@ -416,24 +416,22 @@ export function TournamentTab({
                         )}
                       </div>
                       <button onClick={() => { setLineupPickerSlot(null); setLineupPickerSearch(""); }}
-                        className="grid h-8 w-8 place-items-center rounded-xl bg-white/5 text-white/60 hover:text-white transition text-base">✕</button>
+                        className="grid h-8 w-8 place-items-center rounded-xl transition text-base"
+                        style={{ background: "var(--button-secondary-bg)", color: "var(--button-secondary-text)", border: "1px solid var(--panel-border)" }}>✕</button>
                     </div>
                     <div className="px-5 pt-4 pb-3 space-y-2.5">
                       <input type="text"
                         placeholder={lang === "ru" ? "Поиск по названию…" : "Search by name…"}
                         value={lineupPickerSearch}
                         onChange={(e) => setLineupPickerSearch(e.target.value)}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
+                        className="w-full rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
+                        style={{ border: "1px solid var(--panel-border)", background: "var(--card)", color: "var(--panel-text)" }}
                       />
                       <div className="flex gap-2 flex-wrap">
                         {([null, 0, 1, 2, 3] as (number | null)[]).map((t) => (
                           <button key={t ?? "all"} onClick={() => setLineupPickerTier(t)}
-                            className={`whitespace-nowrap font-display font-bold uppercase tracking-widest text-[10px] px-3 py-1.5 rounded-md transition-all ${
-                              lineupPickerTier === t
-                                ? "text-[#00FF66] bg-[#00FF66]/10 border border-[#00FF66]/50"
-                                : "text-gray-400 bg-white/[0.02] border border-white/10 hover:text-white hover:border-white/30"
-                            }`}
-                            style={lineupPickerTier === t ? { boxShadow: "inset 0 -2px 0 #00FF66, 0 0 12px rgba(0,255,102,0.22)" } : {}}>
+                            className={`whitespace-nowrap font-display font-bold uppercase tracking-widest text-[10px] px-3 py-1.5 rounded-md border transition-all${lineupPickerTier === t ? " nav-tab-active" : ""}`}
+                            style={lineupPickerTier === t ? { color: "var(--filter-chip-active-text)", borderColor: "var(--filter-chip-active-border)" } : { color: "var(--filter-chip-text)", background: "var(--filter-chip-bg)", borderColor: "var(--filter-chip-border)" }}>
                             {t === null ? (lang === "ru" ? "Все" : "All") : TIER_NAMES[t]}
                           </button>
                         ))}
@@ -455,14 +453,13 @@ export function TournamentTab({
                                   const n = [...tnSelectedCards]; n[si] = c.cardAddr; setTnSelectedCards(n);
                                   setLineupPickerSlot(null); setLineupPickerSearch("");
                                 }}
-                                className={`flex flex-col items-center gap-1 rounded-xl border p-1.5 text-center transition hover:scale-105 active:scale-95 ${
-                                  isRoleMatch ? "eligible-glow bg-white/5" : `${tc.border} bg-black/20`
-                                }`}>
-                                <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-black/30">
+                                className={`flex flex-col items-center gap-1 rounded-xl border p-1.5 text-center transition hover:scale-105 active:scale-95 ${tc.border}${isRoleMatch ? " eligible-glow" : ""}`}
+                                style={{ background: "var(--card)" }}>
+                                <div className="relative w-full aspect-square rounded-lg overflow-hidden" style={{ background: "var(--panel-bg)" }}>
                                   <img src={COIN_ICONS[c.playerId]} alt="" className="w-full h-full object-contain p-1 opacity-90" />
                                   {isRoleMatch && <div className="absolute top-0.5 right-0.5 text-[9px] leading-none">⚡</div>}
                                 </div>
-                                <div className="text-[9px] font-semibold text-white truncate w-full leading-tight">{HEROES[c.playerId]}</div>
+                                <div className="text-[9px] font-semibold truncate w-full leading-tight" style={{ color: "var(--panel-text)" }}>{HEROES[c.playerId]}</div>
                                 <span className={`text-[8px] rounded px-1 font-bold ${tc.badge}`}>{TIER_NAMES[c.tier]}</span>
                               </button>
                             );
@@ -488,8 +485,8 @@ export function TournamentTab({
 
       {/* My portfolios history */}
       {tnLineups.length > 0 && (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <div className="text-xs font-semibold text-zinc-400 mb-3">{lang === "ru" ? "Мои портфели" : "My portfolios"}</div>
+        <div className="rounded-2xl p-4" style={{ border: "1px solid var(--panel-border)", background: "var(--card)" }}>
+          <div className="text-xs font-semibold mb-3" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Мои портфели" : "My portfolios"}</div>
           <div className="space-y-3">
             {tnLineups.map((l) => {
               const leagueLabel = ["Bronze", "Silver", "Gold"][l.league] ?? "Bronze";
@@ -499,7 +496,7 @@ export function TournamentTab({
               const totalPts = l.slots ? l.slots.reduce((sum, slot, si) => sum + heroScore(slot.playerId, slot.tier, si, dayScores), 0) : 0;
               const isExpanded = expandedPortfolios.has(l.day);
               return (
-                <div key={l.day} className="rounded-xl border border-white/10 bg-black/20 overflow-hidden">
+                <div key={l.day} className="rounded-xl overflow-hidden" style={{ border: "1px solid var(--panel-border)", background: "var(--panel-bg)" }}>
                   <button
                     onClick={() => {
                       const newSet = new Set(expandedPortfolios);
@@ -618,7 +615,7 @@ export function TournamentTab({
 
         return (
           <div className="mt-2 space-y-4">
-            <details className="rounded-xl border border-white/5 bg-white/3">
+            <details className="rounded-xl" style={{ border: "1px solid var(--panel-border)", background: "var(--card)" }}>
               <summary className="cursor-pointer px-3 py-2 text-xs text-zinc-400 hover:text-white transition select-none">
                 {lang === "ru" ? "ℹ️ Формула рассчета pts" : "ℹ️ How scoring works"}
               </summary>
@@ -640,7 +637,7 @@ export function TournamentTab({
                       { cat: lang === "ru" ? "Выборов игроков" : "Player picks",   formula: lang === "ru" ? "+100 топ-15 монет по выборам игроков за предыдущий день (при равенстве — все)" : "+100 for top-15 coins by player picks previous day (ties included)", cap: "+100" },
                     ] as { cat: string; formula: string; cap: string }[]).map(({ cat, formula, cap }) => (
                       <tr key={cat}>
-                        <td className="py-1.5 pr-3 font-medium text-white">{cat}</td>
+                        <td className="py-1.5 pr-3 font-medium" style={{ color: "var(--panel-text)" }}>{cat}</td>
                         <td className="py-1.5 pr-3 text-zinc-400">{formula}</td>
                         <td className="py-1.5 text-right font-mono text-emerald-400">{cap}</td>
                       </tr>
@@ -680,18 +677,23 @@ export function TournamentTab({
                     const date = dayToDate(d);
                     const dayNum = date.getDate();
                     const mon = date.toLocaleDateString(lang === "ru" ? "ru-RU" : "en-US", { month: "short" });
-                    const btnClass = isToday
-                      ? "border border-cyan-400/60 bg-cyan-500/10 text-cyan-300"
-                      : !past
-                        ? "opacity-30 cursor-not-allowed bg-white/5 text-zinc-600"
-                        : resultsDay === d
-                          ? "bg-violet-600 text-white"
-                          : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white";
+                    const btnClass = resultsDay === d && !isToday
+                      ? "bg-violet-600 text-white"
+                      : !past && !isToday
+                        ? "cursor-not-allowed"
+                        : "";
                     return (
                       <button key={d}
                         onClick={() => { setResultsDay(d); if (past) fetchOracleDays([d]); }}
                         disabled={!past && !isToday}
-                        className={`w-12 h-12 rounded-lg text-xs font-bold transition relative flex flex-col items-center justify-center leading-none ${btnClass}`}>
+                        className={`w-12 h-12 rounded-lg text-xs font-bold transition relative flex flex-col items-center justify-center leading-none ${btnClass}`}
+                        style={isToday
+                          ? { border: "1px solid rgba(34,211,238,0.6)", background: "rgba(6,182,212,0.12)", color: "var(--panel-text)" }
+                          : resultsDay === d
+                            ? {}
+                            : !past
+                              ? { background: "var(--card)", color: "var(--nft-muted)", borderStyle: "dashed", borderWidth: "1px", borderColor: "var(--panel-border)" }
+                              : { background: "var(--card)", color: "var(--panel-text-muted)", border: "1px solid var(--panel-border)" }}>
                         <span className="text-sm font-black">{dayNum}</span>
                         <span className="text-[9px] font-normal opacity-70">{mon}</span>
                         {isToday && <span className="text-[7px] font-bold uppercase tracking-wider opacity-70 leading-none mt-0.5">{lang === "ru" ? "сегодня" : "today"}</span>}
@@ -702,7 +704,7 @@ export function TournamentTab({
                 </div>
               </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden" data-tour="invest-coins">
+            <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--panel-border)", background: "var(--card)" }} data-tour="invest-coins">
               <button
                 type="button"
                 onClick={() => setCoinListOpen(o => !o)}
@@ -724,7 +726,8 @@ export function TournamentTab({
                 <select
                   value={coinCategoryFilter}
                   onChange={(e) => setCoinCategoryFilter(e.target.value === "all" ? "all" : Number(e.target.value))}
-                  className="h-8 rounded-lg border border-white/10 bg-[#0a0c18] px-2 text-xs font-semibold text-zinc-300 outline-none transition hover:border-white/20 focus:border-cyan-400/50">
+                  className="h-8 rounded-lg px-2 text-xs font-semibold outline-none transition focus:border-cyan-400/50"
+                  style={{ border: "1px solid var(--panel-border)", background: "var(--card)", color: "var(--panel-text)" }}>
                   {coinCategoryOptions.map((option) => (
                     <option key={option.value} value={option.value}>{option.label}</option>
                   ))}
@@ -742,7 +745,8 @@ export function TournamentTab({
                             aria-label={lang === "ru" ? "Категория" : "Category"}
                             value={coinCategoryFilter}
                             onChange={(e) => setCoinCategoryFilter(e.target.value === "all" ? "all" : Number(e.target.value))}
-                            className="mx-auto h-7 max-w-[130px] rounded-md border border-white/10 bg-[#0a0c18] px-2 text-[10px] font-semibold text-zinc-400 outline-none transition hover:border-white/20 focus:border-cyan-400/50">
+                            className="mx-auto h-7 max-w-[130px] rounded-md px-2 text-[10px] font-semibold outline-none transition focus:border-cyan-400/50"
+                            style={{ border: "1px solid var(--panel-border)", background: "var(--card)", color: "var(--panel-text)" }}>
                             {coinCategoryOptions.map((option) => (
                               <option key={option.value} value={option.value}>{option.label}</option>
                             ))}
@@ -769,7 +773,7 @@ export function TournamentTab({
                             <div className="flex items-center gap-2">
                               <img src={COIN_ICONS[pid]} alt={name} className="h-5 w-5 rounded-full object-cover shrink-0" referrerPolicy="no-referrer" />
                               <div>
-                                <div className="text-zinc-200 font-semibold leading-none">{name}</div>
+                                <div className="font-semibold leading-none" style={{ color: "var(--panel-text)" }}>{name}</div>
                                 <div className="text-[9px] text-zinc-500">{COIN_TICKERS[pid]}</div>
                               </div>
                             </div>

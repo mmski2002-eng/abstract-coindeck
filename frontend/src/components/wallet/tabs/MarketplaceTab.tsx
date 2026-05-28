@@ -67,7 +67,7 @@ export function MarketplaceTab({
           .sort((a, b) => Number(a.price) - Number(b.price) || a.id - b.id);
         if (myListings.length === 0) return null;
         return (
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <div className="rounded-2xl p-4" style={{ border: "1px solid var(--panel-border)", background: "var(--card)" }}>
             <div className="flex items-center justify-between mb-3">
               <div className="font-display font-bold uppercase tracking-widest text-xs text-white/70">{lang === "ru" ? "Мои лоты" : "My lots"} <span className="text-zinc-600 normal-case tracking-normal font-normal">({myListings.length})</span></div>
               {myListings.length > MY_LISTINGS_PAGE_SIZE && (
@@ -84,7 +84,7 @@ export function MarketplaceTab({
               {myListings.slice(myListingsPage * MY_LISTINGS_PAGE_SIZE, (myListingsPage + 1) * MY_LISTINGS_PAGE_SIZE).map((l) => {
                 const tc = TIER_COLORS[l.tier];
                 return (
-                  <div key={l.id} className={`flex flex-col gap-2 rounded-xl border bg-black/20 p-2.5 ${tc.border}`}>
+                  <div key={l.id} className={`flex flex-col gap-2 rounded-xl border p-2.5 ${tc.border}`} style={{ background: "var(--card)" }}>
                     <div className="flex items-center gap-2 min-w-0">
                       <img src={COIN_ICONS[l.playerId]} alt={HEROES[l.playerId]}
                         className="h-8 w-8 rounded-lg object-cover opacity-80 shrink-0" referrerPolicy="no-referrer" />
@@ -119,12 +119,13 @@ export function MarketplaceTab({
             placeholder={lang === "ru" ? "Поиск по тикеру или монете…" : "Search ticker or coin…"}
             value={mpSearchTicker}
             onChange={(e) => setMpSearchTicker(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-white/5 pl-8 pr-8 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-cyan-500/40 font-mono tracking-wide"
+            className="w-full rounded-xl pl-8 pr-8 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-cyan-500/40 font-mono tracking-wide"
+            style={{ border: "1px solid var(--panel-border)", background: "var(--card)", color: "var(--panel-text)" }}
           />
           {mpSearchTicker && (
             <button
               onClick={() => setMpSearchTicker("")}
-              className="absolute inset-y-0 right-2.5 flex items-center text-zinc-500 hover:text-white transition text-xs">✕</button>
+            className="absolute inset-y-0 right-2.5 flex items-center transition text-xs" style={{ color: "var(--panel-text-muted)" }}>✕</button>
           )}
         </div>
         <div className="flex gap-2 flex-wrap pb-1">
@@ -138,12 +139,15 @@ export function MarketplaceTab({
             const active = mpFilterTier === t;
             return (
               <button key={t ?? "all"} onClick={() => setMpFilterTier(t)}
-                className={`whitespace-nowrap font-display font-bold uppercase tracking-widest text-[10px] px-3 py-1.5 rounded-md transition-all ${
-                  active
-                    ? "text-[#00FF66] bg-[#00FF66]/10 border border-[#00FF66]/50"
-                    : "text-gray-400 bg-white/[0.02] border border-white/10 hover:text-white hover:border-white/30"
-                }`}
-                style={active ? { boxShadow: "inset 0 -2px 0 #00FF66, 0 0 12px rgba(0,255,102,0.22)" } : {}}>
+                className={`whitespace-nowrap font-display font-bold uppercase tracking-widest text-[10px] px-3 py-1.5 rounded-md border transition-all${active ? " nav-tab-active" : ""}`}
+                style={active ? {
+                  color: "var(--filter-chip-active-text)",
+                  borderColor: "var(--filter-chip-active-border)",
+                } : {
+                  color: "var(--filter-chip-text)",
+                  background: "var(--filter-chip-bg)",
+                  borderColor: "var(--filter-chip-border)",
+                }}>
                 {label}
               </button>
             );
@@ -154,12 +158,15 @@ export function MarketplaceTab({
             const active = mpFilterTeam === team;
             return (
               <button key={team ?? "all"} onClick={() => setMpFilterTeam(team)}
-                className={`whitespace-nowrap font-display font-bold uppercase tracking-widest text-[10px] px-3 py-1.5 rounded-md transition-all ${
-                  active
-                    ? "text-[#00FF66] bg-[#00FF66]/10 border border-[#00FF66]/50"
-                    : "text-gray-400 bg-white/[0.02] border border-white/10 hover:text-white hover:border-white/30"
-                }`}
-                style={active ? { boxShadow: "inset 0 -2px 0 #00FF66, 0 0 12px rgba(0,255,102,0.22)" } : {}}>
+                className={`whitespace-nowrap font-display font-bold uppercase tracking-widest text-[10px] px-3 py-1.5 rounded-md border transition-all${active ? " nav-tab-active" : ""}`}
+                style={active ? {
+                  color: "var(--filter-chip-active-text)",
+                  borderColor: "var(--filter-chip-active-border)",
+                } : {
+                  color: "var(--filter-chip-text)",
+                  background: "var(--filter-chip-bg)",
+                  borderColor: "var(--filter-chip-border)",
+                }}>
                 {team ?? (lang === "ru" ? "Все" : "All")}
               </button>
             );
@@ -191,7 +198,7 @@ export function MarketplaceTab({
                   <div aria-hidden className="absolute -inset-1 rounded-[22px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl" style={{ background: ts.glow }} />
                   {isLegendary && <div aria-hidden className="absolute -inset-[2px] rounded-[22px] foil-perpetual" />}
                   <div className="relative rounded-[20px] overflow-hidden" style={{ padding: "1.5px", background: `linear-gradient(180deg, ${ts.border}, rgba(255,255,255,0.04) 60%, rgba(255,255,255,0.01))` }}>
-                    <div className="relative rounded-[18px] overflow-hidden bg-[#0a0c18] flex flex-col transition-transform duration-500 group-hover:-translate-y-1.5" style={{ boxShadow: `0 12px 40px -12px ${ts.glow}` }}>
+                    <div className="relative rounded-[18px] overflow-hidden flex flex-col transition-transform duration-500 group-hover:-translate-y-1.5" style={{ background: "var(--card)", boxShadow: `0 12px 40px -12px ${ts.glow}` }}>
                       <div className="relative aspect-[4/5] overflow-hidden grain" style={{ background: ts.gradient }}>
                         <div className="relative flex items-center justify-center w-full h-full">
                           <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 55%, ${brand}22, transparent 70%)` }} />
@@ -211,13 +218,13 @@ export function MarketplaceTab({
                         </div>
                         {isOwn && (
                           <div className="absolute top-2.5 right-2.5 z-10">
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md border backdrop-blur-md text-emerald-300 border-emerald-500/40 bg-black/60">{lang === "ru" ? "МОЙ" : "MINE"}</span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md border backdrop-blur-md text-emerald-600 border-emerald-500/40" style={{ background: "var(--nft-badge-bg)" }}>{lang === "ru" ? "МОЙ" : "MINE"}</span>
                           </div>
                         )}
                         {(isRare || isEpic || isLegendary) && <div aria-hidden className="absolute inset-0 holo-sheen overflow-hidden" />}
                         <div aria-hidden className="absolute bottom-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${ts.color}, transparent)` }} />
                       </div>
-                      <div className="relative p-3.5 bg-[#0a0c18]/90">
+                      <div className="relative p-3.5" style={{ background: "var(--card)" }}>
                         <div className="flex items-start justify-between gap-2 mb-[10px]">
                           <div className="min-w-0">
                             <h4 className="font-bold text-white text-sm tracking-tight truncate">{HEROES[l.playerId]}</h4>

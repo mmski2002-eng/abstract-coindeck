@@ -53,18 +53,6 @@ const ICON_WALLET = (
   </svg>
 );
 
-const BTN_WRAP: React.CSSProperties = {
-  background: "linear-gradient(135deg, rgba(0,240,255,0.6), rgba(176,38,255,0.6))",
-  borderRadius: "0.75rem",
-};
-const BTN_STYLE = (active: boolean): React.CSSProperties => ({
-  background: active
-    ? "linear-gradient(135deg, rgba(0,240,255,0.18), rgba(176,38,255,0.18))"
-    : "linear-gradient(#0a0c1a, #0a0c1a)",
-  color: "#e2e8f0",
-  fontSize: "0.75rem",
-  fontWeight: 700,
-});
 
 function WalletButton({ lang }: { lang: string }) {
   const { address, isConnected } = useAccount();
@@ -101,12 +89,19 @@ function WalletButton({ lang }: { lang: string }) {
 
   return (
     <div ref={wrapperRef} className="relative">
-      <span className="inline-flex rounded-xl p-px" style={BTN_WRAP}>
+      <span className="inline-flex rounded-xl p-px" style={{ background: "var(--ctrl-border)" }}>
         <button
           onClick={() => setMenuOpen(v => !v)}
           className="group relative flex items-center gap-1.5 px-3 py-2 rounded-[calc(0.75rem-1px)] transition-all active:scale-95"
-          style={BTN_STYLE(menuOpen)}
+          style={{
+            background: "var(--ctrl-fill)",
+            boxShadow: menuOpen ? "var(--control-shadow-active)" : "var(--control-shadow)",
+            color: wrongNetwork ? undefined : "var(--control-text)",
+          }}
         >
+          <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+            <span aria-hidden className="absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" />
+          </span>
           {wrongNetwork ? (
             <span className="relative z-10 flex items-center gap-1.5">
               {ICON_WALLET}
@@ -130,12 +125,11 @@ function WalletButton({ lang }: { lang: string }) {
         <div
           className="absolute top-full right-0 mt-2 w-52 rounded-xl overflow-hidden z-[60]"
           style={{
-            background: "linear-gradient(#0d0f22, #08091a) padding-box, linear-gradient(135deg, rgba(0,240,255,0.3), rgba(176,38,255,0.3)) border-box",
-            border: "1px solid transparent",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(0,240,255,0.1)",
+            background: "var(--control-bg)",
+            boxShadow: "var(--control-shadow-active)",
           }}
         >
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-white/8">
+          <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid var(--panel-border)" }}>
             {wrongNetwork ? (
               <>
                 <span className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
@@ -144,7 +138,8 @@ function WalletButton({ lang }: { lang: string }) {
                 </span>
                 <button
                   onClick={() => { switchChain({ chainId: abstractTestnet.id }); setMenuOpen(false); }}
-                  className="text-[11px] font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
+                  className="text-[11px] font-semibold transition-colors"
+                  style={{ color: "var(--control-text)" }}
                 >
                   {lang === "ru" ? "Сменить" : "Switch"}
                 </button>
@@ -152,24 +147,25 @@ function WalletButton({ lang }: { lang: string }) {
             ) : (
               <>
                 <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                <span className="text-xs font-semibold text-emerald-300">Abstract Testnet</span>
+                <span className="text-xs font-semibold text-emerald-500">Abstract Testnet</span>
               </>
             )}
           </div>
 
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-white/8">
-            <svg className="h-3.5 w-3.5 text-white/35 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid var(--panel-border)" }}>
+            <svg className="h-3.5 w-3.5 shrink-0 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" style={{ color: "var(--control-text)" }}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <span className="text-xs text-white/50 truncate flex-1">{nickname || shortAddr}</span>
+            <span className="text-xs truncate flex-1 opacity-60" style={{ color: "var(--control-text)" }}>{nickname || shortAddr}</span>
           </div>
 
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-white/8">
-            <svg className="h-3.5 w-3.5 text-white/35 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid var(--panel-border)" }}>
+            <svg className="h-3.5 w-3.5 shrink-0 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" style={{ color: "var(--control-text)" }}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
             <button
-              className="text-xs text-white/50 hover:text-white/80 transition-colors font-mono truncate flex-1 text-left"
+              className="text-xs font-mono truncate flex-1 text-left opacity-50 transition-opacity hover:opacity-80"
+              style={{ color: "var(--control-text)" }}
               onClick={() => { navigator.clipboard.writeText(address ?? "").catch(() => {}); setMenuOpen(false); }}
             >
               {address?.slice(0, 10)}…{address?.slice(-8)}
@@ -178,7 +174,10 @@ function WalletButton({ lang }: { lang: string }) {
 
           <button
             onClick={() => { disconnect(); setMenuOpen(false); }}
-            className="w-full flex items-center gap-2 px-4 py-3 text-xs font-semibold text-red-400 hover:bg-red-500/10 transition-colors"
+            className="w-full flex items-center gap-2 px-4 py-3 text-xs font-semibold text-red-500 transition-colors"
+            style={{ background: "transparent" }}
+            onMouseEnter={e => (e.currentTarget.style.background = "rgba(239,68,68,0.08)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
           >
             <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -275,12 +274,8 @@ function ConnectModal({ lang, open, onClose }: ConnectModalProps) {
           </div>
         )}
 
-        <div className="px-6 py-3 border-t border-white/6">
-          <p className="text-[11px] text-white/30 text-center">
-            {lang === "ru"
-              ? "Abstract Global Wallet — нативный смарт-контракт кошелёк"
-              : "Abstract Global Wallet — native smart contract wallet"}
-          </p>
+        <div className="px-6 py-3 flex justify-center" style={{ borderTop: "1px solid var(--panel-border)" }}>
+          <img src="/logo.svg" alt="CoinDeck" className="h-5 w-auto opacity-60" />
         </div>
       </div>
     </div>,
@@ -295,25 +290,27 @@ type ConnectButtonProps = {
 
 function ConnectButton({ lang, onOpenConnect }: ConnectButtonProps) {
   return (
-    <div className="flex flex-col items-end gap-2">
-      <span className="inline-flex rounded-xl p-px" style={BTN_WRAP}>
-        <button
-          onClick={onOpenConnect}
-          className="group relative flex items-center gap-1.5 px-3 py-2 rounded-[calc(0.75rem-1px)] transition-all active:scale-95"
-          style={BTN_STYLE(false)}
-        >
-          <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
-            <span aria-hidden className="absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" />
+    <span className="inline-flex rounded-xl p-px" style={{ background: "var(--ctrl-border)" }}>
+      <button
+        onClick={onOpenConnect}
+        className="group relative flex items-center gap-1.5 px-3 py-2 rounded-[calc(0.75rem-1px)] transition-all active:scale-95"
+        style={{
+          background: "var(--ctrl-fill)",
+          boxShadow: "var(--control-shadow)",
+          color: "var(--control-text)",
+        }}
+      >
+        <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+          <span aria-hidden className="absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" />
+        </span>
+        <span className="relative z-10 flex items-center gap-1.5">
+          {ICON_WALLET}
+          <span className="text-xs font-bold uppercase tracking-widest">
+            {lang === "ru" ? "Войти" : "Connect"}
           </span>
-          <span className="relative z-10 flex items-center gap-1.5">
-            {ICON_WALLET}
-            <span className="text-xs font-bold uppercase tracking-widest">
-              {lang === "ru" ? "Войти" : "Connect"}
-            </span>
-          </span>
-        </button>
-      </span>
-    </div>
+        </span>
+      </button>
+    </span>
   );
 }
 

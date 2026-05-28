@@ -37,15 +37,16 @@ export function ChestOpenModal({ lang, modal, onClose, chestOpenQty, setChestOpe
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[150] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[150] flex items-center justify-center backdrop-blur-sm p-4"
+      style={{ background: "var(--overlay-backdrop)" }}
       onClick={onClose}
     >
       <div
         className="relative w-full max-w-sm rounded-2xl overflow-hidden"
         style={{
-          background: `linear-gradient(#0d0f22, #08091a) padding-box, linear-gradient(135deg, ${t.b1}, ${t.b2}) border-box`,
+          background: `linear-gradient(var(--modal-bg), var(--modal-bg)) padding-box, linear-gradient(135deg, ${t.b1}, ${t.b2}) border-box`,
           border: "1.5px solid transparent",
-          boxShadow: `0 0 60px ${t.glow}, 0 25px 50px rgba(0,0,0,0.7)`,
+          boxShadow: `0 0 60px ${t.glow}, var(--modal-shadow)`,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -68,11 +69,11 @@ export function ChestOpenModal({ lang, modal, onClose, chestOpenQty, setChestOpe
             />
           </div>
           <div className="relative text-center">
-            <div className="font-display font-black text-xl text-white tracking-tight">{modal.label}</div>
+            <div className="font-display font-black text-xl tracking-tight" style={{ color: "var(--panel-text)" }}>{modal.label}</div>
             <div className="mt-2 flex items-center justify-center gap-2 flex-wrap">
               <span
                 className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.55)" }}
+                style={{ background: "var(--panel-bg)", border: "1px solid var(--panel-border)", color: "var(--panel-text-muted)" }}
               >
                 {modal.available} {ru ? "шт." : "pcs."}
               </span>
@@ -87,29 +88,26 @@ export function ChestOpenModal({ lang, modal, onClose, chestOpenQty, setChestOpe
         </div>
 
         {/* ── Divider ── */}
-        <div
-          className="mx-6 h-px"
-          style={{ background: `linear-gradient(to right, transparent, ${t.accent}35, transparent)` }}
-        />
+        <div className="mx-6 h-px" style={{ background: `linear-gradient(to right, transparent, ${t.accent}35, transparent)` }} />
 
         {/* ── Body ── */}
         <div className="p-6 space-y-4">
           {/* Qty stepper */}
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-white/30">
+            <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--nft-muted)" }}>
               {ru ? "Открыть" : "Open"}
             </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setChestOpenQty((q) => Math.max(1, q - 1))}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-base transition active:scale-90"
-                style={{ background: t.accent + "14", border: `1px solid ${t.accent}30` }}
+                className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90"
+                style={{ background: t.accent + "14", border: `1px solid ${t.accent}30`, color: "var(--panel-text)" }}
               >−</button>
-              <span className="w-10 text-center text-white font-bold text-base tabular-nums">{chestOpenQty}</span>
+              <span className="w-10 text-center font-bold text-base tabular-nums" style={{ color: "var(--panel-text)" }}>{chestOpenQty}</span>
               <button
                 onClick={() => setChestOpenQty((q) => Math.min(modal.available, q + 1))}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-base transition active:scale-90"
-                style={{ background: t.accent + "14", border: `1px solid ${t.accent}30` }}
+                className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90"
+                style={{ background: t.accent + "14", border: `1px solid ${t.accent}30`, color: "var(--panel-text)" }}
               >+</button>
               <button
                 onClick={() => setChestOpenQty(modal.available)}
@@ -124,9 +122,9 @@ export function ChestOpenModal({ lang, modal, onClose, chestOpenQty, setChestOpe
             className="rounded-xl px-4 py-3 text-sm leading-relaxed"
             style={{ background: t.accent + "0a", border: `1px solid ${t.accent}22` }}
           >
-            <span className="text-white/50">{ru ? "Откроется " : "Opening "}</span>
-            <span className="font-bold text-white">{chestOpenQty} {chestWord(chestOpenQty, ru)}</span>
-            <span className="text-white/50"> → </span>
+            <span style={{ color: "var(--panel-text-muted)" }}>{ru ? "Откроется " : "Opening "}</span>
+            <span className="font-bold" style={{ color: "var(--panel-text)" }}>{chestOpenQty} {chestWord(chestOpenQty, ru)}</span>
+            <span style={{ color: "var(--panel-text-muted)" }}> → </span>
             <span className="font-bold" style={{ color: tc }}>
               {chestOpenQty} {ru ? `карточек Tier ${modal.tier + 1}` : `Tier ${modal.tier + 1} card${chestOpenQty > 1 ? "s" : ""}`}
             </span>
@@ -136,8 +134,8 @@ export function ChestOpenModal({ lang, modal, onClose, chestOpenQty, setChestOpe
           <div className="flex gap-3 pt-1">
             <button
               onClick={onClose}
-              className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white/45 hover:text-white/70 transition"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+              className="flex-1 rounded-xl py-2.5 text-sm font-semibold transition"
+              style={{ background: "var(--button-secondary-bg)", border: "1px solid var(--panel-border)", color: "var(--button-secondary-text)" }}
             >
               {ru ? "Отмена" : "Cancel"}
             </button>

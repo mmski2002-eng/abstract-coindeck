@@ -203,7 +203,10 @@ export function useRosterLogic({ restUrl, moduleAddress, wagmiConfig, submitTx, 
     try {
       await ensureInitialized();
       const priceKey = type === 0 ? "wooden" : type === 1 ? "iron" : "silver";
-      const unitPrice = chestPricesWei[priceKey];
+      const freshPrices = await readEvmChestPrices(wagmiConfig);
+      setChestPricesWei(freshPrices);
+      setChestPrices({ wooden: Number(freshPrices.wooden), iron: Number(freshPrices.iron), silver: Number(freshPrices.silver) });
+      const unitPrice = freshPrices[priceKey];
       await submitTx({ function: `${moduleAddress}::fantasy_league::buy_chest`, typeArguments: [], functionArguments: [type, qty], value: unitPrice * BigInt(qty) });
       setChestBuySuccess(type);
       setTimeout(() => setChestBuySuccess(null), 2000);

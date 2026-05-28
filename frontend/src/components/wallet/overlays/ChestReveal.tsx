@@ -22,7 +22,8 @@ export function ChestReveal({
   const isRare = card.tier === 1;
   return createPortal(
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-md"
+      className="fixed inset-0 z-[200] flex items-center justify-center backdrop-blur-md"
+      style={{ background: "var(--overlay-backdrop)" }}
       onClick={onClose}
     >
       <style>{`
@@ -57,7 +58,7 @@ export function ChestReveal({
       >
         {isLegendary && <div aria-hidden className="absolute -inset-[2px] rounded-[22px] foil-perpetual" />}
         <div className="relative rounded-[20px] overflow-hidden" style={{ padding: "1.5px", background: `linear-gradient(180deg, ${ts.border}, rgba(255,255,255,0.04) 60%, rgba(255,255,255,0.01))` }}>
-          <div className="relative rounded-[18px] overflow-hidden bg-[#0a0c18] flex flex-col" style={{ boxShadow: `0 12px 40px -12px ${ts.glow}` }}>
+          <div className="relative rounded-[18px] overflow-hidden flex flex-col" style={{ background: "var(--card)", boxShadow: `0 12px 40px -12px ${ts.glow}` }}>
             <div className="relative aspect-[4/5] overflow-hidden grain" style={{ background: ts.gradient }}>
               <div className="relative flex items-center justify-center w-full h-full">
                 <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 55%, ${brand}22, transparent 70%)` }} />
@@ -81,13 +82,14 @@ export function ChestReveal({
               {(isRare || isEpic || isLegendary) && <div aria-hidden className="absolute inset-0 holo-sheen overflow-hidden" />}
               <div aria-hidden className="absolute bottom-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${ts.color}, transparent)` }} />
             </div>
-            <div className="relative p-3.5 bg-[#0a0c18]/90">
+            <div className="relative p-3.5" style={{ background: "var(--card)" }}>
               <h4 className="font-bold text-sm tracking-tight truncate" style={{ color: ts.color }}>{HEROES[card.playerId]}</h4>
               <span className="text-[10px] uppercase tracking-[0.2em] text-white/40">{ticker}</span>
-              <div className="mt-3 text-center text-xs text-white/50 mb-2">✨ {lang === "ru" ? "Новая карточка!" : "New card!"}</div>
+              <div className="mt-3 text-center text-xs mb-2" style={{ color: "var(--nft-muted)" }}>✨ {lang === "ru" ? "Новая карточка!" : "New card!"}</div>
               <button
                 onClick={onClose}
-                className="w-full rounded-xl bg-white/10 py-2 text-sm font-semibold text-white hover:bg-white/20 transition"
+                className="w-full rounded-xl py-2 text-sm font-semibold transition"
+                style={{ background: "var(--button-secondary-bg)", color: "var(--button-secondary-text)", border: "1px solid var(--panel-border)" }}
               >
                 {lang === "ru" ? "Отлично!" : "Nice!"}
               </button>
@@ -111,7 +113,8 @@ export function ChestRevealMulti({
 }) {
   return createPortal(
     <div
-      className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-4 overflow-y-auto"
+      className="fixed inset-0 z-[200] flex flex-col items-center justify-center backdrop-blur-md p-4 overflow-y-auto"
+      style={{ background: "var(--overlay-backdrop)" }}
       onClick={onClose}
     >
       <style>{`
@@ -121,10 +124,10 @@ export function ChestRevealMulti({
         }
       `}</style>
       <div className="mb-5 text-center pointer-events-none">
-        <div className="text-lg font-black text-white">
+        <div className="text-lg font-black" style={{ color: "var(--panel-text)" }}>
           {lang === "ru" ? `🎉 Получено ${cards.length} карточек!` : `🎉 Got ${cards.length} cards!`}
         </div>
-        <div className="text-xs text-white/40 mt-1">{lang === "ru" ? "Нажмите чтобы закрыть" : "Tap to close"}</div>
+        <div className="text-xs mt-1" style={{ color: "var(--nft-muted)" }}>{lang === "ru" ? "Нажмите чтобы закрыть" : "Tap to close"}</div>
       </div>
       <div className="flex gap-3 overflow-hidden" onClick={(e) => e.stopPropagation()}>
         {cards.map((card, i) => {
@@ -144,7 +147,7 @@ export function ChestRevealMulti({
             >
               {isLegendary && <div aria-hidden className="absolute -inset-[2px] rounded-[16px] foil-perpetual" />}
               <div className="relative rounded-[15px] overflow-hidden" style={{ padding: "1.5px", background: `linear-gradient(180deg, ${ts.border}, rgba(255,255,255,0.04) 60%, rgba(255,255,255,0.01))` }}>
-                <div className="relative rounded-[13px] overflow-hidden bg-[#0a0c18] flex flex-col" style={{ boxShadow: `0 8px 24px -8px ${ts.glow}` }}>
+                <div className="relative rounded-[13px] overflow-hidden flex flex-col" style={{ background: "var(--card)", boxShadow: `0 8px 24px -8px ${ts.glow}` }}>
                   <div className="relative aspect-[4/5] overflow-hidden grain" style={{ background: ts.gradient }}>
                     <div className="relative flex items-center justify-center w-full h-full">
                       <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 55%, ${brand}22, transparent 70%)` }} />
@@ -162,7 +165,7 @@ export function ChestRevealMulti({
                     </div>
                     {(isRare || isEpic || isLegendary) && <div aria-hidden className="absolute inset-0 holo-sheen overflow-hidden" />}
                   </div>
-                  <div className="p-2 bg-[#0a0c18]/90">
+                  <div className="p-2" style={{ background: "var(--card)" }}>
                     <div className="text-[9px] font-black truncate leading-tight" style={{ color: ts.color }}>{HEROES[card.playerId]}</div>
                     <div className="text-[8px] text-white/40 uppercase tracking-wider truncate">{ticker}</div>
                   </div>
@@ -174,7 +177,8 @@ export function ChestRevealMulti({
       </div>
       <button
         onClick={onClose}
-        className="mt-6 rounded-xl bg-white/10 hover:bg-white/20 px-8 py-2.5 text-sm font-semibold text-white transition"
+        className="mt-6 rounded-xl px-8 py-2.5 text-sm font-semibold transition"
+        style={{ background: "var(--button-secondary-bg)", color: "var(--button-secondary-text)", border: "1px solid var(--panel-border)" }}
       >
         {lang === "ru" ? "Отлично!" : "Nice!"}
       </button>

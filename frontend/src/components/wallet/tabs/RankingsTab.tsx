@@ -261,17 +261,17 @@ export function RankingsTab({
 
       {/* Table */}
       {lbLoading && lbRows.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-10 text-center text-sm text-zinc-400">
+        <div className="rounded-2xl p-10 text-center text-sm" style={{ border: "1px solid var(--panel-border)", background: "var(--card)", color: "var(--panel-text-muted)" }}>
           <div className="animate-pulse">{lang === "ru" ? "Загрузка рейтинга…" : "Loading rankings…"}</div>
           <div className="text-xs text-zinc-600 mt-1">{lang === "ru" ? "Запрашиваем данные участников" : "Fetching participant data"}</div>
         </div>
       ) : !lbLoading && visibleRows.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-10 text-center text-sm text-zinc-500">
+        <div className="rounded-2xl p-10 text-center text-sm" style={{ border: "1px solid var(--panel-border)", background: "var(--card)", color: "var(--nft-muted)" }}>
           {lang === "ru" ? "Нет данных" : "No data"}
         </div>
       ) : (
         <>
-          <div className="rounded-2xl border border-white/10 bg-black/20 overflow-hidden" data-tour="rankings-table">
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--panel-border)", background: "var(--card)" }} data-tour="rankings-table">
             <div className="grid grid-cols-[2rem_1fr_5rem_3.5rem_5rem] gap-3 px-4 py-2 border-b border-white/10 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
               <div>#</div>
               <div className="flex items-center justify-between">
@@ -296,14 +296,15 @@ export function RankingsTab({
                   <div className="min-w-0 flex items-center gap-2">
                     <div className="min-w-0 flex-1">
                       {row.nickname && (
-                        <div className={`text-xs font-semibold truncate leading-tight ${isMe ? "text-violet-300" : "text-white"}`}>
+                        <div className={`text-xs font-semibold truncate leading-tight`} style={isMe ? { color: "var(--panel-text)" } : {}}>
                           {row.nickname}
-                          {isMe && <span className="ml-1.5 text-[9px] font-black text-violet-300 bg-violet-900/50 rounded px-1">YOU</span>}
+                          {isMe && <span className="ml-1.5 text-[9px] font-black rounded px-1" style={{ color: "var(--panel-text)", background: "rgba(109,40,217,0.12)" }}>YOU</span>}
                         </div>
                       )}
-                      <div className={`font-mono truncate leading-tight ${row.nickname ? "text-[10px] text-zinc-500" : `text-xs ${isMe ? "text-violet-300 font-bold" : "text-zinc-300"}`}`}>
+                      <div className={`font-mono truncate leading-tight ${row.nickname ? "text-[10px] text-zinc-500" : `text-xs ${!isMe ? "text-zinc-300" : "font-bold"}`}`}
+                        style={!row.nickname && isMe ? { color: "var(--panel-text)" } : {}}>
                         {row.addr.slice(0, 6)}…{row.addr.slice(-4)}
-                        {!row.nickname && isMe && <span className="ml-1.5 text-[9px] font-black text-violet-300 bg-violet-900/50 rounded px-1">YOU</span>}
+                        {!row.nickname && isMe && <span className="ml-1.5 text-[9px] font-black rounded px-1" style={{ color: "var(--panel-text)", background: "rgba(109,40,217,0.12)" }}>YOU</span>}
                       </div>
                     </div>
                     {row.prevDayPids && row.prevDayPids.length > 0 && (
@@ -326,7 +327,7 @@ export function RankingsTab({
                     {lang === "ru" ? rowLL.ru : rowLL.en}
                   </div>
                   <div className="text-xs text-zinc-500 text-right tabular-nums">{row.days}/{totalDays}</div>
-                  <div className={`text-sm font-black text-right tabular-nums ${isMe ? "text-violet-300" : "text-white"}`}>
+                  <div className="text-sm font-black text-right tabular-nums" style={{ color: "var(--panel-text)" }}>
                     {row.score.toLocaleString()}
                   </div>
                 </div>
@@ -485,9 +486,9 @@ function LeagueDayDots({
               key={day}
               className={`grid ${dotSize} place-items-center rounded-full border font-black tabular-nums`}
               style={{
-                color: active ? "#ffffff" : "#a1a1aa",
-                background: active ? colors.color : "#27272a",
-                borderColor: active ? colors.color : "rgba(113,113,122,0.35)",
+                color: active ? "#ffffff" : "var(--nft-semi)",
+                background: active ? colors.color : "var(--card)",
+                borderColor: active ? colors.color : "var(--panel-border)",
                 ["--league-glow" as string]: colors.glow,
                 animation: active ? "leagueDayGlow 2.2s ease-in-out infinite" : undefined,
               }}

@@ -27,6 +27,27 @@
 :root {
   color-scheme: light;
 
+  /* ── PRIMER tokens ────────────────────────────────────────────────────── */
+  --ink:        #0F1115;
+  --ink-2:      #3A4049;
+  --ink-3:      #7A828D;
+  --mint:       #26C6A8;
+  --mint-deep:  #1DA88E;
+  --mint-soft:  #BFEDE2;
+  --sky:        #7AC7E8;
+  --sky-deep:   #4DAFD5;
+  --sky-soft:   #DCEEF7;
+  --lime-pop:   #88FC00;
+  --paper:      #F4EFE2;
+  --paper-2:    #FBF7EC;
+  --paper-3:    #FFFFFF;
+  --sunken:     #E9E2D1;
+  --shadow-sticker:    4px 4px 0 #0F1115;
+  --shadow-sticker-sm: 2px 2px 0 #0F1115;
+  --shadow-sticker-legend: 4px 4px 0 #0F1115, 8px 8px 0 #88FC00;
+  --radius-sm: 10px;
+  --radius-md: 18px;
+
   --background: #f4f5f7;
   --foreground: #16181d;
   --page-gradient: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 65%, #0288D1 72%, #0277BD 88%, #0277BD 90%, #C8A56A 90%, #DEB887 100%);
@@ -103,15 +124,15 @@
   --info-block-icon-bg: rgba(22,24,29,0.06);
   --info-block-icon-border: rgba(22,24,29,0.16);
   --info-block-icon-text: rgba(22,24,29,0.70);
-  --chest-card-bg: rgba(255,255,255,0.95);
-  --chest-card-border: rgba(22,24,29,0.26);
-  --chest-card-text-muted: rgba(22,24,29,0.52);
-  --chest-card-text-subtle: rgba(22,24,29,0.38);
-  --chest-card-pill-bg: rgba(22,24,29,0.06);
-  --chest-card-pill-border: rgba(22,24,29,0.12);
-  --chest-card-shadow: 0 18px 26px -18px rgba(22,24,29,0.22);
-  --chest-open-disabled-text: rgba(22,24,29,0.68);
-  --chest-open-disabled-border: rgba(22,24,29,0.28);
+  --chest-card-bg: #FBF7EC;
+  --chest-card-border: #0F1115;
+  --chest-card-shadow: 4px 4px 0 #0F1115;
+  --chest-card-text-muted: #3A4049;
+  --chest-card-text-subtle: #7A828D;
+  --chest-card-pill-bg: rgba(15,17,21,0.07);
+  --chest-card-pill-border: #0F1115;
+  --chest-open-disabled-text: #7A828D;
+  --chest-open-disabled-border: rgba(15,17,21,0.30);
   --nft-badge-bg: rgba(22,24,29,0.09);
   --nft-badge-text: rgba(22,24,29,0.85);
   --nft-lock-bg: rgba(255,255,255,0.82);
@@ -144,6 +165,14 @@
 
 html[data-theme="dark"] {
   color-scheme: dark;
+
+  /* ── PRIMER dark overrides ─────────────────────────────────────────── */
+  --paper:   #0E141A;
+  --paper-2: #141B23;
+  --paper-3: #1B232C;
+  --sunken:  #0A0F14;
+  --ink-2:   #E8EEF5;
+  --ink-3:   #9AA3AE;
 
   --background: #171718;
   --foreground: #ffffff;
@@ -216,14 +245,15 @@ html[data-theme="dark"] {
   --info-block-icon-bg: rgba(255,255,255,0.06);
   --info-block-icon-border: rgba(237,239,243,0.14);
   --info-block-icon-text: #d7dce4;
-  --chest-card-bg: rgba(33,33,36,0.95);
-  --chest-card-border: rgba(237,239,243,0.12);
-  --chest-card-text-muted: rgba(237,239,243,0.58);
-  --chest-card-text-subtle: rgba(237,239,243,0.34);
-  --chest-card-pill-bg: rgba(255,255,255,0.08);
-  --chest-card-pill-border: rgba(237,239,243,0.12);
-  --chest-open-disabled-text: rgba(237,239,243,0.50);
-  --chest-open-disabled-border: rgba(237,239,243,0.20);
+  --chest-card-bg: #141B23;
+  --chest-card-border: #0F1115;
+  --chest-card-shadow: 4px 4px 0 #0F1115;
+  --chest-card-text-muted: #9AA3AE;
+  --chest-card-text-subtle: #7A828D;
+  --chest-card-pill-bg: rgba(255,255,255,0.07);
+  --chest-card-pill-border: #0F1115;
+  --chest-open-disabled-text: #7A828D;
+  --chest-open-disabled-border: rgba(15,17,21,0.60);
   --nft-badge-bg: rgba(0,0,0,0.50);
   --nft-badge-text: rgba(255,255,255,0.90);
   --nft-lock-bg: rgba(0,0,0,0.55);
@@ -587,4 +617,62 @@ html[data-theme="light"] .text-white\/70 { color: rgba(22,24,29,0.70) !important
 .ticker-marquee {
   animation: ticker-marquee 26s linear infinite;
   will-change: transform;
+}
+
+/* ── PRIMER sticker buttons ──────────────────────────────────────────── */
+.btn-sticker-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--mint);
+  color: var(--ink);
+  border: 2.5px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: transform 0.12s cubic-bezier(0.22,1,0.36,1), box-shadow 0.12s cubic-bezier(0.22,1,0.36,1);
+}
+.btn-sticker-primary:hover:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.btn-sticker-primary:active:not(:disabled) {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+.btn-sticker-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-sticker-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--paper-3);
+  color: var(--ink-2);
+  border: 2.5px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: transform 0.12s cubic-bezier(0.22,1,0.36,1), box-shadow 0.12s cubic-bezier(0.22,1,0.36,1);
+}
+.btn-sticker-outline:hover:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.btn-sticker-outline:active:not(:disabled) {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+.btn-sticker-outline:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.card-sticker {
+  background: var(--paper-2);
+  border: 2.5px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  border-radius: 18px;
 }

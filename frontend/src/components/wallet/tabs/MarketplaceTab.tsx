@@ -131,23 +131,24 @@ export function MarketplaceTab({
         <div className="flex gap-2 flex-wrap pb-1">
           {([
             { t: null, label: lang === "ru" ? "Все" : "All" },
-            { t: 0,    label: "Common" },
-            { t: 1,    label: "Rare" },
-            { t: 2,    label: "Epic" },
-            { t: 3,    label: "Legendary" },
+            { t: 0,    label: lang === "ru" ? "Маленькое" : "Small" },
+            { t: 1,    label: lang === "ru" ? "Среднее" : "Medium" },
+            { t: 2,    label: lang === "ru" ? "Большое" : "Heavy" },
+            { t: 3,    label: lang === "ru" ? "Тяжёлое" : "Super Heavy" },
           ] as { t: number | null; label: string }[]).map(({ t, label }) => {
             const active = mpFilterTier === t;
             return (
               <button key={t ?? "all"} onClick={() => setMpFilterTier(t)}
-                className={`whitespace-nowrap font-display font-bold uppercase tracking-widest text-[10px] px-3 py-1.5 rounded-md border transition-all${active ? " nav-tab-active" : ""}`}
-                style={active ? {
-                  color: "var(--filter-chip-active-text)",
-                  borderColor: "var(--filter-chip-active-border)",
-                } : {
-                  color: "var(--filter-chip-text)",
-                  background: "var(--filter-chip-bg)",
-                  borderColor: "var(--filter-chip-border)",
-                }}>
+                style={{
+                  padding: "8px 14px", whiteSpace: "nowrap",
+                  background: active ? "var(--mint)" : "var(--paper-3)",
+                  color: "var(--ink)", border: "2.5px solid var(--ink)", borderRadius: 999,
+                  fontSize: 11, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
+                  boxShadow: active ? "4px 4px 0 var(--ink)" : "2px 2px 0 var(--ink)",
+                  transition: "background .12s",
+                }}
+                onMouseEnter={e => { if (!active) e.currentTarget.style.background = "var(--sky-soft)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = active ? "var(--mint)" : "var(--paper-3)"; }}>
                 {label}
               </button>
             );
@@ -158,15 +159,16 @@ export function MarketplaceTab({
             const active = mpFilterTeam === team;
             return (
               <button key={team ?? "all"} onClick={() => setMpFilterTeam(team)}
-                className={`whitespace-nowrap font-display font-bold uppercase tracking-widest text-[10px] px-3 py-1.5 rounded-md border transition-all${active ? " nav-tab-active" : ""}`}
-                style={active ? {
-                  color: "var(--filter-chip-active-text)",
-                  borderColor: "var(--filter-chip-active-border)",
-                } : {
-                  color: "var(--filter-chip-text)",
-                  background: "var(--filter-chip-bg)",
-                  borderColor: "var(--filter-chip-border)",
-                }}>
+                style={{
+                  padding: "8px 14px", whiteSpace: "nowrap",
+                  background: active ? "var(--mint)" : "var(--paper-3)",
+                  color: "var(--ink)", border: "2.5px solid var(--ink)", borderRadius: 999,
+                  fontSize: 11, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
+                  boxShadow: active ? "4px 4px 0 var(--ink)" : "2px 2px 0 var(--ink)",
+                  transition: "background .12s",
+                }}
+                onMouseEnter={e => { if (!active) e.currentTarget.style.background = "var(--sky-soft)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = active ? "var(--mint)" : "var(--paper-3)"; }}>
                 {team ?? (lang === "ru" ? "Все" : "All")}
               </button>
             );
@@ -187,7 +189,8 @@ export function MarketplaceTab({
               const brand = COIN_BRAND_COLORS[l.playerId] ?? "#6B7280";
               const ticker = COIN_TICKERS[l.playerId];
               const coinIcon = COIN_ICONS[l.playerId];
-              const tickerFontSize = ticker.length <= 3 ? "3.5rem" : ticker.length <= 4 ? "2.8rem" : "2.2rem";
+              const eggW = (["50%","65%","79%","94%"] as const)[l.tier] ?? "72%";
+              const eggH = (["57%","74%","90%","107%"] as const)[l.tier] ?? "82%";
               const isOwn = accountAddress && l.seller.toLowerCase() === accountAddress.toLowerCase();
               const buyKey = `mp_buy_${l.id}`;
               const isLegendary = l.tier === 3;
@@ -202,16 +205,16 @@ export function MarketplaceTab({
                       <div className="relative aspect-[4/5] overflow-hidden grain" style={{ background: ts.gradient }}>
                         <div className="relative flex items-center justify-center w-full h-full">
                           <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 55%, ${brand}22, transparent 70%)` }} />
-                          <div aria-hidden className="absolute inset-6 rounded-full border border-dashed opacity-30" style={{ borderColor: brand }} />
-                          <div aria-hidden className="absolute inset-10 rounded-full border opacity-20" style={{ borderColor: brand }} />
-                          <img
-                            src={coinIcon}
-                            alt=""
-                            aria-hidden
-                            className="absolute w-24 h-24 object-contain select-none opacity-35 anim-float"
-                            style={{ filter: `blur(1.5px) drop-shadow(0 0 10px ${brand}60)`, animationDelay: `${(cardIdx % 3) * -2}s` }}
-                          />
-                          <span className="relative z-10 font-black leading-none tracking-tighter select-none" style={{ fontSize: tickerFontSize, color: brand, textShadow: `0 0 30px ${brand}80, 0 4px 20px rgba(0,0,0,0.6)` }}>{ticker}</span>
+                          <div className="absolute anim-float" style={{ width: eggW, height: eggH, animationDelay: `${(cardIdx % 3) * -2}s` }}>
+                            <img src="/egg.png" alt="" aria-hidden
+                              className="w-full h-full select-none"
+                              style={{ objectFit: "contain", filter: `drop-shadow(0 4px 24px ${brand}50)` }} />
+                            {coinIcon && (
+                              <img src={coinIcon} alt="" aria-hidden
+                                className="absolute select-none"
+                                style={{ width: "35%", height: "35%", objectFit: "contain", top: "50%", left: "50%", transform: "translate(-50%, -50%)", mixBlendMode: "multiply", opacity: 0.9 }} />
+                            )}
+                          </div>
                         </div>
                         <div className="absolute top-2.5 left-2.5 z-10">
                           <span className="text-[9px] font-bold uppercase tracking-[0.22em] px-2 py-1 rounded-md border backdrop-blur-md" style={{ color: ts.color, borderColor: ts.border, background: "rgba(0,0,0,0.4)" }}>{ts.label}</span>

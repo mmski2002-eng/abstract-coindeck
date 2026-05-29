@@ -16,7 +16,8 @@ export function ChestReveal({
   const brand = COIN_BRAND_COLORS[card.playerId] ?? "#6B7280";
   const ticker = COIN_TICKERS[card.playerId];
   const coinIcon = COIN_ICONS[card.playerId];
-  const tickerFontSize = ticker.length <= 3 ? "3.5rem" : ticker.length <= 4 ? "2.8rem" : "2.2rem";
+  const eggW = (["50%","65%","79%","94%"] as const)[card.tier] ?? "72%";
+  const eggH = (["57%","74%","90%","107%"] as const)[card.tier] ?? "82%";
   const isLegendary = card.tier === 3;
   const isEpic = card.tier === 2;
   const isRare = card.tier === 1;
@@ -62,16 +63,16 @@ export function ChestReveal({
             <div className="relative aspect-[4/5] overflow-hidden grain" style={{ background: ts.gradient }}>
               <div className="relative flex items-center justify-center w-full h-full">
                 <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 55%, ${brand}22, transparent 70%)` }} />
-                <div aria-hidden className="absolute inset-6 rounded-full border border-dashed opacity-30" style={{ borderColor: brand }} />
-                <div aria-hidden className="absolute inset-10 rounded-full border opacity-20" style={{ borderColor: brand }} />
-                <img
-                  src={coinIcon}
-                  alt=""
-                  aria-hidden
-                  className="absolute w-24 h-24 object-contain select-none opacity-35"
-                  style={{ filter: `blur(3px) drop-shadow(0 0 10px ${brand}60)` }}
-                />
-                <span className="relative z-10 font-black leading-none tracking-tighter select-none" style={{ fontSize: tickerFontSize, color: brand, textShadow: `0 0 30px ${brand}80, 0 4px 20px rgba(0,0,0,0.6)` }}>{ticker}</span>
+                <div className="absolute anim-float" style={{ width: eggW, height: eggH }}>
+                  <img src="/egg.png" alt="" aria-hidden
+                    className="w-full h-full select-none"
+                    style={{ objectFit: "contain", filter: `drop-shadow(0 4px 24px ${brand}50)` }} />
+                  {coinIcon && (
+                    <img src={coinIcon} alt="" aria-hidden
+                      className="absolute select-none"
+                      style={{ width: "35%", height: "35%", objectFit: "contain", top: "50%", left: "50%", transform: "translate(-50%, -50%)", mixBlendMode: "multiply", opacity: 0.9 }} />
+                  )}
+                </div>
               </div>
               <div className="absolute top-2.5 left-2.5 z-10">
                 <span className="text-[9px] font-bold uppercase tracking-[0.22em] px-2 py-1 rounded-md border backdrop-blur-md" style={{ color: ts.color, borderColor: ts.border, background: "rgba(0,0,0,0.4)" }}>{ts.label}</span>
@@ -135,7 +136,8 @@ export function ChestRevealMulti({
           const brand = COIN_BRAND_COLORS[card.playerId] ?? "#6B7280";
           const ticker = COIN_TICKERS[card.playerId];
           const coinIcon = COIN_ICONS[card.playerId];
-          const tickerFs = ticker.length <= 3 ? "1.8rem" : ticker.length <= 4 ? "1.4rem" : "1.1rem";
+          const eggW = (["50%","65%","79%","94%"] as const)[card.tier] ?? "72%";
+          const eggH = (["57%","74%","90%","107%"] as const)[card.tier] ?? "82%";
           const isLegendary = card.tier === 3;
           const isEpic = card.tier === 2;
           const isRare = card.tier === 1;
@@ -151,14 +153,16 @@ export function ChestRevealMulti({
                   <div className="relative aspect-[4/5] overflow-hidden grain" style={{ background: ts.gradient }}>
                     <div className="relative flex items-center justify-center w-full h-full">
                       <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 55%, ${brand}22, transparent 70%)` }} />
-                      <img
-                        src={coinIcon}
-                        alt=""
-                        aria-hidden
-                        className="absolute w-14 h-14 object-contain select-none opacity-35"
-                        style={{ filter: `blur(2px) drop-shadow(0 0 8px ${brand}60)` }}
-                      />
-                      <span className="relative z-10 font-black leading-none tracking-tighter" style={{ fontSize: tickerFs, color: brand, textShadow: `0 0 20px ${brand}80` }}>{ticker}</span>
+                      <div className="absolute anim-float" style={{ width: eggW, height: eggH }}>
+                        <img src="/egg.png" alt="" aria-hidden
+                          className="w-full h-full select-none"
+                          style={{ objectFit: "contain", filter: `drop-shadow(0 4px 20px ${brand}50)` }} />
+                        {coinIcon && (
+                          <img src={coinIcon} alt="" aria-hidden
+                            className="absolute select-none"
+                            style={{ width: "35%", height: "35%", objectFit: "contain", top: "50%", left: "50%", transform: "translate(-50%, -50%)", mixBlendMode: "multiply", opacity: 0.9 }} />
+                        )}
+                      </div>
                     </div>
                     <div className="absolute top-1.5 left-1.5 z-10">
                       <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border backdrop-blur-md" style={{ color: ts.color, borderColor: ts.border, background: "rgba(0,0,0,0.4)" }}>{ts.label}</span>

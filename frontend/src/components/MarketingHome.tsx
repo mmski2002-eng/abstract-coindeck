@@ -361,97 +361,77 @@ export function MarketingHome() {
           <div className="ml-auto flex shrink-0 items-center gap-3 lg:ml-0">
             <div id="network-badge" />
             <div className="hidden items-center gap-2 md:flex">
-              <span className="inline-flex rounded-xl p-px" style={{ background: "var(--ctrl-border)" }}>
-                <a
-                  href="https://x.com/CoinDeck"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative overflow-hidden flex h-8 w-8 items-center justify-center rounded-[calc(0.75rem-1px)] transition-all active:scale-95"
-                  style={{ background: "var(--ctrl-fill)", boxShadow: "var(--control-shadow)", color: "var(--control-text)" }}
-                  aria-label="X (Twitter)"
-                >
-                  <span aria-hidden className="pointer-events-none absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" />
-                  <span className="relative z-10 flex items-center justify-center">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.733-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                    </svg>
-                  </span>
-                </a>
-              </span>
-            </div>
-            <div className="hidden items-center gap-2 md:flex">
-              <span className="inline-flex rounded-xl p-px" style={{ background: "var(--ctrl-border)" }}>
-                <button
-                  type="button"
-                  onClick={() => setTheme((prev) => (prev === "dark" ? "light" : "dark"))}
-                  className="group relative overflow-hidden flex h-8 w-8 items-center justify-center rounded-[calc(0.75rem-1px)] transition-all active:scale-95"
-                  style={{ background: "var(--ctrl-fill)", boxShadow: "var(--control-shadow)", color: "var(--control-text)" }}
-                  aria-label={lang === "ru" ? "Переключить тему" : "Toggle theme"}
-                >
-                  <span aria-hidden className="pointer-events-none absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" />
-                  <span className="relative z-10 flex items-center justify-center">
-                    {themeReady && isDark ? <Moon size={15} /> : <Sun size={15} />}
-                  </span>
-                </button>
-              </span>
+              <a
+                href="https://x.com/CoinDeck"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-sticker-outline h-9 w-9 p-0"
+                aria-label="X (Twitter)"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.733-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+              </a>
+
+              <button
+                type="button"
+                onClick={() => setTheme((prev) => (prev === "dark" ? "light" : "dark"))}
+                className="btn-sticker-outline h-9 w-9 p-0"
+                aria-label={lang === "ru" ? "Переключить тему" : "Toggle theme"}
+              >
+                {themeReady && isDark ? <Moon size={15} /> : <Sun size={15} />}
+              </button>
 
               <div className="relative" ref={langRef}>
-              <span className="inline-flex overflow-hidden rounded-xl p-px" style={{ background: "var(--ctrl-border)" }}>
               <button
                 type="button"
                 onClick={() => setLangOpen((v) => !v)}
-                className="group relative overflow-hidden flex items-center gap-1.5 rounded-[calc(0.75rem-1px)] px-3 py-1.5 transition-all active:scale-95"
-                style={{
-                  background: "var(--ctrl-fill)",
-                  boxShadow: langOpen ? "var(--control-shadow-active)" : "var(--control-shadow)",
-                  color: "var(--control-text)",
-                }}
+                className="btn-sticker-outline flex items-center gap-1.5 px-3 py-2"
                 aria-label="Switch language"
               >
-                <span aria-hidden className="pointer-events-none absolute inset-0 translate-x-[calc(100%+2px)] group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" />
-                <span className="relative z-10 flex items-center gap-1.5">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                  </svg>
-                  <span className="text-xs font-bold uppercase tracking-widest">
-                    {lang}
-                  </span>
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="transition-transform duration-200" style={{ transform: langOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
-                    <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+                <span className="text-xs font-bold uppercase tracking-widest">{lang}</span>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="opacity-50 transition-transform duration-200" style={{ transform: langOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
+                  <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </button>
-              </span>
 
               {langOpen && (
                 <div
-                  className="absolute right-0 top-full z-50 mt-2 w-36 overflow-hidden rounded-xl"
+                  className="absolute right-0 top-full z-50 mt-3 w-40"
                   style={{
-                    background: "var(--control-bg)",
-                    border: "1px solid transparent",
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.16), var(--control-shadow)",
+                    background: "var(--paper-2)",
+                    border: "2.5px solid var(--ink)",
+                    borderRadius: 14,
+                    boxShadow: "4px 4px 0 var(--ink)",
                   }}
                 >
                   {([
                     { code: "ru", label: "Русский", flag: "🇷🇺" },
                     { code: "en", label: "English", flag: "🇺🇸" },
-                  ] as const).map(({ code, label, flag }) => (
+                  ] as const).map(({ code, label, flag }, i, arr) => (
                     <button
                       key={code}
                       type="button"
                       onClick={() => { setLang(code); setLangOpen(false); }}
-                      className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm transition-all hover:bg-white/6"
+                      className="flex w-full items-center gap-2.5 px-4 py-3 text-sm font-bold transition-colors"
                       style={{
-                        color: lang === code ? "#00FF66" : "var(--control-text)",
-                        background: lang === code ? "rgba(0,255,102,0.08)" : undefined,
+                        color: lang === code ? "var(--ink)" : "var(--ink-2)",
+                        background: lang === code ? "var(--mint-soft)" : "transparent",
+                        borderBottom: i < arr.length - 1 ? "1.5px solid rgba(15,17,21,0.12)" : "none",
+                        borderRadius: i === 0 ? "11px 11px 0 0" : i === arr.length - 1 ? "0 0 11px 11px" : 0,
                       }}
+                      onMouseEnter={e => { if (lang !== code) e.currentTarget.style.background = "var(--sky-soft)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = lang === code ? "var(--mint-soft)" : "transparent"; }}
                     >
                       <span className="text-base leading-none">{flag}</span>
-                      <span className="font-medium">{label}</span>
+                      <span>{label}</span>
                       {lang === code && (
                         <svg className="ml-auto" width="12" height="12" viewBox="0 0 12 12" fill="none">
-                          <path d="M2 6l3 3 5-5" stroke="#00FF66" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M2 6l3 3 5-5" stroke="var(--mint-deep)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       )}
                     </button>
@@ -643,10 +623,10 @@ export function MarketingHome() {
             <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Множители карточек" : "Card multipliers"}</div>
             <div className="grid grid-cols-4 gap-1.5">
               {[
-                { label: "Common", mult: "x1.0", color: "text-zinc-400", bg: "bg-zinc-800/40 border-zinc-600/30" },
-                { label: "Rare", mult: "x1.4", color: "text-blue-300", bg: "bg-blue-900/20 border-blue-500/20" },
-                { label: "Epic", mult: "x1.9", color: "text-purple-300", bg: "bg-purple-900/20 border-purple-500/20" },
-                { label: "Leg.", mult: "x2.5", color: "text-amber-300", bg: "bg-amber-900/20 border-amber-500/20" },
+                { label: lang === "ru" ? "Мал." : "Sm.", mult: "x1.0", color: "text-zinc-400", bg: "bg-zinc-800/40 border-zinc-600/30" },
+                { label: lang === "ru" ? "Ср."  : "Md.", mult: "x1.4", color: "text-blue-300", bg: "bg-blue-900/20 border-blue-500/20" },
+                { label: lang === "ru" ? "Бол." : "Hvy.", mult: "x1.9", color: "text-purple-300", bg: "bg-purple-900/20 border-purple-500/20" },
+                { label: lang === "ru" ? "Тяж." : "S.H.", mult: "x2.5", color: "text-amber-300", bg: "bg-amber-900/20 border-amber-500/20" },
               ].map(({ label, mult, color, bg }) => (
                 <div key={label} className={`rounded-lg border px-2 py-2 text-center ${bg}`}>
                   <div className={`text-[10px] font-semibold ${color}`}>{label}</div>

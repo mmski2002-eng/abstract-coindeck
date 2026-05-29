@@ -10,7 +10,7 @@ const THEME = [
 ];
 
 const TIER_COLOR = ["#9ca3af", "#60a5fa", "#c084fc", "#fbbf24"];
-const TIER_NAME  = ["Common",  "Rare",    "Epic",    "Legendary"];
+const TIER_NAME  = ["Маленькое", "Среднее", "Большое", "Тяжёлое"];
 
 function chestWord(n: number, ru: boolean) {
   if (!ru) return n === 1 ? "chest" : "chests";

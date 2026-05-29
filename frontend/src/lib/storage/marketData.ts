@@ -12,7 +12,7 @@ export type CoinResult = {
 
 export type JobStatus =
   | { state: "idle" }
-  | { state: "running"; progress: number; total: number; startedAt: number }
+  | { state: "running"; progress: number; total: number; startedAt: number; partial?: CoinResult[] }
   | { state: "done"; data: CoinResult[]; completedAt: number; fromTs?: number; toTs?: number }
   | { state: "error"; error: string };
 

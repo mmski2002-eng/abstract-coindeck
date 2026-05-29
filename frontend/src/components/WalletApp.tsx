@@ -215,6 +215,7 @@ function Inner({
   } = useAdminLogic({
     submitTx,
     refreshTournament,
+    refreshInventory: () => refreshInventory().then(() => {}),
     restUrl,
     moduleAddress,
     walletAccount,

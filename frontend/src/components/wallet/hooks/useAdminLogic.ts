@@ -13,6 +13,7 @@ import type { Config } from "@wagmi/core";
 interface Deps {
   submitTx: (p: TransactionPayload, opts?: TxOptions) => Promise<void>;
   refreshTournament: () => Promise<void>;
+  refreshInventory: () => Promise<void>;
   restUrl: string;
   moduleAddress: string;
   walletAccount: { publicKey?: unknown } | null | undefined;
@@ -21,7 +22,7 @@ interface Deps {
   wagmiConfig: Config;
 }
 
-export function useAdminLogic({ submitTx, refreshTournament, restUrl, moduleAddress, walletAccount, walletSignMessage, tournamentStartTs, wagmiConfig }: Deps) {
+export function useAdminLogic({ submitTx, refreshTournament, refreshInventory, restUrl, moduleAddress, walletAccount, walletSignMessage, tournamentStartTs, wagmiConfig }: Deps) {
   function mkStats(): HeroStats { return { priceChg: 0, vol24h: 0, high24h: 0, low24h: 0, tempRatio: 0, hype: false }; }
   function finiteOrZero(value: number): number { return Number.isFinite(value) ? value : 0; }
   function normalizePublicKey(value: unknown): string {
@@ -259,9 +260,7 @@ export function useAdminLogic({ submitTx, refreshTournament, restUrl, moduleAddr
       await submitTx(payload);
       setAdminOk(`✓ ${label}`);
       await new Promise(r => setTimeout(r, 600));
-      await refreshTournament();
-      await fetchClaimState();
-      await fetchGovernanceState();
+      await Promise.all([refreshTournament(), refreshInventory(), fetchClaimState(), fetchGovernanceState()]);
     } catch (e: unknown) { setAdminError(getErrorMessage(e)); }
     finally { setAdminBusy(null); }
   }

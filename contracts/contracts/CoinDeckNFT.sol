@@ -13,10 +13,11 @@ import "./AdminControl.sol";
 contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
 
     // в"Ђв"Ђ Constants в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
-    uint8  public constant MAX_TIER       = 3;
     uint64 public constant MERGE_COUNT    = 5;
-    uint8  public constant MAX_PLAYERS    = 50;
     uint8  public constant MAX_CHEST_TYPE = 2;
+
+    uint8 public maxTier    = 3;
+    uint8 public maxPlayers = 50;
     uint64 public constant MAX_CHEST_BATCH = 100;
     uint256 public constant MAX_NICKNAME_LEN = 30;
 
@@ -73,6 +74,11 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
     string public cardBaseUri;
     string public chestBaseUri;
 
+    // extension data for players beyond id 49 and tiers beyond 3
+    mapping(uint8 => string) private _extPlayerName;
+    mapping(uint8 => string) private _extPlayerSlug;
+    mapping(uint8 => string) private _extTierName;
+
     // tournament contract address вЂ" only it may lock/unlock cards
     address public tournamentContract;
 
@@ -85,6 +91,10 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
     event BaseUrisUpdated();
     event TournamentSet(address indexed tournament);
     event NicknameSet(address indexed user, string nickname);
+    event MaxTierUpdated(uint8 newMax);
+    event MaxPlayersUpdated(uint8 newMax);
+    event PlayerAdded(uint8 indexed id, string name);
+    event TierNameSet(uint8 indexed tier, string name);
 
     // в"Ђв"Ђ Errors в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
     error NotAdmin();
@@ -153,6 +163,33 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
         emit BaseUrisUpdated();
     }
 
+    function setMaxTier(uint8 newMax) external onlyNFTAdmin {
+        require(newMax > maxTier, "only increase");
+        maxTier = newMax;
+        emit MaxTierUpdated(newMax);
+    }
+
+    function setMaxPlayers(uint8 newMax) external onlyNFTAdmin {
+        require(newMax > maxPlayers, "only increase");
+        maxPlayers = newMax;
+        emit MaxPlayersUpdated(newMax);
+    }
+
+    function addPlayer(uint8 id, string calldata name, string calldata slug) external onlyNFTAdmin {
+        require(id >= 50, "use built-in range");
+        require(id < maxPlayers, "id >= maxPlayers");
+        _extPlayerName[id] = name;
+        _extPlayerSlug[id] = slug;
+        emit PlayerAdded(id, name);
+    }
+
+    function setExtTierName(uint8 tier, string calldata name) external onlyNFTAdmin {
+        require(tier > 3, "use built-in range");
+        require(tier <= maxTier, "tier > maxTier");
+        _extTierName[tier] = name;
+        emit TierNameSet(tier, name);
+    }
+
     // в"Ђв"Ђ Nickname в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
     function setNickname(string calldata nick) external {
         if (bytes(nick).length > MAX_NICKNAME_LEN) revert NicknameTooLong();
@@ -167,7 +204,7 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
         uint8   tier,
         uint256 count
     ) external onlyNFTAdmin {
-        if (tier > MAX_TIER) revert InvalidTier();
+        if (tier > maxTier) revert InvalidTier();
         adminControl.consumeAction(
             adminControl.ACTION_ADMIN_MINT_TO(),
             keccak256(abi.encode(recipient, playerId, tier, count))
@@ -214,7 +251,7 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
         _burn(chestId);
 
         uint8 tier     = chestType; // Woodenв†'Common, Ironв†'Rare, Silverв†'Epic
-        uint8 playerId = _pseudoRand(msg.sender, chestId, 0, MAX_PLAYERS);
+        uint8 playerId = _pseudoRand(msg.sender, chestId, 0, maxPlayers);
         uint256 newId  = _mintCard(msg.sender, playerId, tier);
 
         emit ChestOpened(msg.sender, chestId, newId);
@@ -241,7 +278,7 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
             _burn(chestId);
 
             uint8 tier     = chestType;
-            uint8 playerId = _pseudoRand(msg.sender, chestId, uint8(i), MAX_PLAYERS);
+            uint8 playerId = _pseudoRand(msg.sender, chestId, uint8(i), maxPlayers);
             uint256 newId  = _mintCard(msg.sender, playerId, tier);
             emit ChestOpened(msg.sender, chestId, newId);
         }
@@ -253,7 +290,7 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
         uint8     tier,
         uint256[] calldata tokenIds
     ) external nonReentrant {
-        if (tier >= MAX_TIER) revert MaxTier();
+        if (tier >= maxTier) revert MaxTier();
         if (tokenIds.length != MERGE_COUNT) revert WrongCard();
 
         // Dedup
@@ -312,7 +349,7 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
 
     // в"Ђв"Ђ Internal mints в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
     function _mintCard(address to, uint8 playerId, uint8 tier) internal returns (uint256) {
-        if (tier > MAX_TIER) revert InvalidTier();
+        if (tier > maxTier) revert InvalidTier();
         uint256 id = _nextTokenId++;
         // Set metadata BEFORE _safeMint so _afterTokenTransfer can read tokenType
         tokenType[id] = TYPE_CARD;
@@ -424,28 +461,31 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
     }
 
     // в"Ђв"Ђ Coin/name tables в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
-    function playerName(uint8 id) public pure returns (string memory) {
-        string[50] memory names = [
-            "Bitcoin","Ethereum","BNB","XRP","Solana",
-            "Dogecoin","Cardano","TRON","Avalanche","Shiba Inu",
-            "Polkadot","Bitcoin Cash","Chainlink","NEAR","Litecoin",
-            "Uniswap","Aptos","Hedera","Monero","Internet Computer",
-            "Ethereum Classic","OKB","Cosmos","Filecoin","Arbitrum",
-            "Polygon","Stellar","Optimism","Immutable","Mantle",
-            "VeChain","Cronos","Stacks","Algorand","Render",
-            "Injective","The Graph","Sui","Fantom","Theta",
-            "EOS","Aave","Maker","Lido","Sei",
-            "Kaspa","Pepe","Bonk","dogwifhat","Abstract"
-        ];
-        if (id >= 50) id = 49;
-        return names[id];
+    function playerName(uint8 id) public view returns (string memory) {
+        if (id < 50) {
+            string[50] memory names = [
+                "Bitcoin","Ethereum","BNB","XRP","Solana",
+                "Dogecoin","Cardano","TRON","Avalanche","Shiba Inu",
+                "Polkadot","Bitcoin Cash","Chainlink","NEAR","Litecoin",
+                "Uniswap","Aptos","Hedera","Monero","Internet Computer",
+                "Ethereum Classic","OKB","Cosmos","Filecoin","Arbitrum",
+                "Polygon","Stellar","Optimism","Immutable","Mantle",
+                "VeChain","Cronos","Stacks","Algorand","Render",
+                "Injective","The Graph","Sui","Fantom","Theta",
+                "EOS","Aave","Maker","Lido","Sei",
+                "Kaspa","Pepe","Bonk","dogwifhat","Abstract"
+            ];
+            return names[id];
+        }
+        return _extPlayerName[id];
     }
 
-    function tierName(uint8 tier) public pure returns (string memory) {
+    function tierName(uint8 tier) public view returns (string memory) {
         if (tier == 0) return "Common";
         if (tier == 1) return "Rare";
         if (tier == 2) return "Epic";
-        return "Legendary";
+        if (tier == 3) return "Legendary";
+        return _extTierName[tier];
     }
 
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
@@ -464,61 +504,63 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
         }
     }
 
-    function _playerSlug(uint8 id) internal pure returns (string memory) {
-        string[50] memory slugs = [
-            "1/small/bitcoin.png",
-            "279/small/ethereum.png",
-            "825/small/bnb-icon2_2x.png",
-            "44/small/xrp-symbol-white-128.png",
-            "4128/small/solana.png",
-            "5/small/dogecoin.png",
-            "975/small/cardano.png",
-            "1094/small/tronix.png",
-            "12559/small/Avalanche_Circle_RedWhite_Trans.png",
-            "11939/small/shiba.png",
-            "12171/small/polkadot.png",
-            "780/small/bitcoin-cash-circle.png",
-            "877/small/chainlink-new-logo.png",
-            "10365/small/near.jpg",
-            "2/small/litecoin.png",
-            "12504/small/uniswap-uni-logo.png",
-            "26455/small/aptos_round.png",
-            "3688/small/hbar.png",
-            "69/small/monero_logo.png",
-            "14495/small/Internet_Computer_logo.png",
-            "328/small/ethereum-classic.png",
-            "4463/small/WeChat_Image_20220118095654.png",
-            "1481/small/cosmos_hub.png",
-            "12817/small/filecoin.png",
-            "16547/small/photo_2023-03-29_21.47.00.jpeg",
-            "4713/small/matic-token-icon.png",
-            "100/small/Stellar_symbol_black_RGB.png",
-            "25244/small/Optimism.png",
-            "17500/small/imx.png",
-            "27075/small/mantle-seeklogo.png",
-            "1167/small/VET_Token_Icon.png",
-            "7310/small/cro_token_logo.png",
-            "4847/small/Stacks_logo_full.png",
-            "4380/small/download.png",
-            "11636/small/rndr.png",
-            "12882/small/Secondary_Symbol.png",
-            "13397/small/Graph_Token.png",
-            "26375/small/sui-ocean-square.png",
-            "4001/small/Fantom_round.png",
-            "2416/small/theta-token-logo.png",
-            "738/small/eos-eos-logo.png",
-            "12645/small/AAVE.png",
-            "1364/small/Mark_Maker.png",
-            "13573/small/Lido_DAO.png",
-            "28205/small/Sei_Logo_-_Transparent.png",
-            "25751/small/kaspa-icon-exchanges.png",
-            "29850/small/pepe-token.jpeg",
-            "28600/small/bonk.jpg",
-            "33566/small/dogwifhat.jpg",
-            "32452/small/abstract.jpg"
-        ];
-        if (id >= 50) id = 49;
-        return slugs[id];
+    function _playerSlug(uint8 id) internal view returns (string memory) {
+        if (id < 50) {
+            string[50] memory slugs = [
+                "1/small/bitcoin.png",
+                "279/small/ethereum.png",
+                "825/small/bnb-icon2_2x.png",
+                "44/small/xrp-symbol-white-128.png",
+                "4128/small/solana.png",
+                "5/small/dogecoin.png",
+                "975/small/cardano.png",
+                "1094/small/tronix.png",
+                "12559/small/Avalanche_Circle_RedWhite_Trans.png",
+                "11939/small/shiba.png",
+                "12171/small/polkadot.png",
+                "780/small/bitcoin-cash-circle.png",
+                "877/small/chainlink-new-logo.png",
+                "10365/small/near.jpg",
+                "2/small/litecoin.png",
+                "12504/small/uniswap-uni-logo.png",
+                "26455/small/aptos_round.png",
+                "3688/small/hbar.png",
+                "69/small/monero_logo.png",
+                "14495/small/Internet_Computer_logo.png",
+                "328/small/ethereum-classic.png",
+                "4463/small/WeChat_Image_20220118095654.png",
+                "1481/small/cosmos_hub.png",
+                "12817/small/filecoin.png",
+                "16547/small/photo_2023-03-29_21.47.00.jpeg",
+                "4713/small/matic-token-icon.png",
+                "100/small/Stellar_symbol_black_RGB.png",
+                "25244/small/Optimism.png",
+                "17500/small/imx.png",
+                "27075/small/mantle-seeklogo.png",
+                "1167/small/VET_Token_Icon.png",
+                "7310/small/cro_token_logo.png",
+                "4847/small/Stacks_logo_full.png",
+                "4380/small/download.png",
+                "11636/small/rndr.png",
+                "12882/small/Secondary_Symbol.png",
+                "13397/small/Graph_Token.png",
+                "26375/small/sui-ocean-square.png",
+                "4001/small/Fantom_round.png",
+                "2416/small/theta-token-logo.png",
+                "738/small/eos-eos-logo.png",
+                "12645/small/AAVE.png",
+                "1364/small/Mark_Maker.png",
+                "13573/small/Lido_DAO.png",
+                "28205/small/Sei_Logo_-_Transparent.png",
+                "25751/small/kaspa-icon-exchanges.png",
+                "29850/small/pepe-token.jpeg",
+                "28600/small/bonk.jpg",
+                "33566/small/dogwifhat.jpg",
+                "32452/small/abstract.jpg"
+            ];
+            return slugs[id];
+        }
+        return _extPlayerSlug[id];
     }
 
     // в"Ђв"Ђ ETH receive (prize vault) в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ

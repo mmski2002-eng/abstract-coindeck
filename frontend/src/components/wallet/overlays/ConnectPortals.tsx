@@ -89,55 +89,51 @@ function WalletButton({ lang }: { lang: string }) {
 
   return (
     <div ref={wrapperRef} className="relative">
-      <span className="inline-flex rounded-xl p-px" style={{ background: "var(--ctrl-border)" }}>
-        <button
-          onClick={() => setMenuOpen(v => !v)}
-          className="group relative overflow-hidden flex items-center gap-1.5 px-3 py-2 rounded-[calc(0.75rem-1px)] transition-all active:scale-95"
-          style={{
-            background: "var(--ctrl-fill)",
-            boxShadow: menuOpen ? "var(--control-shadow-active)" : "var(--control-shadow)",
-            color: wrongNetwork ? undefined : "var(--control-text)",
-          }}
-        >
-          <span aria-hidden className="pointer-events-none absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" />
-          {wrongNetwork ? (
-            <span className="relative z-10 flex items-center gap-1.5">
-              {ICON_WALLET}
-              <span className="text-xs font-bold uppercase tracking-widest text-red-400">
-                {lang === "ru" ? "Сеть!" : "Net!"}
-              </span>
+      <button
+        onClick={() => setMenuOpen(v => !v)}
+        className="btn-sticker-outline flex items-center gap-1.5 px-3 py-2"
+        style={wrongNetwork ? { borderColor: "#E25C5C", boxShadow: "4px 4px 0 #E25C5C" } : undefined}
+      >
+        {wrongNetwork ? (
+          <>
+            {ICON_WALLET}
+            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#E25C5C" }}>
+              {lang === "ru" ? "Сеть!" : "Net!"}
             </span>
-          ) : (
-            <span className="relative z-10 flex items-center gap-1.5">
-              {ICON_WALLET}
-              <span className="text-xs font-bold uppercase tracking-widest">{shortAddr}</span>
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="transition-transform duration-200 opacity-50" style={{ transform: menuOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
-                <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </span>
-          )}
-        </button>
-      </span>
+          </>
+        ) : (
+          <>
+            {ICON_WALLET}
+            <span className="text-xs font-bold uppercase tracking-widest">{shortAddr}</span>
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="opacity-50 transition-transform duration-200" style={{ transform: menuOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
+              <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </>
+        )}
+      </button>
 
       {menuOpen && (
         <div
-          className="absolute top-full right-0 mt-2 w-52 rounded-xl overflow-hidden z-[60]"
+          className="absolute top-full right-0 mt-3 w-56 z-[60]"
           style={{
-            background: "var(--control-bg)",
-            boxShadow: "var(--control-shadow-active)",
+            background: "var(--paper-2)",
+            border: "2.5px solid var(--ink)",
+            borderRadius: 14,
+            boxShadow: "4px 4px 0 var(--ink)",
           }}
         >
-          <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid var(--panel-border)" }}>
+          {/* network row */}
+          <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1.5px solid rgba(15,17,21,0.12)" }}>
             {wrongNetwork ? (
               <>
                 <span className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
-                <span className="text-xs font-semibold text-red-400 flex-1">
+                <span className="text-xs font-bold flex-1" style={{ color: "#E25C5C" }}>
                   {lang === "ru" ? "Не та сеть" : "Wrong network"}
                 </span>
                 <button
                   onClick={() => { switchChain({ chainId: abstractTestnet.id }); setMenuOpen(false); }}
-                  className="text-[11px] font-semibold transition-colors"
-                  style={{ color: "var(--control-text)" }}
+                  className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md"
+                  style={{ background: "#E25C5C", color: "#0F1115", border: "1.5px solid #0F1115" }}
                 >
                   {lang === "ru" ? "Сменить" : "Switch"}
                 </button>
@@ -145,36 +141,39 @@ function WalletButton({ lang }: { lang: string }) {
             ) : (
               <>
                 <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                <span className="text-xs font-semibold text-emerald-500">Abstract Testnet</span>
+                <span className="text-xs font-bold" style={{ color: "var(--ink-2)" }}>Abstract Testnet</span>
               </>
             )}
           </div>
 
-          <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid var(--panel-border)" }}>
-            <svg className="h-3.5 w-3.5 shrink-0 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" style={{ color: "var(--control-text)" }}>
+          {/* nickname row */}
+          <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1.5px solid rgba(15,17,21,0.12)" }}>
+            <svg className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--ink-3)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <span className="text-xs truncate flex-1 opacity-60" style={{ color: "var(--control-text)" }}>{nickname || shortAddr}</span>
+            <span className="text-xs font-semibold truncate flex-1" style={{ color: "var(--ink-2)" }}>{nickname || shortAddr}</span>
           </div>
 
-          <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid var(--panel-border)" }}>
-            <svg className="h-3.5 w-3.5 shrink-0 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" style={{ color: "var(--control-text)" }}>
+          {/* address copy row */}
+          <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1.5px solid rgba(15,17,21,0.12)" }}>
+            <svg className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--ink-3)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
             <button
-              className="text-xs font-mono truncate flex-1 text-left opacity-50 transition-opacity hover:opacity-80"
-              style={{ color: "var(--control-text)" }}
+              className="text-xs font-mono truncate flex-1 text-left transition-opacity hover:opacity-70"
+              style={{ color: "var(--ink-3)" }}
               onClick={() => { navigator.clipboard.writeText(address ?? "").catch(() => {}); setMenuOpen(false); }}
             >
               {address?.slice(0, 10)}…{address?.slice(-8)}
             </button>
           </div>
 
+          {/* disconnect */}
           <button
             onClick={() => { disconnect(); setMenuOpen(false); }}
-            className="w-full flex items-center gap-2 px-4 py-3 text-xs font-semibold text-red-500 transition-colors"
-            style={{ background: "transparent" }}
-            onMouseEnter={e => (e.currentTarget.style.background = "rgba(239,68,68,0.08)")}
+            className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold transition-colors rounded-b-[11px]"
+            style={{ color: "#E25C5C", background: "transparent" }}
+            onMouseEnter={e => (e.currentTarget.style.background = "rgba(226,92,92,0.08)")}
             onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
           >
             <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -288,25 +287,15 @@ type ConnectButtonProps = {
 
 function ConnectButton({ lang, onOpenConnect }: ConnectButtonProps) {
   return (
-    <span className="inline-flex rounded-xl p-px" style={{ background: "var(--ctrl-border)" }}>
-      <button
-        onClick={onOpenConnect}
-        className="group relative overflow-hidden flex items-center gap-1.5 px-3 py-2 rounded-[calc(0.75rem-1px)] transition-all active:scale-95"
-        style={{
-          background: "var(--ctrl-fill)",
-          boxShadow: "var(--control-shadow)",
-          color: "var(--control-text)",
-        }}
-      >
-        <span aria-hidden className="pointer-events-none absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" />
-        <span className="relative z-10 flex items-center gap-1.5">
-          {ICON_WALLET}
-          <span className="text-xs font-bold uppercase tracking-widest">
-            {lang === "ru" ? "Войти" : "Connect"}
-          </span>
-        </span>
-      </button>
-    </span>
+    <button
+      onClick={onOpenConnect}
+      className="btn-sticker-primary flex items-center gap-1.5 px-4 py-2"
+    >
+      {ICON_WALLET}
+      <span className="text-xs font-bold uppercase tracking-widest">
+        {lang === "ru" ? "Войти" : "Connect"}
+      </span>
+    </button>
   );
 }
 

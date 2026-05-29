@@ -30,7 +30,9 @@ async function persistStatus(key: string, status: JobStatus) {
 
 async function loadSeedData(key: string): Promise<CoinResult[]> {
   const existing = await readMarketJobState(key);
-  return existing.state === "done" ? existing.data : [];
+  if (existing.state === "done") return existing.data;
+  if (existing.state === "running" && existing.partial && existing.partial.length > 0) return existing.partial;
+  return [];
 }
 
 async function fetchTrendingIds(): Promise<Set<string>> {
@@ -131,7 +133,7 @@ async function runHistoricalJob(dateKey: string, dayStartTs: number, seedData: C
 
   for (let i = 0; i < missingPids.length; i++) {
     const pid = missingPids[i];
-    await persistStatus(key, { state: "running", progress: resultMap.size, total, startedAt });
+    await persistStatus(key, { state: "running", progress: resultMap.size, total, startedAt, partial: Array.from(resultMap.values()) });
     const data = await fetchCoinHistorical(CGK_IDS[pid], dayStartTs, dayEndTs);
     if (data) {
       const coin = parseCoinData(pid, data);
@@ -143,7 +145,7 @@ async function runHistoricalJob(dateKey: string, dayStartTs: number, seedData: C
   // Retry missing coins once
   const missing = CGK_IDS.map((_, pid) => pid).filter(pid => !resultMap.has(pid));
   if (missing.length > 0) {
-    await persistStatus(key, { state: "running", progress: resultMap.size, total, startedAt });
+    await persistStatus(key, { state: "running", progress: resultMap.size, total, startedAt, partial: Array.from(resultMap.values()) });
     for (let i = 0; i < missing.length; i++) {
       const pid = missing[i];
       await delay(CGK_DELAY_MS * 2);
@@ -152,7 +154,7 @@ async function runHistoricalJob(dateKey: string, dayStartTs: number, seedData: C
         const coin = parseCoinData(pid, data);
         if (coin) resultMap.set(pid, coin);
       }
-      await persistStatus(key, { state: "running", progress: resultMap.size, total, startedAt });
+      await persistStatus(key, { state: "running", progress: resultMap.size, total, startedAt, partial: Array.from(resultMap.values()) });
     }
   }
 

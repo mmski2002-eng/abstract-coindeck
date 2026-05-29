@@ -1024,12 +1024,12 @@ export function AdminTab({
             <div className="text-xs font-semibold text-cyan-300/80">{lang === "ru" ? "URI изображений NFT" : "NFT image URIs"}</div>
             <div className="flex gap-2 items-center">
               <label className="text-xs text-zinc-400 w-16 shrink-0">{lang === "ru" ? "Карта" : "Card"}</label>
-              <input type="text" placeholder="https://..." id="admin-uri-card" defaultValue={baseUris.card}
+              <input type="text" placeholder="https://..." id="admin-uri-card" key={baseUris.card} defaultValue={baseUris.card}
                 className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white font-mono placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-white/20" />
             </div>
             <div className="flex gap-2 items-center">
               <label className="text-xs text-zinc-400 w-16 shrink-0">{lang === "ru" ? "Сундук" : "Chest"}</label>
-              <input type="text" placeholder="https://..." id="admin-uri-chest" defaultValue={baseUris.chest}
+              <input type="text" placeholder="https://..." id="admin-uri-chest" key={baseUris.chest} defaultValue={baseUris.chest}
                 className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white font-mono placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-white/20" />
             </div>
             <div className="flex gap-2 items-center">

@@ -220,6 +220,7 @@ function Inner({
     walletAccount,
     walletSignMessage: signMessageAsync,
     tournamentStartTs: tnState?.startTimestamp ?? null,
+    wagmiConfig,
   });
 
   const isAdmin = !!accountAddress && (

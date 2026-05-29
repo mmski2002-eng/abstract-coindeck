@@ -10,11 +10,18 @@ import { Moon, Shield, Store, Sun, TrendingUp, Trophy, Wallet } from "lucide-rea
 type Tab = "roster" | "marketplace" | "tournament" | "rankings" | "admin";
 type Theme = "light" | "dark";
 
-const TICKER_ITEMS = [
+const TICKER_DEFAULT = [
   { symbol: "BTC", price: "$109,482", change: "+2.41%" },
   { symbol: "ETH", price: "$5,864", change: "+1.18%" },
   { symbol: "SOL", price: "$214.77", change: "-0.62%" },
   { symbol: "BNB", price: "$1,024.55", change: "+0.93%" },
+];
+
+const TICKER_IDS: [string, string][] = [
+  ["bitcoin", "BTC"],
+  ["ethereum", "ETH"],
+  ["solana", "SOL"],
+  ["binancecoin", "BNB"],
 ];
 
 function MergeRow({
@@ -76,6 +83,7 @@ export function MarketingHome() {
   const [tourActive, setTourActive] = useState(false);
   const [tourDemoMode, setTourDemoMode] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const [tickerItems, setTickerItems] = useState(TICKER_DEFAULT);
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof document === "undefined") return "light";
     const current = document.documentElement.dataset.theme;
@@ -163,6 +171,26 @@ export function MarketingHome() {
     } catch {}
   }, []);
 
+  useEffect(() => {
+    const ids = TICKER_IDS.map(([id]) => id).join(",");
+    fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`)
+      .then(r => r.json())
+      .then((data: Record<string, { usd: number; usd_24h_change: number }>) => {
+        const items = TICKER_IDS.map(([id, symbol]) => {
+          const d = data[id];
+          if (!d) return TICKER_DEFAULT.find(t => t.symbol === symbol) ?? TICKER_DEFAULT[0];
+          const price = d.usd >= 1000
+            ? "$" + d.usd.toLocaleString("en-US", { maximumFractionDigits: 0 })
+            : "$" + d.usd.toLocaleString("en-US", { maximumFractionDigits: 2 });
+          const ch = d.usd_24h_change;
+          const change = (ch >= 0 ? "+" : "") + ch.toFixed(2) + "%";
+          return { symbol, price, change };
+        });
+        setTickerItems(items);
+      })
+      .catch(() => {});
+  }, []);
+
   const prevIsAdmin = React.useRef(isAdmin);
   useEffect(() => {
     const prev = prevIsAdmin.current;
@@ -185,11 +213,7 @@ export function MarketingHome() {
 
   return (
     <div className="noise min-h-screen" style={{ color: "var(--foreground)" }}>
-      <div aria-hidden className="pointer-events-none fixed inset-0 z-0" style={{
-        background: isDark
-          ? "linear-gradient(to bottom, #05061a 0%, #05061a 65%, #060e22 72%, #050c1c 88%, #050c1c 90%, #2a1a05 90%, #1a1005 100%)"
-          : "linear-gradient(to bottom, #87CEEB 0%, #87CEEB 65%, #0288D1 72%, #0277BD 88%, #0277BD 90%, #C8A56A 90%, #DEB887 100%)"
-      }} />
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-0" style={{ background: "var(--page-gradient)" }} />
 
       <style>{`
         @keyframes sky-drift {
@@ -203,8 +227,7 @@ export function MarketingHome() {
       `}</style>
 
       {/* Дневное небо */}
-      {!isDark && (
-        <div aria-hidden className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
+      <div aria-hidden className="sky-day pointer-events-none fixed inset-0 z-[1] overflow-hidden">
           <div style={{ position: "absolute", top: "16%", animation: "sky-drift 195s linear infinite", animationDelay: "-30s" }}>
             <div style={{ width: 64, height: 64, borderRadius: "50%", background: "radial-gradient(circle at 40% 40%, #FFF176, #FFD600)", boxShadow: "0 0 40px 14px rgba(255,214,0,0.45)" }} />
           </div>
@@ -229,11 +252,9 @@ export function MarketingHome() {
             </svg>
           </div>
         </div>
-      )}
 
       {/* Ночное небо */}
-      {isDark && (
-        <div aria-hidden className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
+      <div aria-hidden className="sky-night pointer-events-none fixed inset-0 z-[1] overflow-hidden">
           {/* Луна-полумесяц */}
           <div style={{ position: "absolute", top: "14%", animation: "sky-drift 220s linear infinite", animationDelay: "-50s" }}>
             <svg width="64" height="64" viewBox="0 0 64 64">
@@ -241,7 +262,6 @@ export function MarketingHome() {
               <circle cx="44" cy="24" r="24" fill="#05061a" />
             </svg>
           </div>
-          {/* Звёзды */}
           {([
             [8,6,1.8,0],[15,18,1.2,2.1],[24,9,2,0.8],[33,4,1.4,3.5],[41,22,1,1.6],
             [50,11,1.6,4.2],[58,7,1.2,0.3],[66,19,2.2,2.8],[74,3,1,1.1],[82,14,1.5,3.9],
@@ -260,7 +280,6 @@ export function MarketingHome() {
             }} />
           ))}
         </div>
-      )}
 
       <div aria-hidden className="pointer-events-none fixed left-0 top-20 bottom-0 z-[2] hidden w-[22vw] min-w-[200px] max-w-[340px] lg:block">
         <img
@@ -449,7 +468,7 @@ export function MarketingHome() {
 
       <div className="sticky top-16 z-[15] overflow-hidden border-b" style={{ borderColor: "var(--header-border)", background: "var(--ticker-bg)" }}>
         <div className="ticker-marquee flex min-w-max items-center gap-4 px-6 py-1.5">
-          {[...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS].map((item, idx) => {
+          {[...tickerItems, ...tickerItems, ...tickerItems].map((item, idx) => {
             const positive = item.change.startsWith("+");
             return (
               <div key={`${item.symbol}-${idx}`} className="flex items-center gap-3 rounded-full px-4 py-1.5" style={{ border: "1px solid var(--ticker-pill-border)", background: "var(--ticker-pill-bg)" }}>

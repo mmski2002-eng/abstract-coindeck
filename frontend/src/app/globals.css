@@ -29,6 +29,7 @@
 
   --background: #f4f5f7;
   --foreground: #16181d;
+  --page-gradient: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 65%, #0288D1 72%, #0277BD 88%, #0277BD 90%, #C8A56A 90%, #DEB887 100%);
 
   --card:      rgba(255,255,255,0.95);
   --card-2:    #f4f5f7;
@@ -148,6 +149,7 @@ html[data-theme="dark"] {
   --foreground: #ffffff;
   --card: rgba(33,33,36,0.95);
   --card-2: #1f1f1f;
+  --page-gradient: linear-gradient(to bottom, #05061a 0%, #05061a 65%, #060e22 72%, #050c1c 88%, #050c1c 90%, #2a1a05 90%, #1a1005 100%);
   --surface: rgba(20,20,21,0.9);
   --surface-2: rgba(23,23,24,0.96);
   --border: #262627;
@@ -511,6 +513,12 @@ body {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+
+/* ── Sky day/night toggle ────────────────────────────────────────────── */
+.sky-day  { display: block; }
+.sky-night { display: none; }
+html[data-theme="dark"] .sky-day  { display: none; }
+html[data-theme="dark"] .sky-night { display: block; }
 
 /* ── Light theme: nav-tab-active solid bg ────────────────────────────── */
 html[data-theme="light"] .nav-tab-active {

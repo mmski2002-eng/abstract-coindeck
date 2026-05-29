@@ -170,7 +170,40 @@ const COIN_DECK_NFT_VIEW_ABI = [
   { name: "chests", type: "function", stateMutability: "view", inputs: [{ name: "", type: "uint256" }], outputs: [
     { name: "chestType", type: "uint8" },
   ]},
+  { name: "cardBaseUri",  type: "function", stateMutability: "view", inputs: [], outputs: [{ type: "string" }] },
+  { name: "chestBaseUri", type: "function", stateMutability: "view", inputs: [], outputs: [{ type: "string" }] },
 ] as const;
+
+async function evmCall(rpc: string, contract: string, selector: string): Promise<string> {
+  const res = await fetch(rpc, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", method: "eth_call", params: [{ to: contract, data: selector }, "latest"], id: 1 }),
+  });
+  const json = await res.json() as { result?: string; error?: unknown };
+  if (json.error) { console.error("[evmCall] RPC error:", json.error); return ""; }
+  const result = json.result ?? "";
+  if (!result || result === "0x") return "";
+  const hex = result.slice(2);
+  const len = parseInt(hex.slice(64, 128), 16);
+  const bytes = Uint8Array.from((hex.slice(128, 128 + len * 2).match(/.{2}/g) ?? []).map(b => parseInt(b, 16)));
+  return new TextDecoder().decode(bytes);
+}
+
+export async function readBaseUris(_config?: Config): Promise<{ card: string; chest: string }> {
+  const addrs = getRuntimeProjectAddresses();
+  const rpc = addrs.restUrl;
+  const contract = addrs.coinDeckNFT;
+  try {
+    const [card, chest] = await Promise.all([
+      evmCall(rpc, contract, "0x2a24b46f"),
+      evmCall(rpc, contract, "0x27a24411"),
+    ]);
+    return { card, chest };
+  } catch {
+    return { card: "", chest: "" };
+  }
+}
 
 export async function readEvmChestPrices(config: Config): Promise<{ wooden: bigint; iron: bigint; silver: bigint }> {
   const addrs = getRuntimeProjectAddresses();

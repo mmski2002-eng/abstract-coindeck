@@ -7,6 +7,8 @@ import { getErrorMessage } from "../utils";
 import { buildAdminActionMessage, buildWalletFullMessage, stableStringify, MARKET_DATA_PARSE_ACTION } from "@/lib/adminAuth";
 import { calcOraclePoints } from "@/lib/oracleScoring";
 import { buildMarketDataQuery, resolveOracleWindow } from "@/lib/oracleWindow";
+import { readBaseUris } from "@/lib/evmContracts";
+import type { Config } from "@wagmi/core";
 
 interface Deps {
   submitTx: (p: TransactionPayload, opts?: TxOptions) => Promise<void>;
@@ -16,9 +18,10 @@ interface Deps {
   walletAccount: { publicKey?: unknown } | null | undefined;
   walletSignMessage: (opts: { message: string; nonce: string }) => Promise<unknown>;
   tournamentStartTs?: number | null;
+  wagmiConfig: Config;
 }
 
-export function useAdminLogic({ submitTx, refreshTournament, restUrl, moduleAddress, walletAccount, walletSignMessage, tournamentStartTs }: Deps) {
+export function useAdminLogic({ submitTx, refreshTournament, restUrl, moduleAddress, walletAccount, walletSignMessage, tournamentStartTs, wagmiConfig }: Deps) {
   function mkStats(): HeroStats { return { priceChg: 0, vol24h: 0, high24h: 0, low24h: 0, tempRatio: 0, hype: false }; }
   function finiteOrZero(value: number): number { return Number.isFinite(value) ? value : 0; }
   function normalizePublicKey(value: unknown): string {
@@ -294,7 +297,7 @@ export function useAdminLogic({ submitTx, refreshTournament, restUrl, moduleAddr
         view<[unknown, string, string, string, string]>("admin_control::get_withdrawal_policy"),
         view<[unknown, unknown]>("admin_control::get_epoch_guard"),
         view<[unknown, unknown, unknown]>("admin_control::get_pending_actions"),
-        view<[string, string]>("fantasy_league::get_base_uris"),
+        readBaseUris(wagmiConfig).catch(() => null),
         view<string[]>("fantasy_league::get_admins"),
         view<[string[], string[]]>("admin_control::get_role_list"),
       ]);
@@ -313,7 +316,7 @@ export function useAdminLogic({ submitTx, refreshTournament, restUrl, moduleAddr
         }));
       }
 
-      if (withdrawPolicy) {
+      if (withdrawPolicy && Array.isArray(withdrawPolicy)) {
         const [enabled, perTxLimit, dailyLimit, spentToday, dayIndex] = withdrawPolicy;
         setGovernancePolicy((prev) => ({
           ...prev,
@@ -325,7 +328,7 @@ export function useAdminLogic({ submitTx, refreshTournament, restUrl, moduleAddr
         }));
       }
 
-      if (epochGuard) {
+      if (epochGuard && Array.isArray(epochGuard)) {
         const [freezeDuringEpoch, epochActive] = epochGuard;
         setGovernancePolicy((prev) => ({
           ...prev,
@@ -346,9 +349,7 @@ export function useAdminLogic({ submitTx, refreshTournament, restUrl, moduleAddr
         setPendingAdminActions(next);
       }
 
-      if (Array.isArray(uris) && uris.length >= 2) {
-        setBaseUris({ card: String(uris[0] ?? ""), chest: String(uris[1] ?? "") });
-      }
+      if (uris) setBaseUris(uris);
       const normalizedAdmins = singleReturnVector(admins)
         .map((item) => String(item))
         .filter((addr) => addr.length > 0);

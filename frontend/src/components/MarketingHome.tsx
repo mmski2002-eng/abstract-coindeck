@@ -185,19 +185,96 @@ export function MarketingHome() {
 
   return (
     <div className="noise min-h-screen" style={{ color: "var(--foreground)" }}>
-      <div aria-hidden className="pointer-events-none fixed left-0 top-20 bottom-0 z-[1] hidden w-[22vw] min-w-[200px] max-w-[340px] lg:block">
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-0" style={{
+        background: isDark
+          ? "linear-gradient(to bottom, #05061a 0%, #05061a 65%, #060e22 72%, #050c1c 88%, #050c1c 90%, #2a1a05 90%, #1a1005 100%)"
+          : "linear-gradient(to bottom, #87CEEB 0%, #87CEEB 65%, #0288D1 72%, #0277BD 88%, #0277BD 90%, #C8A56A 90%, #DEB887 100%)"
+      }} />
+
+      <style>{`
+        @keyframes sky-drift {
+          from { transform: translateX(-300px); }
+          to   { transform: translateX(calc(100vw + 300px)); }
+        }
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.15; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.3); }
+        }
+      `}</style>
+
+      {/* Дневное небо */}
+      {!isDark && (
+        <div aria-hidden className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
+          <div style={{ position: "absolute", top: "16%", animation: "sky-drift 195s linear infinite", animationDelay: "-30s" }}>
+            <div style={{ width: 64, height: 64, borderRadius: "50%", background: "radial-gradient(circle at 40% 40%, #FFF176, #FFD600)", boxShadow: "0 0 40px 14px rgba(255,214,0,0.45)" }} />
+          </div>
+          <div style={{ position: "absolute", top: "22%", animation: "sky-drift 135s linear infinite", animationDelay: "-15s" }}>
+            <svg width="180" height="80" viewBox="0 0 180 80" fill="white" opacity="0.92">
+              <ellipse cx="90" cy="62" rx="82" ry="24" /><ellipse cx="60" cy="48" rx="44" ry="32" /><ellipse cx="105" cy="42" rx="52" ry="36" /><ellipse cx="140" cy="54" rx="36" ry="26" />
+            </svg>
+          </div>
+          <div style={{ position: "absolute", top: "33%", animation: "sky-drift 105s linear infinite", animationDelay: "-60s" }}>
+            <svg width="130" height="60" viewBox="0 0 130 60" fill="white" opacity="0.85">
+              <ellipse cx="65" cy="46" rx="60" ry="18" /><ellipse cx="42" cy="34" rx="32" ry="24" /><ellipse cx="78" cy="30" rx="38" ry="27" /><ellipse cx="105" cy="40" rx="24" ry="17" />
+            </svg>
+          </div>
+          <div style={{ position: "absolute", top: "46%", animation: "sky-drift 83s linear infinite", animationDelay: "-38s" }}>
+            <svg width="100" height="48" viewBox="0 0 100 48" fill="white" opacity="0.78">
+              <ellipse cx="50" cy="36" rx="46" ry="15" /><ellipse cx="32" cy="26" rx="26" ry="19" /><ellipse cx="62" cy="22" rx="30" ry="22" /><ellipse cx="82" cy="32" rx="20" ry="14" />
+            </svg>
+          </div>
+          <div style={{ position: "absolute", top: "12%", animation: "sky-drift 165s linear infinite", animationDelay: "-98s" }}>
+            <svg width="110" height="50" viewBox="0 0 110 50" fill="white" opacity="0.7">
+              <ellipse cx="55" cy="38" rx="50" ry="16" /><ellipse cx="35" cy="28" rx="28" ry="21" /><ellipse cx="68" cy="24" rx="34" ry="24" /><ellipse cx="90" cy="34" rx="20" ry="15" />
+            </svg>
+          </div>
+        </div>
+      )}
+
+      {/* Ночное небо */}
+      {isDark && (
+        <div aria-hidden className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
+          {/* Луна-полумесяц */}
+          <div style={{ position: "absolute", top: "14%", animation: "sky-drift 220s linear infinite", animationDelay: "-50s" }}>
+            <svg width="64" height="64" viewBox="0 0 64 64">
+              <circle cx="32" cy="32" r="28" fill="#FFD633" />
+              <circle cx="44" cy="24" r="24" fill="#05061a" />
+            </svg>
+          </div>
+          {/* Звёзды */}
+          {([
+            [8,6,1.8,0],[15,18,1.2,2.1],[24,9,2,0.8],[33,4,1.4,3.5],[41,22,1,1.6],
+            [50,11,1.6,4.2],[58,7,1.2,0.3],[66,19,2.2,2.8],[74,3,1,1.1],[82,14,1.5,3.9],
+            [89,8,1.8,0.7],[95,20,1,2.3],[7,35,1.4,4.8],[19,42,1.2,1.4],[29,30,1.8,3.1],
+            [38,50,1,0.6],[47,38,2,2.6],[55,44,1.3,4.1],[63,28,1.6,1.9],[71,55,1,3.3],
+            [78,40,1.8,0.4],[85,32,1.2,2.9],[92,48,1.5,1.7],[13,58,1,4.5],[53,60,1.4,3.0],
+          ] as [number,number,number,number][]).map(([x, y, r, delay], i) => (
+            <div key={i} style={{
+              position: "absolute",
+              left: `${x}%`, top: `${y}%`,
+              width: r * 2, height: r * 2,
+              borderRadius: "50%",
+              background: "white",
+              animation: `twinkle ${2.5 + (i % 4) * 0.7}s ease-in-out infinite`,
+              animationDelay: `${delay}s`,
+            }} />
+          ))}
+        </div>
+      )}
+
+      <div aria-hidden className="pointer-events-none fixed left-0 top-20 bottom-0 z-[2] hidden w-[22vw] min-w-[200px] max-w-[340px] lg:block">
         <img
           src="/penguin-left.webp"
           alt=""
-          className="absolute left-0 bottom-0 h-full w-auto max-w-none opacity-72"
+          className="absolute left-0 bottom-0 h-full w-auto max-w-none opacity-100"
           style={{ filter: isDark ? "brightness(0.55) saturate(0.6)" : "brightness(0.85) saturate(1)" }}
         />
       </div>
-      <div aria-hidden className="pointer-events-none fixed right-0 top-20 bottom-0 z-[1] hidden w-[22vw] min-w-[200px] max-w-[340px] lg:block">
+      <div aria-hidden className="pointer-events-none fixed right-0 top-20 bottom-0 z-[2] hidden w-[22vw] min-w-[200px] max-w-[340px] lg:block">
         <img
           src="/fonpepe-right.webp"
           alt=""
-          className="absolute right-0 bottom-0 h-full w-auto max-w-none opacity-72"
+          className="absolute right-0 bottom-0 h-full w-auto max-w-none opacity-100"
           style={{ filter: isDark ? "brightness(0.55) saturate(0.6)" : "brightness(0.85) saturate(1)" }}
         />
       </div>
@@ -270,11 +347,11 @@ export function MarketingHome() {
                   href="https://x.com/CoinDeck"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative flex h-8 w-8 items-center justify-center rounded-[calc(0.75rem-1px)] transition-all active:scale-95"
+                  className="group relative overflow-hidden flex h-8 w-8 items-center justify-center rounded-[calc(0.75rem-1px)] transition-all active:scale-95"
                   style={{ background: "var(--ctrl-fill)", boxShadow: "var(--control-shadow)", color: "var(--control-text)" }}
                   aria-label="X (Twitter)"
                 >
-                  <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]"><span aria-hidden className="absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" /></span>
+                  <span aria-hidden className="pointer-events-none absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" />
                   <span className="relative z-10 flex items-center justify-center">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.733-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -288,11 +365,11 @@ export function MarketingHome() {
                 <button
                   type="button"
                   onClick={() => setTheme((prev) => (prev === "dark" ? "light" : "dark"))}
-                  className="group relative flex h-8 w-8 items-center justify-center rounded-[calc(0.75rem-1px)] transition-all active:scale-95"
+                  className="group relative overflow-hidden flex h-8 w-8 items-center justify-center rounded-[calc(0.75rem-1px)] transition-all active:scale-95"
                   style={{ background: "var(--ctrl-fill)", boxShadow: "var(--control-shadow)", color: "var(--control-text)" }}
                   aria-label={lang === "ru" ? "Переключить тему" : "Toggle theme"}
                 >
-                  <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]"><span aria-hidden className="absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" /></span>
+                  <span aria-hidden className="pointer-events-none absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" />
                   <span className="relative z-10 flex items-center justify-center">
                     {themeReady && isDark ? <Moon size={15} /> : <Sun size={15} />}
                   </span>
@@ -300,11 +377,11 @@ export function MarketingHome() {
               </span>
 
               <div className="relative" ref={langRef}>
-              <span className="inline-flex rounded-xl p-px" style={{ background: "var(--ctrl-border)" }}>
+              <span className="inline-flex overflow-hidden rounded-xl p-px" style={{ background: "var(--ctrl-border)" }}>
               <button
                 type="button"
                 onClick={() => setLangOpen((v) => !v)}
-                className="group relative flex items-center gap-1.5 rounded-[calc(0.75rem-1px)] px-3 py-1.5 transition-all active:scale-95"
+                className="group relative overflow-hidden flex items-center gap-1.5 rounded-[calc(0.75rem-1px)] px-3 py-1.5 transition-all active:scale-95"
                 style={{
                   background: "var(--ctrl-fill)",
                   boxShadow: langOpen ? "var(--control-shadow-active)" : "var(--control-shadow)",
@@ -312,7 +389,7 @@ export function MarketingHome() {
                 }}
                 aria-label="Switch language"
               >
-                <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]"><span aria-hidden className="absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" /></span>
+                <span aria-hidden className="pointer-events-none absolute inset-0 translate-x-[calc(100%+2px)] group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" />
                 <span className="relative z-10 flex items-center gap-1.5">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="10" />
@@ -364,7 +441,7 @@ export function MarketingHome() {
               )}
               </div>
             </div>
-            <div id="wallet-cta" />
+            <div id="wallet-cta" className="flex items-center" />
           </div>
         </div>
 

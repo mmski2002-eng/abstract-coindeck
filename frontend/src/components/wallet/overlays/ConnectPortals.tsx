@@ -92,16 +92,14 @@ function WalletButton({ lang }: { lang: string }) {
       <span className="inline-flex rounded-xl p-px" style={{ background: "var(--ctrl-border)" }}>
         <button
           onClick={() => setMenuOpen(v => !v)}
-          className="group relative flex items-center gap-1.5 px-3 py-2 rounded-[calc(0.75rem-1px)] transition-all active:scale-95"
+          className="group relative overflow-hidden flex items-center gap-1.5 px-3 py-2 rounded-[calc(0.75rem-1px)] transition-all active:scale-95"
           style={{
             background: "var(--ctrl-fill)",
             boxShadow: menuOpen ? "var(--control-shadow-active)" : "var(--control-shadow)",
             color: wrongNetwork ? undefined : "var(--control-text)",
           }}
         >
-          <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
-            <span aria-hidden className="absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" />
-          </span>
+          <span aria-hidden className="pointer-events-none absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" />
           {wrongNetwork ? (
             <span className="relative z-10 flex items-center gap-1.5">
               {ICON_WALLET}
@@ -293,16 +291,14 @@ function ConnectButton({ lang, onOpenConnect }: ConnectButtonProps) {
     <span className="inline-flex rounded-xl p-px" style={{ background: "var(--ctrl-border)" }}>
       <button
         onClick={onOpenConnect}
-        className="group relative flex items-center gap-1.5 px-3 py-2 rounded-[calc(0.75rem-1px)] transition-all active:scale-95"
+        className="group relative overflow-hidden flex items-center gap-1.5 px-3 py-2 rounded-[calc(0.75rem-1px)] transition-all active:scale-95"
         style={{
           background: "var(--ctrl-fill)",
           boxShadow: "var(--control-shadow)",
           color: "var(--control-text)",
         }}
       >
-        <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
-          <span aria-hidden className="absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" />
-        </span>
+        <span aria-hidden className="pointer-events-none absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] bg-[#00FF66]" />
         <span className="relative z-10 flex items-center gap-1.5">
           {ICON_WALLET}
           <span className="text-xs font-bold uppercase tracking-widest">
@@ -331,7 +327,7 @@ export function ConnectPortals({ lang, ctaHost }: Props) {
 
   return (
     <>
-      {ctaHost ? createPortal(button, ctaHost) : button}
+      {ctaHost ? createPortal(button, ctaHost) : null}
       <ConnectModal lang={lang} open={connectOpen} onClose={() => setConnectOpen(false)} />
     </>
   );

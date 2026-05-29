@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useAccount, useChainId, useConfig, useSwitchChain, useSignMessage } from "wagmi";
 import { abstractTestnet } from "viem/chains";
 import { useI18n } from "@/components/LanguageProvider";
@@ -101,7 +101,7 @@ function Inner({
 
   const [ctaHost, setCtaHost] = useState<HTMLElement | null>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = document.getElementById("wallet-cta");
     setCtaHost(el instanceof HTMLElement ? el : null);
   }, []);

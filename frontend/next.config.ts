@@ -22,9 +22,9 @@ function buildContentSecurityPolicy() {
     "img-src 'self' data: blob: https://assets.coingecko.com",
     "media-src 'self' blob:",
     "manifest-src 'self'",
-    "frame-src 'self'",
+    "frame-src 'self' https://auth.privy.io https://*.privy.io",
     "worker-src 'self' blob:",
-    "connect-src 'self' https://api.testnet.abs.xyz https://api.mainnet.abs.xyz wss://api.testnet.abs.xyz wss://api.mainnet.abs.xyz https://api.coingecko.com https://assets.coingecko.com",
+    "connect-src 'self' https://api.testnet.abs.xyz https://api.mainnet.abs.xyz wss://api.testnet.abs.xyz wss://api.mainnet.abs.xyz https://api.coingecko.com https://assets.coingecko.com https://auth.privy.io https://*.privy.io wss://auth.privy.io",
   ].join("; ");
 }
 

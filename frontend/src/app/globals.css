@@ -518,6 +518,12 @@ html[data-theme="light"] .nav-tab-active {
   animation: activeTabColorWave 10s ease-in-out infinite !important;
 }
 
+/* ── Dark theme: nav-tab-active solid bg ─────────────────────────────── */
+html[data-theme="dark"] .nav-tab-active {
+  background: rgba(0,20,30,0.92) !important;
+  animation: activeTabColorWave 10s ease-in-out infinite !important;
+}
+
 /* ── Light theme: adapt dark-optimised transparent utilities ─────────── */
 html[data-theme="light"] .bg-white\/5,
 html[data-theme="light"] .bg-white\/\[0\.02\],

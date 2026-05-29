@@ -39,7 +39,7 @@
   --sky-soft:   #DCEEF7;
   --lime-pop:   #88FC00;
   --paper:      #F4EFE2;
-  --paper-2:    #FBF7EC;
+  --paper-2:    rgba(251,247,236,0.90);
   --paper-3:    #FFFFFF;
   --sunken:     #E9E2D1;
   --shadow-sticker:    4px 4px 0 #0F1115;
@@ -113,6 +113,13 @@
   --info-block-shell: rgba(255,255,255,0.85);
   --info-block-shell-border: rgba(22,24,29,0.14);
   --info-block-shell-shadow: none;
+  --info-shell-shadow: var(--ink);
+  --card-shadow: var(--ink);
+  --brand-stroke: #0F1115;
+  --header-btn-color: var(--ink);
+  --chest-buy-btn-text: #1B232C;
+  --no-eggs-text: #1B232C;
+  --progress-filled: #1B232C;
   --info-block-card: rgba(245,246,248,0.85);
   --info-block-card-border: rgba(22,24,29,0.14);
   --info-block-card-shadow: inset 0 1px 0 rgba(255,255,255,0.75), 0 12px 20px -14px rgba(22,24,29,0.16);
@@ -165,14 +172,21 @@
 
 html[data-theme="dark"] {
   color-scheme: dark;
+  --info-shell-shadow: #1B232C;
+  --card-shadow: #1B232C;
+  --brand-stroke: #E8EEF5;
+  --header-btn-color: #E8EEF5;
+  --chest-buy-btn-text: var(--ink);
+  --no-eggs-text: #D9D3C2;
+  --progress-filled: #9AA3AE;
 
   /* ── PRIMER dark overrides ─────────────────────────────────────────── */
   --paper:   #0E141A;
-  --paper-2: #141B23;
+  --paper-2: rgba(20,27,35,0.95);
   --paper-3: #1B232C;
   --sunken:  #0A0F14;
   --ink-2:   #E8EEF5;
-  --ink-3:   #9AA3AE;
+  --ink-3:   #1B232C;
 
   --background: #171718;
   --foreground: #ffffff;
@@ -186,7 +200,7 @@ html[data-theme="dark"] {
     radial-gradient(720px 320px at 50% -12%, rgba(255,255,255,0.025), transparent 58%),
     linear-gradient(180deg, #171718 0%, #141415 54%, #121213 100%);
   --grid-line: rgba(255,255,255,0.05);
-  --header-bg: rgba(23,23,24,0.92);
+  --header-bg: #1B232C;
   --header-border: #262627;
   --header-muted: #a5adb8;
   --hover-surface: rgba(255,255,255,0.06);
@@ -197,7 +211,7 @@ html[data-theme="dark"] {
   --panel-text: #ffffff;
   --panel-text-muted: #b0b0b0;
   --ticker-bg: rgba(20,20,21,0.5);
-  --ticker-pill-bg: #212124;
+  --ticker-pill-bg: #1B232C;
   --ticker-pill-border: #262627;
   --ticker-symbol: #a5adb8;
   --control-bg: linear-gradient(#050506, #0a0a0b) padding-box, linear-gradient(135deg, rgba(0,240,255,0.55), rgba(176,38,255,0.40)) border-box;
@@ -231,10 +245,10 @@ html[data-theme="dark"] {
   --input-text: #ffffff;
   --input-placeholder: #808080;
   --input-focus: rgba(0,255,102,0.28);
-  --info-block-shell: rgba(21,21,23,0.85);
+  --info-block-shell: rgba(27,35,44,0.90);
   --info-block-shell-border: rgba(237,239,243,0.12);
   --info-block-shell-shadow: 0 22px 46px rgba(0,0,0,0.28);
-  --info-block-card: rgba(25,25,27,0.85);
+  --info-block-card: rgba(27,35,44,0.90);
   --info-block-card-border: rgba(237,239,243,0.14);
   --info-block-card-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 30px rgba(0,0,0,0.20);
   --info-block-glow: linear-gradient(135deg, rgba(0,255,102,0.14), rgba(0,194,215,0.05));
@@ -248,7 +262,7 @@ html[data-theme="dark"] {
   --chest-card-bg: #141B23;
   --chest-card-border: #0F1115;
   --chest-card-shadow: 4px 4px 0 #0F1115;
-  --chest-card-text-muted: #9AA3AE;
+  --chest-card-text-muted: #1B232C;
   --chest-card-text-subtle: #7A828D;
   --chest-card-pill-bg: rgba(255,255,255,0.07);
   --chest-card-pill-border: #0F1115;
@@ -471,6 +485,61 @@ body {
 .anim-glow-pulse     { animation: glow-pulse 4.5s ease-in-out infinite; }
 .anim-sparkle        { animation: sparkle 2.4s ease-in-out infinite; }
 
+/* ── Egg glow + stars ────────────────────────────────────────────────── */
+@keyframes egg-star {
+  0%,100% { opacity: 0; transform: scale(0.2) rotate(0deg); }
+  50%      { opacity: 1; transform: scale(1)   rotate(180deg); }
+}
+.egg-star {
+  position: absolute; pointer-events: none; font-size: 10px; line-height: 1;
+  animation: egg-star ease-in-out infinite;
+}
+@keyframes egg-glow-pulse {
+  0%,100% { filter: drop-shadow(0 0 6px currentColor) drop-shadow(0 0 12px currentColor); }
+  50%      { filter: drop-shadow(0 0 14px currentColor) drop-shadow(0 0 28px currentColor); }
+}
+.egg-glow { animation: egg-glow-pulse 3s ease-in-out infinite; }
+
+/* ── Egg shake + ripple ──────────────────────────────────────────────── */
+@keyframes egg-float-shake {
+  0%   { transform: translateY(0) rotate(0deg); }
+  20%  { transform: translateY(-8px) rotate(-0.5deg); }
+  40%  { transform: translateY(0) rotate(0deg); }
+  60%  { transform: translateY(0) rotate(0deg); }
+  62%  { transform: translateY(0) rotate(-6deg); }
+  64%  { transform: translateY(-4px) rotate(7deg); }
+  66%  { transform: translateY(0) rotate(-5deg); }
+  68%  { transform: translateY(-3px) rotate(6deg); }
+  70%  { transform: translateY(0) rotate(-4deg); }
+  72%  { transform: translateY(-2px) rotate(3deg); }
+  74%  { transform: translateY(0) rotate(0deg); }
+  87%  { transform: translateY(-8px) rotate(-0.5deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+@keyframes egg-ripple {
+  0%,  60% { transform: scale(0.3); opacity: 0; }
+  61%       { transform: scale(0.3); opacity: 0.55; }
+  78%       { transform: scale(2.2); opacity: 0; }
+  100%      { transform: scale(2.2); opacity: 0; }
+}
+@keyframes egg-ripple-2 {
+  0%,  62% { transform: scale(0.3); opacity: 0; }
+  63%       { transform: scale(0.3); opacity: 0.4; }
+  81%       { transform: scale(2.6); opacity: 0; }
+  100%      { transform: scale(2.6); opacity: 0; }
+}
+.egg-shake   { animation: egg-float-shake 12s ease-in-out infinite; }
+.egg-ripple  {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 2px solid currentColor; pointer-events: none;
+  animation: egg-ripple 12s ease-out infinite;
+}
+.egg-ripple-2 {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 1.5px solid currentColor; pointer-events: none;
+  animation: egg-ripple-2 12s ease-out infinite;
+}
+
 /* ── Grain texture on card art panel ─────────────────────────────────── */
 .grain::before {
   content: "";
@@ -669,6 +738,12 @@ html[data-theme="light"] .text-white\/70 { color: rgba(22,24,29,0.70) !important
   box-shadow: none;
 }
 .btn-sticker-outline:disabled { opacity: 0.4; cursor: not-allowed; }
+
+html[data-theme="dark"] .btn-no-eggs { color: #D9D3C2 !important; }
+html[data-theme="dark"] .btn-sticker-primary { box-shadow: 4px 4px 0 #1B232C; }
+html[data-theme="dark"] .btn-sticker-primary:hover:not(:disabled) { box-shadow: 2px 2px 0 #1B232C; }
+html[data-theme="dark"] .btn-sticker-outline  { box-shadow: 4px 4px 0 #1B232C; }
+html[data-theme="dark"] .btn-sticker-outline:hover:not(:disabled)  { box-shadow: 2px 2px 0 #1B232C; }
 
 .card-sticker {
   background: var(--paper-2);

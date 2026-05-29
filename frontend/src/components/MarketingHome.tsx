@@ -302,60 +302,86 @@ export function MarketingHome() {
         <div className="mx-auto flex min-h-16 max-w-[1440px] items-center gap-4 px-6 py-2 lg:px-10">
           <div className="hidden shrink-0 xl:flex items-center gap-2.5">
             <div
-              className="font-abs-brand relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-base font-bold"
-              style={{ background: "linear-gradient(135deg, #00CFFF, #00FF47)", boxShadow: "0 0 16px rgba(0,207,255,0.25), inset 0 1px 0 rgba(255,255,255,0.3)" }}
             >
-              <span className="select-none text-black drop-shadow">CD</span>
+              <img src="/logo.webp" alt="logo" style={{ width: 32, height: 32, objectFit: "cover", borderRadius: 8 }} />
             </div>
-            <span className="font-abs-brand text-3xl leading-none font-bold tracking-[0.06em]" style={{ color: "var(--foreground)" }}>
-              CoinDeck
+            <span
+              className="leading-none select-none"
+              style={{
+                fontFamily: "var(--font-titan-one)",
+                fontSize: "2rem",
+                fontWeight: 900,
+                color: "#000000",
+              }}
+            >
+              HEAVYEGGS
             </span>
           </div>
 
           <div className="flex shrink-0 items-center gap-2.5 xl:hidden">
             <div
-              className="font-abs-brand relative flex h-8 w-8 items-center justify-center rounded-lg text-base font-bold"
-              style={{ background: "linear-gradient(135deg, #00CFFF, #00FF47)", boxShadow: "0 0 16px rgba(0,207,255,0.25), inset 0 1px 0 rgba(255,255,255,0.3)" }}
             >
-              <span className="select-none text-black drop-shadow">CD</span>
+              <img src="/logo.webp" alt="logo" style={{ width: 32, height: 32, objectFit: "cover", borderRadius: 8 }} />
             </div>
-            <span className="font-abs-brand text-3xl leading-none font-bold tracking-[0.06em]" style={{ color: "var(--foreground)" }}>
-              CoinDeck
+            <span
+              className="leading-none select-none"
+              style={{
+                fontFamily: "var(--font-titan-one)",
+                fontSize: "2rem",
+                fontWeight: 900,
+                color: "#000000",
+              }}
+            >
+              HEAVYEGGS
             </span>
           </div>
 
-          <nav className="mx-auto hidden min-w-0 flex-shrink items-center gap-1.5 overflow-x-auto scrollbar-hide lg:flex">
-            {tabs.filter(({ adminOnly }) => !adminOnly || isAdmin).map(({ id, ru, en, icon: Icon }) => (
-              <button
-                key={id}
-                id={`tour-tab-${id}`}
-                type="button"
-                onClick={() => { setActiveTab(id); try { localStorage.setItem("active_tab", id); } catch {} }}
-                className={`flex items-center gap-1.5 rounded-md px-3.5 py-1 text-xs font-medium uppercase tracking-wide transition-all ${
-                  activeTab === id ? "nav-tab-active border" :"text-[var(--header-muted)] hover:bg-[var(--hover-surface)] hover:text-[var(--foreground)]"
-                }`}
-                style={{}}
-              >
-                <Icon size={13} strokeWidth={2} />
-                <span>{lang === "ru" ? ru : en}</span>
-              </button>
-            ))}
+          <nav className="mx-auto hidden min-w-0 flex-shrink items-center gap-1.5 overflow-x-auto scrollbar-hide lg:flex" style={{ paddingBottom: 6, marginBottom: -6 }}>
+            {tabs.filter(({ adminOnly }) => !adminOnly || isAdmin).map(({ id, ru, en, icon: Icon }) => {
+              const active = activeTab === id;
+              return (
+                <button
+                  key={id}
+                  id={`tour-tab-${id}`}
+                  type="button"
+                  onClick={() => { setActiveTab(id); try { localStorage.setItem("active_tab", id); } catch {} }}
+                  className="flex items-center gap-1.5 transition-all"
+                  style={{
+                    padding: "6px 14px", whiteSpace: "nowrap",
+                    background: active ? "var(--mint)" : "var(--paper-3)",
+                    color: "var(--header-btn-color)", border: "2.5px solid var(--ink)", borderRadius: 999,
+                    fontSize: 11, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
+                    boxShadow: active ? "4px 4px 0 var(--card-shadow)" : "2px 2px 0 var(--card-shadow)",
+                  }}
+                >
+                  <Icon size={13} strokeWidth={2} />
+                  <span>{lang === "ru" ? ru : en}</span>
+                </button>
+              );
+            })}
           </nav>
 
-          <nav className="mx-auto flex gap-1.5 overflow-x-auto scrollbar-hide lg:hidden">
-            {tabs.filter(({ adminOnly }) => !adminOnly || isAdmin).map(({ id, icon: Icon }) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => { setActiveTab(id); try { localStorage.setItem("active_tab", id); } catch {} }}
-                className={`flex h-8 w-8 items-center justify-center rounded-md transition-all ${
-                  activeTab === id ? "nav-tab-active border" :"text-[var(--header-muted)] hover:bg-[var(--hover-surface)] hover:text-[var(--foreground)]"
-                }`}
-                style={{}}
-              >
-                <Icon size={15} strokeWidth={2} />
-              </button>
-            ))}
+          <nav className="mx-auto flex gap-1.5 overflow-x-auto scrollbar-hide lg:hidden" style={{ paddingBottom: 6, marginBottom: -6 }}>
+            {tabs.filter(({ adminOnly }) => !adminOnly || isAdmin).map(({ id, icon: Icon }) => {
+              const active = activeTab === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => { setActiveTab(id); try { localStorage.setItem("active_tab", id); } catch {} }}
+                  className="flex items-center justify-center transition-all"
+                  style={{
+                    width: 36, height: 36,
+                    background: active ? "var(--mint)" : "var(--paper-3)",
+                    color: "var(--ink)", border: "2.5px solid var(--ink)", borderRadius: 999,
+                    cursor: "pointer",
+                    boxShadow: active ? "4px 4px 0 var(--card-shadow)" : "2px 2px 0 var(--card-shadow)",
+                  }}
+                >
+                  <Icon size={15} strokeWidth={2} />
+                </button>
+              );
+            })}
           </nav>
 
           <div className="ml-auto flex shrink-0 items-center gap-3 lg:ml-0">

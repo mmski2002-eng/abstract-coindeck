@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { Inter, Lora } from "next/font/google";
+import { Inter, Lora, Titan_One } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { SuppressExtensionErrors } from "@/components/SuppressExtensionErrors";
+
+const titanOne = Titan_One({
+  variable: "--font-titan-one",
+  subsets: ["latin"],
+  weight: ["400"],
+});
 
 const lora = Lora({
   variable: "--font-display",
@@ -86,7 +92,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${lora.variable} ${inter.variable} h-full antialiased`}
+      className={`${lora.variable} ${inter.variable} ${titanOne.variable} h-full antialiased`}
       data-theme={initialTheme}
       style={{ colorScheme: initialTheme }}
       suppressHydrationWarning

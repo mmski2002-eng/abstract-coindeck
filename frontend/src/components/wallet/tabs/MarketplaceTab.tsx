@@ -206,7 +206,7 @@ export function MarketplaceTab({
                         <div className="relative flex items-center justify-center w-full h-full">
                           <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 55%, ${brand}22, transparent 70%)` }} />
                           <div className="absolute anim-float" style={{ width: eggW, height: eggH, animationDelay: `${(cardIdx % 3) * -2}s` }}>
-                            <img src="/egg.png" alt="" aria-hidden
+                            <img src="/egg.webp" alt="" aria-hidden
                               className="w-full h-full select-none"
                               style={{ objectFit: "contain", filter: `drop-shadow(0 4px 24px ${brand}50)` }} />
                             {coinIcon && (

@@ -82,169 +82,61 @@ function getRenderableAssetBase(assetBase?: string): string {
   return `http://127.0.0.1:${port}`;
 }
 
-export function buildCardImageResponse(playerId: number, tier: number): Response {
+export async function buildCardImageResponse(playerId: number, tier: number, origin = "https://escape.isgood.host"): Promise<Response> {
   if (playerId < 0 || playerId > 49) return new Response("Not found", { status: 404 });
 
   const ticker = TICKERS[playerId];
-  const name = NAMES[playerId];
-  const brand = BRAND[playerId];
-  const coinImageUrl = CGK + CGK_SLUGS[playerId];
-  const tickerSize = ticker.length <= 3 ? 72 : ticker.length <= 4 ? 58 : 46;
-  const tierColors = [
-    { color: "#9CA3AF", label: "COMMON", grad: "rgba(156,163,175,0.22)" },
-    { color: "#60A5FA", label: "RARE", grad: "rgba(59,130,246,0.28)" },
-    { color: "#C084FC", label: "EPIC", grad: "rgba(168,85,247,0.30)" },
-    { color: "#FBBF24", label: "LEGENDARY", grad: "rgba(245,158,11,0.34)" },
+  const name   = NAMES[playerId];
+
+  const TIER_STYLES = [
+    { fill: "#D9D3C2", label: "COMMON"    },
+    { fill: "#7AC7E8", label: "RARE"      },
+    { fill: "#26C6A8", label: "EPIC"      },
+    { fill: "#FFB800", label: "LEGENDARY" },
   ];
-  const tc = tierColors[Math.min(Math.max(tier, 0), 3)];
+  const ts = TIER_STYLES[Math.min(Math.max(tier, 0), 3)];
+
+  const eggUrl  = `${origin}/egg.png`;
+  const coinUrl = `${origin}/coins/${playerId}_${ticker}.png`;
 
   return new ImageResponse(
     (
-      <div
-        style={{
-          width: 400,
-          height: 400,
-          background: "#0a0c18",
-          borderRadius: 24,
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-          fontFamily: "sans-serif",
-          border: `2px solid ${tc.color}88`,
-          position: "relative",
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: `linear-gradient(180deg, ${tc.grad}, rgba(10,12,24,0.1))`,
-          }}
-        />
-        <div style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at 50% 50%, ${brand}22, transparent 70%)` }} />
-
-        <div
-          style={{
-            height: 52,
-            padding: "14px 14px 0 14px",
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
-          <div style={{ background: "rgba(0,0,0,0.55)", border: `1px solid ${tc.color}77`, borderRadius: 8, padding: "4px 10px", fontSize: 11, fontWeight: 700, color: tc.color, letterSpacing: "0.18em", display: "flex" }}>
-            {tc.label}
+      <div style={{ width: 400, height: 400, background: ts.fill, display: "flex", flexDirection: "column", fontFamily: "sans-serif", border: "3px solid #0F1115", overflow: "hidden" }}>
+        {/* header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 14px 0" }}>
+          <div style={{ background: ts.fill, color: "#0F1115", border: "2.5px solid #0F1115", borderRadius: 999, padding: "5px 14px", fontSize: 12, fontWeight: 800, letterSpacing: "0.15em", display: "flex" }}>
+            {ts.label}
           </div>
-          <div style={{ background: "rgba(0,0,0,0.55)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, padding: "4px 10px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.6)", letterSpacing: "0.1em", display: "flex" }}>
-            MOVEINVESTOR
+          <div style={{ background: ts.fill, color: "#0F1115", border: "2.5px solid #0F1115", borderRadius: 999, padding: "5px 14px", fontSize: 11, fontWeight: 800, letterSpacing: "0.12em", display: "flex" }}>
+            COINDECK
           </div>
         </div>
 
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "relative",
-            overflow: "hidden",
-            zIndex: 1,
-            paddingTop: 6,
-            paddingBottom: 22,
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              width: 252,
-              height: 252,
-              borderRadius: "50%",
-              border: `1.5px dashed ${brand}44`,
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -58%)",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              width: 184,
-              height: 184,
-              borderRadius: "50%",
-              border: `1px solid ${brand}28`,
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -58%)",
-            }}
-          />
-          <img
-            src={coinImageUrl}
-            width={188}
-            height={188}
-            style={{
-              position: "absolute",
-              objectFit: "contain",
-              opacity: 0.24,
-              filter: "blur(5px)",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -58%)",
-            }}
-            alt=""
-          />
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -58%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              minWidth: 180,
-              minHeight: 110,
-              padding: "0 22px",
-              background: `radial-gradient(circle, ${brand}18 0%, rgba(10,12,24,0.18) 62%, transparent 100%)`,
-              borderRadius: 999,
-              boxShadow: `0 0 48px ${brand}22`,
-            }}
-          >
-            <span style={{ fontSize: tickerSize, fontWeight: 900, color: brand, letterSpacing: "-2px", lineHeight: 1, textShadow: `0 0 40px ${brand}99, 0 4px 24px rgba(0,0,0,0.8)`, display: "flex" }}>
-              {ticker}
-            </span>
+        {/* egg + coin stacked via flex */}
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 200, height: 200 }}>
+            {/* egg */}
+            <img src={eggUrl} width={200} height={200} style={{ objectFit: "contain", display: "flex" }} alt="" />
           </div>
         </div>
 
-        <div
-          style={{
-            height: 88,
-            padding: "0 16px 14px 16px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-end",
-            gap: 4,
-            position: "relative",
-            zIndex: 1,
-            background: "linear-gradient(180deg, rgba(10,12,24,0) 0%, rgba(10,12,24,0.74) 24%, rgba(10,12,24,0.96) 100%)",
-          }}
-        >
-          <div style={{ fontSize: 22, fontWeight: 800, color: tc.color, letterSpacing: "-0.5px", display: "flex" }}>
-            {name}
-          </div>
-          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.42)", letterSpacing: "0.14em", textTransform: "uppercase", display: "flex" }}>
-            {ticker} · NFT Card
-          </div>
+        {/* coin overlay row — positioned using negative margin trick */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: -130 }}>
+          <img src={coinUrl} width={68} height={68} style={{ objectFit: "contain", display: "flex" }} alt="" />
         </div>
+        <div style={{ flex: 1 }} />
 
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, ${tc.color}, transparent)` }} />
+        {/* footer */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 4, padding: "0 16px 14px", borderTop: "2.5px solid #0F1115", background: ts.fill, paddingTop: 10 }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: "#0F1115", display: "flex" }}>{name}</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#0F1115", opacity: 0.5, letterSpacing: "0.14em", textTransform: "uppercase", display: "flex" }}>{ticker} · NFT</div>
+        </div>
       </div>
     ),
     {
       width: 400,
       height: 400,
-      headers: { "Cache-Control": "public, max-age=86400, s-maxage=86400" },
+      headers: { "Cache-Control": "public, max-age=3600" },
     },
   );
 }
@@ -279,7 +171,7 @@ export async function buildChestImageResponse(type: number, assetBase?: string):
           {chest.label}
         </div>
         <div style={{ position: "absolute", top: 16, right: 16, background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "4px 12px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.5)", letterSpacing: "0.1em", display: "flex" }}>
-          MOVEINVESTOR
+          COINDECK
         </div>
         <div
           style={{
@@ -333,7 +225,7 @@ export async function buildChestImageResponse(type: number, assetBase?: string):
             {chest.label}
           </div>
           <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.42)", letterSpacing: "0.18em", textTransform: "uppercase", display: "flex" }}>
-            MOVEINVESTOR CHEST
+            COINDECK EGG
           </div>
         </div>
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, ${chest.accent}, transparent)`, display: "flex" }} />

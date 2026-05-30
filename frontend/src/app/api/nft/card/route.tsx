@@ -20,5 +20,7 @@ export async function GET(req: NextRequest) {
   } else {
     playerId = getPlayerIdFromCardPath(pathname);
   }
-  return buildCardImageResponse(playerId, tier);
+  const proto  = req.headers.get("x-forwarded-proto") ?? "https";
+  const host   = req.headers.get("host") ?? "escape.isgood.host";
+  return await buildCardImageResponse(playerId, tier, `${proto}://${host}`);
 }

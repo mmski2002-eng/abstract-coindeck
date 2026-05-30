@@ -28,7 +28,7 @@ export async function GET(
   return NextResponse.json({
     name: `${name} — ${tierLabel}`,
     description: `CoinDeck NFT Card — ${ticker} (${role})`,
-    image: `${origin}/api/nft/card-img-gen/${playerId}/${tier}`,
+    image: `${origin}/cards-anim/${playerId}_${tier}.gif`,
     animation_url: `${origin}/api/nft/card-anim/${playerId}/${tier}`,
     attributes: [
       { trait_type: "Coin", value: name },

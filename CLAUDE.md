@@ -192,7 +192,7 @@ scripts/                 Утилиты (oracle_post.js, daily_lineup_bot.js, et
 
 ## Deployment
 - Server: `216.173.70.241`, domain: `https://escape.isgood.host`
-- PM2 process: `abstract-coindeck` (id=49), port `3003`
+- PM2 process: `abstract-coindeck` (id=5), port `3003`
 - DB: PostgreSQL `abstract`, user `abstract_app`
 - Deploy: build standalone locally → rsync → pm2 restart
 

@@ -210,7 +210,7 @@ export function ChestOpenModal({ lang, modal, onClose, chestOpenQty, setChestOpe
           <div style={{ opacity: animOpacity, transition: "opacity 0.35s", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 400, padding: "40px 24px", gap: 20 }}>
 
             {/* Egg stack + lasta */}
-            <div style={{ position: "relative", width: 220, height: 220, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ position: "relative", width: 330, height: 330, display: "flex", alignItems: "center", justifyContent: "center" }}>
 
               {/* Spotted egg (egg2.webp) — base, fades out as clean egg covers */}
               <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -220,13 +220,13 @@ export function ChestOpenModal({ lang, modal, onClose, chestOpenQty, setChestOpe
                   <span key={i} className="egg-star" style={{ ...pos as CSSProperties, color: t.accent }}>✦</span>
                 ))}
                 <img src="/egg2.webp" alt="" className={txSigned ? "" : "egg-shake egg-glow"}
-                  style={{ width: 130, height: 130, objectFit: "contain", position: "relative", zIndex: 1, color: t.accent }} />
+                  style={{ width: 195, height: 195, objectFit: "contain", position: "relative", zIndex: 1, color: t.accent }} />
               </div>
 
               {/* Clean egg (egg.webp) — fades in over spotted egg during scratch */}
               <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2, opacity: cleanEggOpacity, transition: "opacity 2.8s ease" }}>
                 <img src="/egg.webp" alt=""
-                  style={{ width: 137, height: 137, objectFit: "contain", color: t.accent }} />
+                  style={{ width: 206, height: 206, objectFit: "contain", color: t.accent }} />
               </div>
 
               {/* Coin reveal on clean egg */}

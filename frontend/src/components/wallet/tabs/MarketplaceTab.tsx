@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  HEROES, COIN_TICKERS, COIN_ICONS, COIN_BRAND_COLORS,
+  HEROES, COIN_TICKERS, COIN_ICONS,
   CARD_TIER_STYLES, TIER_COLORS, TIER_NAMES, ALL_TEAMS,
 } from "../constants";
 import type { Listing } from "../types";
@@ -28,6 +28,7 @@ type Props = {
   busy: string | null;
   onBuyCard: (id: number) => void;
   onCancelListing: (id: number) => void;
+  isDark?: boolean;
 };
 
 const MP_PAGE_SIZE = 15;
@@ -55,7 +56,9 @@ export function MarketplaceTab({
   busy,
   onBuyCard,
   onCancelListing,
+  isDark = false,
 }: Props) {
+  const accentBg = isDark ? "#141B23" : "#F4EFE2";
   return (
     <div className="mt-2 space-y-4">
       {mpError && <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-200">{mpError}</div>}
@@ -67,7 +70,7 @@ export function MarketplaceTab({
           .sort((a, b) => Number(a.price) - Number(b.price) || a.id - b.id);
         if (myListings.length === 0) return null;
         return (
-          <div className="rounded-2xl p-4" style={{ border: "1px solid var(--panel-border)", background: "var(--card)" }}>
+          <div className="rounded-2xl p-4" style={{ border: "2.5px solid var(--ink)", boxShadow: "4px 4px 0 var(--card-shadow)", background: accentBg }}>
             <div className="flex items-center justify-between mb-3">
               <div className="font-display font-bold uppercase tracking-widest text-xs text-white/70">{lang === "ru" ? "Мои лоты" : "My lots"} <span className="text-zinc-600 normal-case tracking-normal font-normal">({myListings.length})</span></div>
               {myListings.length > MY_LISTINGS_PAGE_SIZE && (
@@ -83,8 +86,9 @@ export function MarketplaceTab({
             <div className="grid gap-2 grid-cols-2 sm:grid-cols-4">
               {myListings.slice(myListingsPage * MY_LISTINGS_PAGE_SIZE, (myListingsPage + 1) * MY_LISTINGS_PAGE_SIZE).map((l) => {
                 const tc = TIER_COLORS[l.tier];
+                const primerFill = (["#D9D3C2","#7AC7E8","#26C6A8","#88FC00"] as const)[l.tier] ?? "#D9D3C2";
                 return (
-                  <div key={l.id} className={`flex flex-col gap-2 rounded-xl border p-2.5 ${tc.border}`} style={{ background: "var(--card)" }}>
+                  <div key={l.id} className={`flex flex-col gap-2 rounded-xl border p-2.5 ${tc.border}`} style={{ background: isDark ? "#1B232C" : "var(--card)" }}>
                     <div className="flex items-center gap-2 min-w-0">
                       <img src={COIN_ICONS[l.playerId]} alt={HEROES[l.playerId]}
                         className="h-8 w-8 rounded-lg object-cover opacity-80 shrink-0" referrerPolicy="no-referrer" />
@@ -94,7 +98,8 @@ export function MarketplaceTab({
                       </div>
                     </div>
                     <button onClick={() => onCancelListing(l.id)} disabled={busy !== null}
-                      className="w-full rounded-lg bg-cyan-500/15 border border-cyan-500/30 px-2 py-1 text-[10px] font-medium text-cyan-300 hover:bg-cyan-500/25 disabled:opacity-50 transition">
+                      className="btn-sticker-outline"
+                      style={{ width: "100%", padding: "6px 10px", justifyContent: "center", fontSize: "0.7rem", borderColor: primerFill }}>
                       {busy === `mp_cancel_${l.id}` ? "…" : (lang === "ru" ? "Снять" : "Cancel")}
                     </button>
                   </div>
@@ -120,7 +125,7 @@ export function MarketplaceTab({
             value={mpSearchTicker}
             onChange={(e) => setMpSearchTicker(e.target.value)}
             className="w-full rounded-xl pl-8 pr-8 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-cyan-500/40 font-mono tracking-wide"
-            style={{ border: "1px solid var(--panel-border)", background: "var(--card)", color: "var(--panel-text)" }}
+            style={{ border: "2.5px solid var(--ink)", color: "var(--panel-text)", boxShadow: "4px 4px 0 var(--card-shadow)", background: accentBg }}
           />
           {mpSearchTicker && (
             <button
@@ -142,9 +147,9 @@ export function MarketplaceTab({
                 style={{
                   padding: "8px 14px", whiteSpace: "nowrap",
                   background: active ? "var(--mint)" : "var(--paper-3)",
-                  color: "var(--ink)", border: "2.5px solid var(--ink)", borderRadius: 999,
+                  color: "var(--header-btn-color)", border: "2.5px solid var(--ink)", borderRadius: 999,
                   fontSize: 11, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
-                  boxShadow: active ? "4px 4px 0 var(--ink)" : "2px 2px 0 var(--ink)",
+                  boxShadow: active ? "4px 4px 0 var(--card-shadow)" : "2px 2px 0 var(--card-shadow)",
                   transition: "background .12s",
                 }}
                 onMouseEnter={e => { if (!active) e.currentTarget.style.background = "var(--sky-soft)"; }}
@@ -162,9 +167,9 @@ export function MarketplaceTab({
                 style={{
                   padding: "8px 14px", whiteSpace: "nowrap",
                   background: active ? "var(--mint)" : "var(--paper-3)",
-                  color: "var(--ink)", border: "2.5px solid var(--ink)", borderRadius: 999,
+                  color: "var(--header-btn-color)", border: "2.5px solid var(--ink)", borderRadius: 999,
                   fontSize: 11, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
-                  boxShadow: active ? "4px 4px 0 var(--ink)" : "2px 2px 0 var(--ink)",
+                  boxShadow: active ? "4px 4px 0 var(--card-shadow)" : "2px 2px 0 var(--card-shadow)",
                   transition: "background .12s",
                 }}
                 onMouseEnter={e => { if (!active) e.currentTarget.style.background = "var(--sky-soft)"; }}
@@ -186,73 +191,90 @@ export function MarketplaceTab({
           <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5" data-tour="market-cards">
             {mpFilteredPage.map((l, cardIdx) => {
               const ts = CARD_TIER_STYLES[l.tier] ?? CARD_TIER_STYLES[0];
-              const brand = COIN_BRAND_COLORS[l.playerId] ?? "#6B7280";
               const ticker = COIN_TICKERS[l.playerId];
               const coinIcon = COIN_ICONS[l.playerId];
-              const eggW = (["50%","65%","79%","94%"] as const)[l.tier] ?? "72%";
-              const eggH = (["57%","74%","90%","107%"] as const)[l.tier] ?? "82%";
               const isOwn = accountAddress && l.seller.toLowerCase() === accountAddress.toLowerCase();
               const buyKey = `mp_buy_${l.id}`;
               const isLegendary = l.tier === 3;
-              const isEpic = l.tier === 2;
-              const isRare = l.tier === 1;
+              const primerFill = (["#D9D3C2","#7AC7E8","#26C6A8","#88FC00"] as const)[l.tier] ?? "#D9D3C2";
+              const eggW = ([72, 88, 108, 120] as const)[l.tier] ?? 88;
               return (
-                <article key={l.id} className="group relative anim-card-entry" style={{ animationDelay: `${cardIdx * 30}ms` }}>
-                  <div aria-hidden className="absolute -inset-1 rounded-[22px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl" style={{ background: ts.glow }} />
-                  {isLegendary && <div aria-hidden className="absolute -inset-[2px] rounded-[22px] foil-perpetual" />}
-                  <div className="relative rounded-[20px] overflow-hidden" style={{ padding: "1.5px", background: `linear-gradient(180deg, ${ts.border}, rgba(255,255,255,0.04) 60%, rgba(255,255,255,0.01))` }}>
-                    <div className="relative rounded-[18px] overflow-hidden flex flex-col transition-transform duration-500 group-hover:-translate-y-1.5" style={{ background: "var(--card)", boxShadow: `0 12px 40px -12px ${ts.glow}` }}>
-                      <div className="relative aspect-[4/5] overflow-hidden grain" style={{ background: ts.gradient }}>
-                        <div className="relative flex items-center justify-center w-full h-full">
-                          <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 55%, ${brand}22, transparent 70%)` }} />
-                          <div className="absolute anim-float" style={{ width: eggW, height: eggH, animationDelay: `${(cardIdx % 3) * -2}s` }}>
-                            <img src="/egg.webp" alt="" aria-hidden
-                              className="w-full h-full select-none"
-                              style={{ objectFit: "contain", filter: `drop-shadow(0 4px 24px ${brand}50)` }} />
-                            {coinIcon && (
-                              <img src={coinIcon} alt="" aria-hidden
-                                className="absolute select-none"
-                                style={{ width: "35%", height: "35%", objectFit: "contain", top: "50%", left: "50%", transform: "translate(-50%, -50%)", mixBlendMode: "multiply", opacity: 0.9 }} />
-                            )}
-                          </div>
-                        </div>
-                        <div className="absolute top-2.5 left-2.5 z-10">
-                          <span className="text-[9px] font-bold uppercase tracking-[0.22em] px-2 py-1 rounded-md border backdrop-blur-md" style={{ color: ts.color, borderColor: ts.border, background: "rgba(0,0,0,0.4)" }}>{ts.label}</span>
-                        </div>
-                        {isOwn && (
-                          <div className="absolute top-2.5 right-2.5 z-10">
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md border backdrop-blur-md text-emerald-600 border-emerald-500/40" style={{ background: "var(--nft-badge-bg)" }}>{lang === "ru" ? "МОЙ" : "MINE"}</span>
-                          </div>
-                        )}
-                        {(isRare || isEpic || isLegendary) && <div aria-hidden className="absolute inset-0 holo-sheen overflow-hidden" />}
-                        <div aria-hidden className="absolute bottom-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${ts.color}, transparent)` }} />
+                <article key={l.id} className="anim-card-entry" style={{ animationDelay: `${cardIdx * 30}ms`, height: "100%", display: "flex", flexDirection: "column" }}>
+                  <div style={{
+                    background: "var(--paper-2)", border: "2.5px solid var(--ink)", borderRadius: 18,
+                    boxShadow: isLegendary ? "4px 4px 0 var(--card-shadow), 8px 8px 0 #88FC00" : "4px 4px 0 var(--card-shadow)",
+                    padding: 16, display: "flex", flexDirection: "column", gap: 12, position: "relative", height: "100%", justifyContent: "flex-start",
+                  }}>
+                    {/* rarity chip + mine badge */}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div style={{
+                        display: "inline-flex", alignItems: "center", gap: 5,
+                        background: primerFill, color: "var(--ink)",
+                        border: "2.5px solid var(--ink)", borderRadius: 999,
+                        padding: "3px 9px", fontSize: 9, letterSpacing: 1.6, fontWeight: 800,
+                        boxShadow: "2px 2px 0 var(--card-shadow)",
+                      }}>
+                        {ts.label}
                       </div>
-                      <div className="relative p-3.5" style={{ background: "var(--card)" }}>
-                        <div className="flex items-start justify-between gap-2 mb-[10px]">
-                          <div className="min-w-0">
-                            <h4 className="font-bold text-white text-sm tracking-tight truncate">{HEROES[l.playerId]}</h4>
-                            <span className="text-[10px] uppercase tracking-[0.2em] text-white/40">{ticker}</span>
-                          </div>
-                          <div className="shrink-0 font-black text-xs" style={{ color: ts.color }}>{(Number(l.price) / 1e18).toFixed(4)} ETH</div>
-                        </div>
-                        {isOwn ? (
-                          <button onClick={() => onCancelListing(l.id)} disabled={busy !== null}
-                            className="w-full py-2 rounded-lg border border-cyan-500/30 text-xs font-semibold text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 disabled:opacity-50 transition">
-                            {busy === `mp_cancel_${l.id}` ? "…" : (lang === "ru" ? "Снять" : "Cancel")}
-                          </button>
-                        ) : (
-                          <>
-                            <button onClick={() => onBuyCard(l.id)} disabled={!hasWalletAccount || busy !== null}
-                              className="w-full py-2 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-90 disabled:opacity-50 transition">
-                              {busy === buyKey ? "…" : (lang === "ru" ? "Купить" : "Buy")}
-                            </button>
-                            <div className="mt-1 text-[10px] text-white/30 text-center">
-                              {lang === "ru" ? "Комиссия платформы" : "Platform fee"}: 5% ({(Number(l.price) * 0.05 / 1e18).toFixed(4)} ETH)
-                            </div>
-                          </>
+                      {isOwn && (
+                        <div style={{
+                          fontSize: 9, letterSpacing: 1.5, fontWeight: 800, padding: "3px 8px",
+                          borderRadius: 999, background: primerFill, color: "var(--ink)",
+                          border: "2.5px solid var(--ink)", boxShadow: "2px 2px 0 var(--card-shadow)",
+                        }}>{lang === "ru" ? "МОЙ" : "MINE"}</div>
+                      )}
+                    </div>
+
+                    {/* image plate */}
+                    <div style={{
+                      height: 140, borderRadius: 14, background: primerFill,
+                      border: "2.5px solid var(--ink)", display: "grid", placeItems: "center",
+                      position: "relative", overflow: "hidden",
+                    }}>
+                      <div aria-hidden style={{
+                        position: "absolute", inset: 0,
+                        backgroundImage: "radial-gradient(var(--ink) 1.2px, transparent 1.4px)",
+                        backgroundSize: "14px 14px", opacity: 0.12,
+                      }} />
+                      <div className="anim-float" style={{ position: "relative", width: eggW, height: eggW, animationDelay: `${(cardIdx % 3) * -2}s` }}>
+                        <img src="/egg.webp" alt="" aria-hidden style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                        {coinIcon && (
+                          <img src={coinIcon} alt="" aria-hidden style={{
+                            position: "absolute", width: "35%", height: "35%", objectFit: "contain",
+                            top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+                            mixBlendMode: "multiply", opacity: 0.9,
+                          }} />
                         )}
-                        <div className="mt-1 text-[10px] text-white/30 truncate">{l.seller.slice(0, 6)}…{l.seller.slice(-4)}</div>
                       </div>
+                    </div>
+
+                    {/* name + ticker */}
+                    <div>
+                      <div style={{ color: "var(--ink-2)", fontWeight: 800, fontSize: 15, letterSpacing: -0.2 }}>{HEROES[l.playerId]}</div>
+                      <div style={{ color: "var(--ink-3)", fontSize: 10, letterSpacing: 1.6, marginTop: 2, fontWeight: 700 }}>{ticker}</div>
+                    </div>
+
+                    {/* price */}
+                    <div style={{ fontFamily: 'ui-monospace,"JetBrains Mono",monospace', fontWeight: 600, fontSize: 12, color: "var(--ink-3)" }}>
+                      <span style={{ fontSize: 16, fontWeight: 800, color: "var(--ink-2)", fontFamily: "inherit" }}>{(Number(l.price) / 1e18).toFixed(4)}</span>
+                      <span style={{ color: "var(--ink-2)", fontWeight: 800 }}>{" ETH"}</span>
+                    </div>
+
+                    {/* action */}
+                    <div style={{ marginTop: "auto" }}>
+                      {isOwn ? (
+                        <button onClick={() => onCancelListing(l.id)} disabled={busy !== null}
+                          className="btn-sticker-outline"
+                          style={{ width: "100%", padding: "10px 16px", justifyContent: "center", borderColor: primerFill }}>
+                          {busy === `mp_cancel_${l.id}` ? "…" : (lang === "ru" ? "Снять" : "Cancel")}
+                        </button>
+                      ) : (
+                        <button onClick={() => onBuyCard(l.id)} disabled={!hasWalletAccount || busy !== null}
+                          className="btn-sticker-primary"
+                          style={{ width: "100%", padding: "10px 16px", justifyContent: "center", background: primerFill, color: "var(--chest-buy-btn-text)" }}>
+                          {busy === buyKey ? "…" : (lang === "ru" ? "Купить" : "Buy")}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </article>

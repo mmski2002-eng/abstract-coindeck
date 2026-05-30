@@ -22,7 +22,7 @@ export async function GET(
   return NextResponse.json({
     name: chest.name,
     description: `CoinDeck NFT Egg — ${chest.rarity}`,
-    image: `${origin}/chests/${chest.file}`,
+    image: `${origin}/chests-anim/${type}.gif`,
     animation_url: `${origin}/api/nft/chest-anim/${type}`,
     attributes: [
       { trait_type: "Size", value: chest.rarity },

@@ -1,7 +1,83 @@
 "use client";
 
 import { createPortal } from "react-dom";
-import { HEROES, COIN_TICKERS, COIN_ICONS, COIN_BRAND_COLORS, CARD_TIER_STYLES } from "../constants";
+import { HEROES, COIN_TICKERS, COIN_ICONS, CARD_TIER_STYLES } from "../constants";
+
+const PRIMER_FILLS = ["#D9D3C2", "#7AC7E8", "#26C6A8", "#88FC00"] as const;
+const RARITY_LABELS = ["Small", "Medium", "Heavy", "Super Heavy"] as const;
+const EGG_SIZES = [108, 132, 162, 180] as const;
+
+function RosterCard({ card, isNew }: { card: { playerId: number; tier: number }; isNew?: boolean }) {
+  const tier       = card.tier;
+  const playerId   = card.playerId;
+  const primerFill = PRIMER_FILLS[tier] ?? PRIMER_FILLS[0];
+  const label      = RARITY_LABELS[tier] ?? RARITY_LABELS[0];
+  const ts         = CARD_TIER_STYLES[tier] ?? CARD_TIER_STYLES[0];
+  const ticker     = COIN_TICKERS[playerId];
+  const coinIcon   = COIN_ICONS[playerId];
+  const eggSz      = EGG_SIZES[tier] ?? 88;
+  const isLegendary = tier === 3;
+
+  return (
+    <div style={{
+      background: "var(--paper-2)",
+      border: "2.5px solid var(--ink)",
+      borderRadius: 18,
+      boxShadow: isLegendary
+        ? "4px 4px 0 var(--card-shadow), 8px 8px 0 #88FC00"
+        : "4px 4px 0 var(--card-shadow)",
+      padding: 16,
+      display: "flex", flexDirection: "column", gap: 12,
+      position: "relative", width: "100%",
+    }}>
+      {/* header row */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{
+          background: primerFill, color: "var(--ink)",
+          border: "2.5px solid var(--ink)", borderRadius: 999,
+          padding: "3px 9px", fontSize: 9, letterSpacing: 1.6, fontWeight: 800,
+          boxShadow: "2px 2px 0 var(--card-shadow)",
+        }}>{label.toUpperCase()}</div>
+        {isNew && (
+          <div style={{
+            fontSize: 9, letterSpacing: 1.5, fontWeight: 800, padding: "3px 8px",
+            borderRadius: 999, background: "var(--lime-pop)", color: "var(--ink)",
+            border: "2.5px solid var(--ink)", boxShadow: "2px 2px 0 var(--card-shadow)",
+          }}>NEW</div>
+        )}
+      </div>
+
+      {/* image plate */}
+      <div style={{
+        height: 210, borderRadius: 14, background: primerFill,
+        border: "2.5px solid var(--ink)", display: "grid", placeItems: "center",
+        position: "relative", overflow: "hidden",
+      }}>
+        <div aria-hidden style={{
+          position: "absolute", inset: 0,
+          backgroundImage: "radial-gradient(var(--ink) 1.2px, transparent 1.4px)",
+          backgroundSize: "14px 14px", opacity: 0.12,
+        }} />
+        <div className="anim-float" style={{ position: "relative", width: eggSz, height: eggSz }}>
+          <img src="/egg.webp" alt="" aria-hidden style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          {coinIcon && (
+            <img src={coinIcon} alt="" aria-hidden style={{
+              position: "absolute", width: "35%", height: "35%", objectFit: "contain",
+              top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+              mixBlendMode: "multiply", opacity: 0.9,
+            }} />
+          )}
+        </div>
+      </div>
+
+      {/* name + role */}
+      <div>
+        <div style={{ color: "var(--ink-2)", fontWeight: 800, fontSize: 15, letterSpacing: -0.2 }}>{HEROES[playerId]}</div>
+        <div style={{ color: "var(--ink-3)", fontSize: 10, letterSpacing: 1.6, marginTop: 2, fontWeight: 700 }}>{ticker}</div>
+      </div>
+    </div>
+  );
+}
 
 export function ChestReveal({
   card,
@@ -12,15 +88,6 @@ export function ChestReveal({
   onClose: () => void;
   lang: string;
 }) {
-  const ts = CARD_TIER_STYLES[card.tier] ?? CARD_TIER_STYLES[0];
-  const brand = COIN_BRAND_COLORS[card.playerId] ?? "#6B7280";
-  const ticker = COIN_TICKERS[card.playerId];
-  const coinIcon = COIN_ICONS[card.playerId];
-  const eggW = (["50%","65%","79%","94%"] as const)[card.tier] ?? "72%";
-  const eggH = (["57%","74%","90%","107%"] as const)[card.tier] ?? "82%";
-  const isLegendary = card.tier === 3;
-  const isEpic = card.tier === 2;
-  const isRare = card.tier === 1;
   return createPortal(
     <div
       className="fixed inset-0 z-[200] flex items-center justify-center backdrop-blur-md"
@@ -39,64 +106,32 @@ export function ChestReveal({
         }
       `}</style>
 
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: `radial-gradient(ellipse at center, ${
-            card.tier === 0 ? "rgba(161,161,170,0.15)" :
-            card.tier === 1 ? "rgba(59,130,246,0.2)" :
-            card.tier === 2 ? "rgba(168,85,247,0.25)" :
-            "rgba(234,179,8,0.3)"
-          } 0%, transparent 65%)`,
-          animation: "revealGlow 500ms ease-out both",
-        }}
-      />
+      <div className="absolute inset-0 pointer-events-none" style={{
+        background: `radial-gradient(ellipse at center, ${
+          card.tier === 0 ? "rgba(161,161,170,0.15)" :
+          card.tier === 1 ? "rgba(59,130,246,0.2)" :
+          card.tier === 2 ? "rgba(168,85,247,0.25)" :
+          "rgba(234,179,8,0.3)"
+        } 0%, transparent 65%)`,
+        animation: "revealGlow 500ms ease-out both",
+      }} />
 
       <article
-        className="relative w-56 select-none"
-        style={{ animation: "revealCard 550ms cubic-bezier(.17,.67,.35,1.3) both" }}
+        className="relative select-none"
+        style={{ width: 224, animation: "revealCard 550ms cubic-bezier(.17,.67,.35,1.3) both" }}
         onClick={(e) => e.stopPropagation()}
       >
-        {isLegendary && <div aria-hidden className="absolute -inset-[2px] rounded-[22px] foil-perpetual" />}
-        <div className="relative rounded-[20px] overflow-hidden" style={{ padding: "1.5px", background: `linear-gradient(180deg, ${ts.border}, rgba(255,255,255,0.04) 60%, rgba(255,255,255,0.01))` }}>
-          <div className="relative rounded-[18px] overflow-hidden flex flex-col" style={{ background: "var(--card)", boxShadow: `0 12px 40px -12px ${ts.glow}` }}>
-            <div className="relative aspect-[4/5] overflow-hidden grain" style={{ background: ts.gradient }}>
-              <div className="relative flex items-center justify-center w-full h-full">
-                <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 55%, ${brand}22, transparent 70%)` }} />
-                <div className="absolute anim-float" style={{ width: eggW, height: eggH }}>
-                  <img src="/egg.webp" alt="" aria-hidden
-                    className="w-full h-full select-none"
-                    style={{ objectFit: "contain", filter: `drop-shadow(0 4px 24px ${brand}50)` }} />
-                  {coinIcon && (
-                    <img src={coinIcon} alt="" aria-hidden
-                      className="absolute select-none"
-                      style={{ width: "35%", height: "35%", objectFit: "contain", top: "50%", left: "50%", transform: "translate(-50%, -50%)", mixBlendMode: "multiply", opacity: 0.9 }} />
-                  )}
-                </div>
-              </div>
-              <div className="absolute top-2.5 left-2.5 z-10">
-                <span className="text-[9px] font-bold uppercase tracking-[0.22em] px-2 py-1 rounded-md border backdrop-blur-md" style={{ color: ts.color, borderColor: ts.border, background: "rgba(0,0,0,0.4)" }}>{ts.label}</span>
-              </div>
-              <div className="absolute top-2.5 right-2.5 z-10">
-                <span className="text-[9px] font-bold uppercase tracking-[0.22em] px-2 py-1 rounded-md border backdrop-blur-md" style={{ color: ts.color, borderColor: `${ts.color}60`, background: "rgba(0,0,0,0.6)" }}>NEW</span>
-              </div>
-              {(isRare || isEpic || isLegendary) && <div aria-hidden className="absolute inset-0 holo-sheen overflow-hidden" />}
-              <div aria-hidden className="absolute bottom-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${ts.color}, transparent)` }} />
-            </div>
-            <div className="relative p-3.5" style={{ background: "var(--card)" }}>
-              <h4 className="font-bold text-sm tracking-tight truncate" style={{ color: ts.color }}>{HEROES[card.playerId]}</h4>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-white/40">{ticker}</span>
-              <div className="mt-3 text-center text-xs mb-2" style={{ color: "var(--nft-muted)" }}>✨ {lang === "ru" ? "Новая карточка!" : "New card!"}</div>
-              <button
-                onClick={onClose}
-                className="w-full rounded-xl py-2 text-sm font-semibold transition"
-                style={{ background: "var(--button-secondary-bg)", color: "var(--button-secondary-text)", border: "1px solid var(--panel-border)" }}
-              >
-                {lang === "ru" ? "Отлично!" : "Nice!"}
-              </button>
-            </div>
-          </div>
+        <RosterCard card={card} isNew />
+        <div className="mt-3 text-center text-xs" style={{ color: "var(--nft-muted)" }}>
+          ✨ {lang === "ru" ? "Новая карточка!" : "New card!"}
         </div>
+        <button
+          onClick={onClose}
+          className="w-full mt-2 rounded-xl py-2 text-sm font-semibold transition"
+          style={{ background: "var(--button-secondary-bg)", color: "var(--button-secondary-text)", border: "1px solid var(--panel-border)" }}
+        >
+          {lang === "ru" ? "Отлично!" : "Nice!"}
+        </button>
       </article>
     </div>,
     document.body,
@@ -128,57 +163,22 @@ export function ChestRevealMulti({
         <div className="text-lg font-black" style={{ color: "var(--panel-text)" }}>
           {lang === "ru" ? `🎉 Получено ${cards.length} карточек!` : `🎉 Got ${cards.length} cards!`}
         </div>
-        <div className="text-xs mt-1" style={{ color: "var(--nft-muted)" }}>{lang === "ru" ? "Нажмите чтобы закрыть" : "Tap to close"}</div>
+        <div className="text-xs mt-1" style={{ color: "var(--nft-muted)" }}>
+          {lang === "ru" ? "Нажмите чтобы закрыть" : "Tap to close"}
+        </div>
       </div>
-      <div className="flex gap-3 overflow-hidden" onClick={(e) => e.stopPropagation()}>
-        {cards.map((card, i) => {
-          const ts = CARD_TIER_STYLES[card.tier] ?? CARD_TIER_STYLES[0];
-          const brand = COIN_BRAND_COLORS[card.playerId] ?? "#6B7280";
-          const ticker = COIN_TICKERS[card.playerId];
-          const coinIcon = COIN_ICONS[card.playerId];
-          const eggW = (["50%","65%","79%","94%"] as const)[card.tier] ?? "72%";
-          const eggH = (["57%","74%","90%","107%"] as const)[card.tier] ?? "82%";
-          const isLegendary = card.tier === 3;
-          const isEpic = card.tier === 2;
-          const isRare = card.tier === 1;
-          return (
-            <article
-              key={i}
-              className="relative flex-none select-none"
-              style={{ width: 110, animation: `cardSlideIn 400ms cubic-bezier(.17,.67,.35,1.3) ${i * 80}ms both` }}
-            >
-              {isLegendary && <div aria-hidden className="absolute -inset-[2px] rounded-[16px] foil-perpetual" />}
-              <div className="relative rounded-[15px] overflow-hidden" style={{ padding: "1.5px", background: `linear-gradient(180deg, ${ts.border}, rgba(255,255,255,0.04) 60%, rgba(255,255,255,0.01))` }}>
-                <div className="relative rounded-[13px] overflow-hidden flex flex-col" style={{ background: "var(--card)", boxShadow: `0 8px 24px -8px ${ts.glow}` }}>
-                  <div className="relative aspect-[4/5] overflow-hidden grain" style={{ background: ts.gradient }}>
-                    <div className="relative flex items-center justify-center w-full h-full">
-                      <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 55%, ${brand}22, transparent 70%)` }} />
-                      <div className="absolute anim-float" style={{ width: eggW, height: eggH }}>
-                        <img src="/egg.webp" alt="" aria-hidden
-                          className="w-full h-full select-none"
-                          style={{ objectFit: "contain", filter: `drop-shadow(0 4px 20px ${brand}50)` }} />
-                        {coinIcon && (
-                          <img src={coinIcon} alt="" aria-hidden
-                            className="absolute select-none"
-                            style={{ width: "35%", height: "35%", objectFit: "contain", top: "50%", left: "50%", transform: "translate(-50%, -50%)", mixBlendMode: "multiply", opacity: 0.9 }} />
-                        )}
-                      </div>
-                    </div>
-                    <div className="absolute top-1.5 left-1.5 z-10">
-                      <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border backdrop-blur-md" style={{ color: ts.color, borderColor: ts.border, background: "rgba(0,0,0,0.4)" }}>{ts.label}</span>
-                    </div>
-                    {(isRare || isEpic || isLegendary) && <div aria-hidden className="absolute inset-0 holo-sheen overflow-hidden" />}
-                  </div>
-                  <div className="p-2" style={{ background: "var(--card)" }}>
-                    <div className="text-[9px] font-black truncate leading-tight" style={{ color: ts.color }}>{HEROES[card.playerId]}</div>
-                    <div className="text-[8px] text-white/40 uppercase tracking-wider truncate">{ticker}</div>
-                  </div>
-                </div>
-              </div>
-            </article>
-          );
-        })}
+
+      <div className="flex gap-3 flex-wrap justify-center" onClick={(e) => e.stopPropagation()}>
+        {cards.map((card, i) => (
+          <div
+            key={i}
+            style={{ width: 140, animation: `cardSlideIn 400ms cubic-bezier(.17,.67,.35,1.3) ${i * 80}ms both` }}
+          >
+            <RosterCard card={card} isNew />
+          </div>
+        ))}
       </div>
+
       <button
         onClick={onClose}
         className="mt-6 rounded-xl px-8 py-2.5 text-sm font-semibold transition"

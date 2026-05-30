@@ -261,17 +261,17 @@ export function RankingsTab({
 
       {/* Table */}
       {lbLoading && lbRows.length === 0 ? (
-        <div className="rounded-2xl p-10 text-center text-sm" style={{ border: "1px solid var(--panel-border)", background: "var(--card)", color: "var(--panel-text-muted)" }}>
+        <div className="rounded-2xl p-10 text-center text-sm" style={{ border: "1px solid var(--panel-border)", background: "var(--my-lots-bg)", color: "var(--panel-text-muted)" }}>
           <div className="animate-pulse">{lang === "ru" ? "Загрузка рейтинга…" : "Loading rankings…"}</div>
           <div className="text-xs text-zinc-600 mt-1">{lang === "ru" ? "Запрашиваем данные участников" : "Fetching participant data"}</div>
         </div>
       ) : !lbLoading && visibleRows.length === 0 ? (
-        <div className="rounded-2xl p-10 text-center text-sm" style={{ border: "1px solid var(--panel-border)", background: "var(--card)", color: "var(--nft-muted)" }}>
+        <div className="rounded-2xl p-10 text-center text-sm" style={{ border: "1px solid var(--panel-border)", background: "var(--my-lots-bg)", color: "var(--nft-muted)" }}>
           {lang === "ru" ? "Нет данных" : "No data"}
         </div>
       ) : (
         <>
-          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--panel-border)", background: "var(--card)" }} data-tour="rankings-table">
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--panel-border)", background: "var(--my-lots-bg)" }} data-tour="rankings-table">
             <div className="grid grid-cols-[2rem_1fr_5rem_3.5rem_5rem] gap-3 px-4 py-2 border-b border-white/10 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
               <div>#</div>
               <div className="flex items-center justify-between">

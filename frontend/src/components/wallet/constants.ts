@@ -33,7 +33,7 @@ export const CARD_TIER_STYLES = [
   { color: "#FBBF24", border: "rgba(245,158,11,0.85)",  glow: "rgba(245,158,11,0.7)",   gradient: "linear-gradient(180deg,rgba(245,158,11,0.32),rgba(245,158,11,0.04))",   label: "ТЯЖЁЛОЕ",    enLabel: "SUPER HEAVY" },
 ];
 
-export const TIER_NAMES = ["🐹 Маленькое", "🐻 Среднее", "🐂 Большое", "🐋 Тяжёлое"];
+export const TIER_NAMES = ["Маленькое", "Среднее", "Большое", "Тяжёлое"];
 export const TIER_HEX = ["#71717a", "#3b82f6", "#a855f7", "#f59e0b"];
 export const TIER_COLORS = [
   { border: "border-zinc-500/40", badge: "bg-zinc-800/80 text-zinc-300", glow: "" },

@@ -131,7 +131,7 @@ export function ChestOpeningOverlay({
       `}</style>
 
       <div className="relative flex flex-col items-center gap-6">
-        <div className="relative w-60 h-60" style={{ "--gc": chest.glow } as CSSProperties & Record<"--gc", string>}>
+        <div className="relative" style={{ width: 540, height: 540, "--gc": chest.glow } as CSSProperties & Record<"--gc", string>}>
           {/* Burst flash */}
           {phase === "burst" && (
             <div

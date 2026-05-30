@@ -97,10 +97,10 @@ export function MarketingHome() {
   const langRef = React.useRef<HTMLDivElement>(null);
 
   const tabs: { id: Tab; ru: string; en: string; icon: React.ElementType; adminOnly?: boolean }[] = [
-    { id: "roster", ru: "Портфель", en: "Portfolio", icon: Wallet },
-    { id: "marketplace", ru: "Маркетплейс", en: "Marketplace", icon: Store },
-    { id: "tournament", ru: "Инвестирование", en: "Investing", icon: TrendingUp },
-    { id: "rankings", ru: "Лидерборд", en: "Leaderboard", icon: Trophy },
+    { id: "roster", ru: "Мои яйца", en: "My Eggs", icon: Wallet },
+    { id: "marketplace", ru: "Магазин Яиц", en: "Egg Market", icon: Store },
+    { id: "tournament", ru: "Взвешивание", en: "Weigh-in", icon: TrendingUp },
+    { id: "rankings", ru: "Тяжеловесы", en: "Heavyweights", icon: Trophy },
     { id: "admin", ru: "Админ", en: "Admin", icon: Shield, adminOnly: true },
   ];
 
@@ -305,17 +305,7 @@ export function MarketingHome() {
             >
               <img src="/logo.webp" alt="logo" style={{ width: 32, height: 32, objectFit: "cover", borderRadius: 8 }} />
             </div>
-            <span
-              className="leading-none select-none"
-              style={{
-                fontFamily: "var(--font-titan-one)",
-                fontSize: "2rem",
-                fontWeight: 900,
-                color: "#000000",
-              }}
-            >
-              HEAVYEGGS
-            </span>
+            <img src="/brand/name.png" alt="HeavyEggs" style={{ height: 36, width: "auto", objectFit: "contain" }} />
           </div>
 
           <div className="flex shrink-0 items-center gap-2.5 xl:hidden">
@@ -323,17 +313,7 @@ export function MarketingHome() {
             >
               <img src="/logo.webp" alt="logo" style={{ width: 32, height: 32, objectFit: "cover", borderRadius: 8 }} />
             </div>
-            <span
-              className="leading-none select-none"
-              style={{
-                fontFamily: "var(--font-titan-one)",
-                fontSize: "2rem",
-                fontWeight: 900,
-                color: "#000000",
-              }}
-            >
-              HEAVYEGGS
-            </span>
+            <img src="/brand/name.png" alt="HeavyEggs" style={{ height: 36, width: "auto", objectFit: "contain" }} />
           </div>
 
           <nav className="mx-auto hidden min-w-0 flex-shrink items-center gap-1.5 overflow-x-auto scrollbar-hide lg:flex" style={{ paddingBottom: 6, marginBottom: -6 }}>
@@ -495,6 +475,7 @@ export function MarketingHome() {
             onAdminChange={setIsAdmin}
             tourDemoMode={tourDemoMode}
             onStartTour={startTour}
+            isDark={isDark}
           />
         </section>
       </main>

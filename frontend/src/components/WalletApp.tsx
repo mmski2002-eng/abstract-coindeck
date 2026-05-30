@@ -76,12 +76,14 @@ function Inner({
   onAdminChange,
   tourDemoMode,
   onStartTour,
+  isDark,
 }: {
   activeTab: Tab;
   setActiveTab: (t: Tab) => void;
   onAdminChange?: (v: boolean) => void;
   tourDemoMode?: boolean;
   onStartTour?: () => void;
+  isDark?: boolean;
 }) {
   const { lang } = useI18n();
   const { address, isConnected } = useAccount();
@@ -530,6 +532,7 @@ function Inner({
             busy={busy}
             onBuyCard={onBuyCard}
             onCancelListing={onCancelListing}
+            isDark={isDark}
           />
         )}
         {sellModal && (
@@ -712,12 +715,14 @@ export function WalletApp({
   onAdminChange,
   tourDemoMode,
   onStartTour,
+  isDark,
 }: {
   activeTab: Tab;
   setActiveTab: (t: Tab) => void;
   onAdminChange?: (v: boolean) => void;
   tourDemoMode?: boolean;
   onStartTour?: () => void;
+  isDark?: boolean;
 }) {
   return (
     <Inner
@@ -726,6 +731,7 @@ export function WalletApp({
       onAdminChange={onAdminChange}
       tourDemoMode={tourDemoMode}
       onStartTour={onStartTour}
+      isDark={isDark}
     />
   );
 }

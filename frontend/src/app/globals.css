@@ -85,8 +85,8 @@
   --control-shadow: 0 0 10px rgba(0,255,102,0.08);
   --control-shadow-active: 0 0 16px rgba(0,255,102,0.18);
   --control-text: #16181d;
-  --overlay-backdrop: rgba(244,245,247,0.88);
-  --modal-bg: rgba(250,251,252,0.98);
+  --overlay-backdrop: rgba(200,205,215,0.60);
+  --modal-bg: #F4EFE2;
   --modal-header-bg: #f4f5f7;
   --modal-shadow: 0 30px 80px rgba(22,24,29,0.18);
   --button-primary-bg: #16181d;
@@ -221,7 +221,7 @@ html[data-theme="dark"] {
   --control-shadow-active: 0 10px 28px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,222,115,0.2);
   --control-text: #ffffff;
   --overlay-backdrop: rgba(0,0,0,0.75);
-  --modal-bg: #2a2a2a;
+  --modal-bg: #3A4049;
   --modal-header-bg: #1f1f1f;
   --modal-shadow: 0 34px 90px rgba(0,0,0,0.42);
   --button-primary-bg: #00FF66;

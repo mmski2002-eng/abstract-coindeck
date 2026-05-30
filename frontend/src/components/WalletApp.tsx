@@ -396,12 +396,12 @@ function Inner({
       )}
 
       {/* Chest reveal overlay */}
-      {revealCard && (
+      {revealCard && !chestOpenModal && (
         <ChestReveal card={revealCard} onClose={() => setRevealCard(null)} lang={lang} />
       )}
 
       {/* Batch chest reveal */}
-      {revealCards && (
+      {revealCards && !chestOpenModal && (
         <ChestRevealMulti cards={revealCards} onClose={() => setRevealCards(null)} lang={lang} />
       )}
 
@@ -441,6 +441,10 @@ function Inner({
           setChestOpenQty={setChestOpenQty}
           busy={busy}
           onOpenChestTyped={onOpenChestTyped}
+          txConfirmed={chestTxConfirmed}
+          cardFound={chestCardFound}
+          revealCard={revealCard}
+          revealCards={revealCards}
         />
       )}
 

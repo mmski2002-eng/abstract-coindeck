@@ -1,13 +1,22 @@
 "use client";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
+
+const EGG_STARS: { top?: string; left?: string; right?: string; bottom?: string; animationDelay: string; animationDuration: string }[] = [
+  { top: "-18px", left: "50%",    animationDelay: "0s",   animationDuration: "2.1s" },
+  { top: "10%",   left: "-20px",  animationDelay: "0.7s", animationDuration: "1.8s" },
+  { top: "10%",   right: "-20px", animationDelay: "1.3s", animationDuration: "2.4s" },
+  { bottom: "5%", left: "-18px",  animationDelay: "0.4s", animationDuration: "1.6s" },
+  { bottom: "5%", right: "-18px", animationDelay: "1.0s", animationDuration: "2.2s" },
+  { bottom: "-16px", left: "40%", animationDelay: "1.6s", animationDuration: "1.9s" },
+];
 
 export type ChestBuyData = { type: number; label: string; emoji: string; rarity: string; desc: string; price: number; buyBg: string };
 
 const THEME = [
-  { accent: "#00F0FF", glow: "rgba(0,240,255,0.22)",   b1: "rgba(0,240,255,0.45)",   b2: "rgba(109,40,217,0.45)", bg: "rgba(0,240,255,0.08)"  },
-  { accent: "#60a5fa", glow: "rgba(96,165,250,0.22)",  b1: "rgba(96,165,250,0.45)",  b2: "rgba(109,40,217,0.45)", bg: "rgba(96,165,250,0.08)" },
-  { accent: "#B026FF", glow: "rgba(176,38,255,0.22)",  b1: "rgba(176,38,255,0.45)",  b2: "rgba(0,240,255,0.45)",  bg: "rgba(176,38,255,0.08)" },
+  { accent: "#D9D3C2", glow: "rgba(217,211,194,0.22)", b1: "rgba(217,211,194,0.45)", b2: "rgba(200,195,180,0.45)", bg: "rgba(217,211,194,0.08)" },
+  { accent: "#7AC7E8", glow: "rgba(122,199,232,0.22)", b1: "rgba(122,199,232,0.45)", b2: "rgba(80,160,210,0.45)",  bg: "rgba(122,199,232,0.08)" },
+  { accent: "#26C6A8", glow: "rgba(38,198,168,0.22)",  b1: "rgba(38,198,168,0.45)",  b2: "rgba(20,160,130,0.45)", bg: "rgba(38,198,168,0.08)"  },
 ];
 
 type Props = {
@@ -40,9 +49,9 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
       <div
         className="relative w-full max-w-sm rounded-2xl overflow-hidden"
         style={{
-          background: `linear-gradient(var(--modal-bg), var(--modal-bg)) padding-box, linear-gradient(135deg, ${t.b1}, ${t.b2}) border-box`,
-          border: "1.5px solid transparent",
-          boxShadow: `0 0 60px ${t.glow}, var(--modal-shadow)`,
+          background: "var(--modal-bg)",
+          border: "1.5px solid #000",
+          boxShadow: "var(--shadow-sticker)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -56,28 +65,33 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
             className="absolute inset-0 pointer-events-none"
             style={{ background: `radial-gradient(ellipse at 50% 0%, ${t.bg} 0%, transparent 65%)` }}
           />
-          <div className="relative mb-4">
+          <div className="relative mb-4" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+            <div className="egg-ripple"   style={{ color: t.accent, animationDelay: `${([0, -4, -8] as const)[modal.type]}s` }} />
+            <div className="egg-ripple-2" style={{ color: t.accent, animationDelay: `${([0, -4, -8] as const)[modal.type]}s` }} />
+            {EGG_STARS.map((pos, i) => (
+              <span key={i} className="egg-star" style={{ ...pos as CSSProperties, color: t.accent }}>✦</span>
+            ))}
             <div
-              className="absolute inset-0 rounded-full blur-3xl scale-[2]"
-              style={{ background: `radial-gradient(circle, ${t.glow} 0%, transparent 70%)` }}
-            />
-            <img
               key={scaleKey}
-              src={["/chests/wooden_closed.webp", "/chests/iron_closed.webp", "/chests/silver_closed.webp"][modal.type]}
-              alt={modal.label}
-              className="relative w-28 h-28 object-contain"
-              style={{
-                filter: `drop-shadow(0 0 18px ${t.accent}99)`,
-                animation: scaleKey > 0 ? `${scaleDir === "grow" ? "chestScaleGrow" : "chestScaleShrink"} 350ms cubic-bezier(.17,.67,.35,1.3) both` : undefined,
-              }}
-            />
+              style={{ animation: scaleKey > 0 ? `${scaleDir === "grow" ? "chestScaleGrow" : "chestScaleShrink"} 350ms cubic-bezier(.17,.67,.35,1.3) both` : undefined }}
+            >
+              <img
+                src="/egg2.webp"
+                alt={modal.label}
+                className="egg-shake egg-glow"
+                style={{ width: ([80, 96, 120] as const)[modal.type], height: ([80, 96, 120] as const)[modal.type], objectFit: "contain", position: "relative", zIndex: 1, animationDelay: `${([0, -4, -8] as const)[modal.type]}s`, color: t.accent }}
+              />
+            </div>
           </div>
           <div className="relative text-center">
             <div className="font-display font-black text-xl tracking-tight" style={{ color: "var(--panel-text)" }}>{modal.label}</div>
-            <div
-              className="mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-[11px] font-bold uppercase tracking-widest"
-              style={{ background: t.accent + "18", border: `1px solid ${t.accent}40`, color: t.accent }}
-            >
+            <div style={{
+              marginTop: 8, display: "inline-flex", alignItems: "center",
+              background: t.accent, color: "var(--ink)",
+              border: "2.5px solid var(--ink)", borderRadius: 999,
+              padding: "4px 10px", fontSize: 10, letterSpacing: 1.6,
+              fontWeight: 800, boxShadow: "2px 2px 0 var(--card-shadow)",
+            }}>
               {modal.rarity}
             </div>
           </div>
@@ -99,13 +113,13 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
               <button
                 onClick={() => handleQtyChange(-1)}
                 className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90"
-                style={{ background: t.accent + "14", border: `1px solid ${t.accent}30`, color: "var(--panel-text)" }}
+                style={{ background: t.accent + "30", border: "1.5px solid var(--ink)", color: "var(--ink)" }}
               >−</button>
               <span className="w-10 text-center font-bold text-base tabular-nums" style={{ color: "var(--panel-text)" }}>{chestBuyQty}</span>
               <button
                 onClick={() => handleQtyChange(1)}
                 className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90"
-                style={{ background: t.accent + "14", border: `1px solid ${t.accent}30`, color: "var(--panel-text)" }}
+                style={{ background: t.accent + "30", border: "1.5px solid var(--ink)", color: "var(--ink)" }}
               >+</button>
             </div>
           </div>
@@ -126,21 +140,14 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
 
           {/* Buttons */}
           <div className="flex gap-3 pt-1">
-            <button
-              onClick={onClose}
-              className="flex-1 rounded-xl py-2.5 text-sm font-semibold transition"
-              style={{ background: "var(--button-secondary-bg)", border: "1px solid var(--panel-border)", color: "var(--button-secondary-text)" }}
-            >
+            <button onClick={onClose} className="btn-sticker-outline flex-1" style={{ padding: "10px 20px", borderColor: t.accent, background: t.accent, color: "var(--chest-buy-btn-text)" }}>
               {lang === "ru" ? "Отмена" : "Cancel"}
             </button>
             <button
               onClick={() => onBuyChestTyped(modal.type, chestBuyQty)}
               disabled={busy !== null}
-              className="flex-1 rounded-xl py-2.5 text-sm font-bold text-white disabled:opacity-40 hover:brightness-110 transition"
-              style={{
-                background: "linear-gradient(135deg, #00F0FF, #6D28D9, #B026FF)",
-                boxShadow: `0 0 18px ${t.glow}`,
-              }}
+              className="btn-sticker-primary flex-1"
+              style={{ padding: "10px 20px", background: t.accent, color: "var(--chest-buy-btn-text)" }}
             >
               {lang === "ru" ? "Купить" : "Buy"}
             </button>

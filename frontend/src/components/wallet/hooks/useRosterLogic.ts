@@ -228,12 +228,10 @@ export function useRosterLogic({ restUrl, moduleAddress, wagmiConfig, submitTx, 
 
   async function onOpenChestTyped(type: number, qty: number = 1) {
     if (!walletAccount) return;
-    setChestOpenModal(null);
     setOpeningChestType(type);
     setChestTxConfirmed(false);
     setChestCardFound(false);
     setBusy(`fl_open_${type}`);
-    setOpeningChest(true);
     setFlError("");
     try {
       await ensureInitialized();

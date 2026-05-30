@@ -179,9 +179,9 @@ export function RosterTab({
               const justBought = chestBuySuccess === type;
               const chestImg = ["/chests/wooden_closed.webp", "/chests/iron_closed.webp", "/chests/silver_closed.webp"][type];
               const descMap: Record<number, { ru: string; en: string; emoji: string }> = {
-                0: { emoji: "🐹", ru: "Гарантированная карточка Tier 1. Хороший старт для новичков.", en: "Guaranteed Tier 1 card. A great start for newcomers." },
-                1: { emoji: "🐻", ru: "Гарантированная карточка Tier 2. Сильнее обычной — больше очков в турнире.", en: "Guaranteed Tier 2 card. Stronger than common — more points in tournaments." },
-                2: { emoji: "🐂", ru: "Гарантированная карточка Tier 3. Максимальная сила — лучший выбор для топ-составов.", en: "Guaranteed Tier 3 card. Maximum power — best choice for top lineups." },
+                0: { emoji: "🐹", ru: "Гарантированное маленькое яйцо. Хороший старт для новичков.", en: "Guaranteed small egg. A great start for newcomers." },
+                1: { emoji: "🐻", ru: "Гарантированное среднее яйцо. Сильнее обычного — больше очков в турнире.", en: "Guaranteed medium egg. Stronger than common — more points in tournaments." },
+                2: { emoji: "🐂", ru: "Гарантированное большое яйцо. Максимальная сила — для твоей корзины.", en: "Guaranteed large egg. Maximum power — for your basket." },
               };
               return (
                 <div
@@ -280,7 +280,7 @@ export function RosterTab({
                     className={`btn-sticker-outline${!has ? " btn-no-eggs" : ""}`}
                     style={{ width: "100%", marginTop: 8, padding: "10px 20px", justifyContent: "center", borderColor: accent, background: has ? accent : undefined, color: has ? "var(--chest-buy-btn-text)" : "var(--no-eggs-text)", boxShadow: `2px 2px 0 var(--card-shadow)` }}
                   >
-                    {isOpening ? "…" : has ? (lang === "ru" ? `Открыть ×${count}` : `Open ×${count}`) : (lang === "ru" ? "Нет яиц" : "No eggs")}
+                    {isOpening ? "…" : has ? (lang === "ru" ? `Почесать ×${count}` : `Scratch ×${count}`) : (lang === "ru" ? "Нет яиц" : "No eggs")}
                   </button>
 
                 </div>
@@ -496,11 +496,11 @@ export function RosterTab({
                         onClick={() => { if (busy) return; setChestOpenQty(1); setChestOpenModal({ type, label, emoji, tier, available: count, grad, ring, buyBg }); }}
                         className="btn-sticker-outline"
                         style={{ width: "100%", padding: "10px 16px", justifyContent: "center", borderColor: chestFill, background: chestFill, color: "var(--chest-buy-btn-text)" }}>
-                        {isOpening ? "…" : (lang === "ru" ? "Открыть" : "Open")}
+                        {isOpening ? "…" : (lang === "ru" ? "Почесать" : "Scratch")}
                       </button>
                       <button
                         onClick={() => {
-                          const d = { 0: { emoji: "🐹", ru: "Гарантированная карточка Tier 1.", en: "Guaranteed Tier 1 card." }, 1: { emoji: "🐻", ru: "Гарантированная карточка Tier 2.", en: "Guaranteed Tier 2 card." }, 2: { emoji: "🐂", ru: "Гарантированная карточка Tier 3.", en: "Guaranteed Tier 3 card." } }[type]!;
+                          const d = { 0: { emoji: "🐹", ru: "Гарантированное маленькое яйцо.", en: "Guaranteed small egg." }, 1: { emoji: "🐻", ru: "Гарантированное среднее яйцо.", en: "Guaranteed medium egg." }, 2: { emoji: "🐂", ru: "Гарантированное большое яйцо.", en: "Guaranteed large egg." } }[type]!;
                           setChestBuyQty(1);
                           setChestBuyModal({ type, label, emoji: d.emoji, rarity: tierLabel, desc: lang === "ru" ? d.ru : d.en, price: type === 0 ? chestPrices.wooden : type === 1 ? chestPrices.iron : chestPrices.silver, buyBg });
                         }}

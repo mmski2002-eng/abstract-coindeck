@@ -25,6 +25,7 @@ interface Deps {
 export function useRosterLogic({ restUrl, moduleAddress, wagmiConfig, submitTx, setBusy, setOnboardingBusy, walletAccount, lang }: Deps) {
   const refreshPromiseRef = useRef<Promise<number> | null>(null);
   const latestCardsRef = useRef<Card[]>([]);
+  const latestChestCountRef = useRef(0);
   const [chestBuyModal, setChestBuyModal] = useState<{ type: number; label: string; emoji: string; rarity: string; desc: string; price: number; buyBg: string } | null>(null);
   const [chestBuyQty, setChestBuyQty] = useState(1);
   const [chestOpenModal, setChestOpenModal] = useState<{ type: number; label: string; emoji: string; tier: number; available: number; grad: string; ring: string; buyBg: string } | null>(null);
@@ -153,7 +154,9 @@ export function useRosterLogic({ restUrl, moduleAddress, wagmiConfig, submitTx, 
         }
         setChestNftAddrs(byType);
         setChestCounts({ wooden: byType.wooden.length, iron: byType.iron.length, silver: byType.silver.length });
-        setFlChests(byType.wooden.length + byType.iron.length + byType.silver.length);
+        const totalChests = byType.wooden.length + byType.iron.length + byType.silver.length;
+        setFlChests(totalChests);
+        latestChestCountRef.current = totalChests;
         return cards.length;
       } catch (e: unknown) {
         setFlError(getErrorMessage(e));
@@ -212,9 +215,14 @@ export function useRosterLogic({ restUrl, moduleAddress, wagmiConfig, submitTx, 
       setTimeout(() => setChestBuySuccess(null), 2000);
     } catch (e: unknown) { setFlError(getErrorMessage(e)); }
     finally { setBusy(null); }
-    for (let i = 0; i < 5; i++) {
-      await new Promise((r) => setTimeout(r, 700));
-      await refreshInventory();
+    {
+      const prevChestCount = latestChestCountRef.current;
+      await new Promise((r) => setTimeout(r, 2000));
+      for (let i = 0; i < 12; i++) {
+        await refreshInventory();
+        if (latestChestCountRef.current > prevChestCount) break;
+        await new Promise((r) => setTimeout(r, 1500));
+      }
     }
   }
 

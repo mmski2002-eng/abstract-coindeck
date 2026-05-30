@@ -301,8 +301,8 @@
       ]
     },
     "C:\\ABSTRACT_COINDECK\\contracts\\contracts\\CoinDeckNFT.sol": {
-      "lastModificationDate": 1780069212045,
-      "contentHash": "785ee1253c779b847638cd17607f6360",
+      "lastModificationDate": 1780134391428,
+      "contentHash": "947fc1c94d346194225bc621bb0c93af",
       "sourceName": "contracts/CoinDeckNFT.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -354,6 +354,7 @@
         "@openzeppelin/contracts/token/ERC721/ERC721.sol",
         "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol",
         "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/utils/Strings.sol",
         "./AdminControl.sol"
       ],
       "versionPragmas": [

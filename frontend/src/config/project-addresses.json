@@ -32,16 +32,16 @@
         "explorerUrl": "https://explorer.testnet.abs.xyz"
       },
       "contracts": {
-        "moduleAddress": "0xcfF1401d87e95CD56F4cc90B3d05E059D1834852",
+        "moduleAddress": "0x557eFCE8F63a57cFAF97e25e8c07698fA71D4FA3",
         "adminAddress": "0xeE2a1267C3CE8a7C4ABB89c2098a39073D326DC0",
-        "prizeVaultAddress": "0x8A304B3519717634a5FB7F883Dbc43E3948ec536",
-        "claimVaultAddress": "0x850Bf7E0D893995eC1ba883C8451E60A1dA71191",
-        "adminControl": "0x8C19998Cb94d3295ba53BB41dC72cB70Abb68106",
-        "coinDeckNFT": "0xcfF1401d87e95CD56F4cc90B3d05E059D1834852",
-        "tournament": "0x8A304B3519717634a5FB7F883Dbc43E3948ec536",
-        "oracle": "0x5A14F5aa9a0F18272f09B07a133422f1A9feAC84",
-        "claim": "0x850Bf7E0D893995eC1ba883C8451E60A1dA71191",
-        "marketplace": "0xc972A93a3E9fe13555feC78BdD2162847Ed889B7"
+        "prizeVaultAddress": "0x0d7c2d6A5C9E2B2988B2071f2e0a345692d06112",
+        "claimVaultAddress": "0x8760A2DA7477D82B1359B614aE55cb10a1ef39D8",
+        "adminControl": "0x5d3df95aF1997fE71935078f56E325438Fe2d440",
+        "coinDeckNFT": "0x557eFCE8F63a57cFAF97e25e8c07698fA71D4FA3",
+        "tournament": "0x0d7c2d6A5C9E2B2988B2071f2e0a345692d06112",
+        "oracle": "0x6E4719dc2B733A6705a1684aA746F44197a72aEB",
+        "claim": "0x8760A2DA7477D82B1359B614aE55cb10a1ef39D8",
+        "marketplace": "0x542dfa5Eb1C5AE07E62d7423Ed374825Fbf0Ac5A"
       },
       "wallets": {
         "debugWallets": [

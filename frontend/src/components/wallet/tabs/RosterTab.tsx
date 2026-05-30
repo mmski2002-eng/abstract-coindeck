@@ -451,7 +451,7 @@ export function RosterTab({
                   <div style={{
                     background: "var(--paper-2)", border: "2.5px solid var(--ink)", borderRadius: 18,
                     boxShadow: "4px 4px 0 var(--card-shadow)", padding: 16,
-                    height: "100%", justifyContent: "space-between",
+                    height: "100%", justifyContent: "flex-start",
                     display: "flex", flexDirection: "column", gap: 12, position: "relative",
                   }}>
                     {/* top row */}
@@ -483,14 +483,14 @@ export function RosterTab({
                       }} />
                       <img src="/egg2.webp" alt={label} loading="lazy"
                         className={isOpening ? "animate-bounce" : "anim-float"}
-                        style={{ width: 72, height: 72, objectFit: "contain", position: "relative" }} />
+                        style={{ width: ([72, 88, 108] as const)[type], height: ([72, 88, 108] as const)[type], objectFit: "contain", position: "relative" }} />
                     </div>
                     {/* name */}
                     <div>
                       <div style={{ color: "var(--ink-2)", fontWeight: 800, fontSize: 14, letterSpacing: -0.2 }}>{label}</div>
                     </div>
                     {/* buttons */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: "auto" }}>
                       <button
                         disabled={busy !== null}
                         onClick={() => { if (busy) return; setChestOpenQty(1); setChestOpenModal({ type, label, emoji, tier, available: count, grad, ring, buyBg }); }}
@@ -544,8 +544,8 @@ export function RosterTab({
               const brand = COIN_BRAND_COLORS[playerId] ?? "#6B7280";
               const ticker = COIN_TICKERS[playerId];
               const coinIcon = COIN_ICONS[playerId];
-              const eggW = "57%";
-              const eggH = "57%";
+              const eggW = ([72, 88, 108, 120] as const)[tier] ?? 88;
+              const eggH = eggW;
               const isLegendary = tier === 3;
               const primerFill = (["#D9D3C2","#7AC7E8","#26C6A8","#88FC00"] as const)[tier] ?? "#D9D3C2";
               return (
@@ -553,7 +553,7 @@ export function RosterTab({
                   <div style={{
                     background: "var(--paper-2)", border: "2.5px solid var(--ink)", borderRadius: 18,
                     boxShadow: isLegendary ? "4px 4px 0 var(--card-shadow), 8px 8px 0 #88FC00" : "4px 4px 0 var(--card-shadow)",
-                    padding: 16, display: "flex", flexDirection: "column", gap: 12, position: "relative", height: "100%", justifyContent: "space-between",
+                    padding: 16, display: "flex", flexDirection: "column", gap: 12, position: "relative", height: "100%", justifyContent: "flex-start",
                   }}>
                     {/* top row: rarity chip + badges */}
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -646,7 +646,7 @@ export function RosterTab({
                     )}
 
                     {/* action buttons */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: "auto" }}>
                       {canMerge ? (
                         <button onClick={() => onMerge(playerId, tier, mergeCardAddrs)} disabled={busy !== null}
                           className="btn-sticker-primary"

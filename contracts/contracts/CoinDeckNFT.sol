@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "./AdminControl.sol";
 
 /**
@@ -11,6 +12,7 @@ import "./AdminControl.sol";
  * ERC-721 РєР°СЂС‚С‹ + СЃСѓРЅРґСѓРєРё, merge, open_chest, inventory
  */
 contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
+    using Strings for uint256;
 
     // в"Ђв"Ђ Constants в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
     uint64 public constant MERGE_COUNT    = 5;
@@ -410,8 +412,12 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
             // mint
             if (isCard) _addCardToInventory(to, firstTokenId);
             else        _addChestToInventory(to, firstTokenId);
-        } else if (to != address(0)) {
-            // transfer (burn = to==0 is handled before _burn)
+        } else if (to == address(0)) {
+            // burn
+            if (isCard) _removeCardFromInventory(from, firstTokenId);
+            else        _removeChestFromInventory(from, firstTokenId);
+        } else {
+            // transfer
             if (isCard) {
                 _removeCardFromInventory(from, firstTokenId);
                 _addCardToInventory(to, firstTokenId);
@@ -494,13 +500,16 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
             CardData memory c = cards[tokenId];
             return string(abi.encodePacked(
                 cardBaseUri,
-                _playerSlug(c.playerId)
+                uint256(c.playerId).toString(),
+                "/",
+                uint256(c.tier).toString()
             ));
         } else {
             ChestData memory ch = chests[tokenId];
-            string memory label = ch.chestType == 0 ? "Wooden Chest" :
-                                  ch.chestType == 1 ? "Iron Chest" : "Silver Chest";
-            return string(abi.encodePacked(chestBaseUri, label, ".png"));
+            return string(abi.encodePacked(
+                chestBaseUri,
+                uint256(ch.chestType).toString()
+            ));
         }
     }
 

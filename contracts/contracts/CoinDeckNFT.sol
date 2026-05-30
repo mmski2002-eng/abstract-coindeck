@@ -249,8 +249,7 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
 
         uint8 chestType = chests[chestId].chestType;
 
-        _removeChestFromInventory(msg.sender, chestId);
-        _burn(chestId);
+        _burn(chestId); // _afterTokenTransfer handles inventory removal
 
         uint8 tier     = chestType; // Woodenв†'Common, Ironв†'Rare, Silverв†'Epic
         uint8 playerId = _pseudoRand(msg.sender, chestId, 0, maxPlayers);
@@ -276,8 +275,7 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
             if (tokenType[chestId] != TYPE_CHEST) revert InvalidChestType();
 
             uint8 chestType = chests[chestId].chestType;
-            _removeChestFromInventory(msg.sender, chestId);
-            _burn(chestId);
+            _burn(chestId); // _afterTokenTransfer handles inventory removal
 
             uint8 tier     = chestType;
             uint8 playerId = _pseudoRand(msg.sender, chestId, uint8(i), maxPlayers);
@@ -310,8 +308,7 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
             CardData memory c = cards[tid];
             if (c.playerId != playerId || c.tier != tier) revert WrongCard();
 
-            _removeCardFromInventory(msg.sender, tid);
-            _burn(tid);
+            _burn(tid); // _afterTokenTransfer handles inventory removal
         }
 
         uint256 newId = _mintCard(msg.sender, playerId, tier + 1);

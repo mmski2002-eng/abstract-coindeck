@@ -29,11 +29,11 @@ export const TIER_MULTS = [100, 140, 190, 250];
 export const CARD_TIER_STYLES = [
   { color: "#9CA3AF", border: "rgba(156,163,175,0.45)", glow: "rgba(156,163,175,0.35)", gradient: "linear-gradient(180deg,rgba(156,163,175,0.18),rgba(156,163,175,0.02))", label: "МАЛЕНЬКОЕ",  enLabel: "SMALL" },
   { color: "#60A5FA", border: "rgba(59,130,246,0.6)",   glow: "rgba(59,130,246,0.45)",  gradient: "linear-gradient(180deg,rgba(59,130,246,0.25),rgba(59,130,246,0.03))",   label: "СРЕДНЕЕ",    enLabel: "MEDIUM" },
-  { color: "#C084FC", border: "rgba(168,85,247,0.65)",  glow: "rgba(168,85,247,0.55)",  gradient: "linear-gradient(180deg,rgba(168,85,247,0.28),rgba(168,85,247,0.03))",   label: "БОЛЬШОЕ",    enLabel: "HEAVY" },
-  { color: "#FBBF24", border: "rgba(245,158,11,0.85)",  glow: "rgba(245,158,11,0.7)",   gradient: "linear-gradient(180deg,rgba(245,158,11,0.32),rgba(245,158,11,0.04))",   label: "ТЯЖЁЛОЕ",    enLabel: "SUPER HEAVY" },
+  { color: "#C084FC", border: "rgba(168,85,247,0.65)",  glow: "rgba(168,85,247,0.55)",  gradient: "linear-gradient(180deg,rgba(168,85,247,0.28),rgba(168,85,247,0.03))",   label: "ТЯЖЕЛОЕ",    enLabel: "HEAVY" },
+  { color: "#FBBF24", border: "rgba(245,158,11,0.85)",  glow: "rgba(245,158,11,0.7)",   gradient: "linear-gradient(180deg,rgba(245,158,11,0.32),rgba(245,158,11,0.04))",   label: "СУПЕР ТЯЖЁЛОЕ",    enLabel: "SUPER HEAVY" },
 ];
 
-export const TIER_NAMES = ["Маленькое", "Среднее", "Большое", "Тяжёлое"];
+export const TIER_NAMES = ["Маленькое", "Среднее", "Тяжелое", "Супер Тяжелое"];
 export const TIER_HEX = ["#71717a", "#3b82f6", "#a855f7", "#f59e0b"];
 export const TIER_COLORS = [
   { border: "border-zinc-500/40", badge: "bg-zinc-800/80 text-zinc-300", glow: "" },

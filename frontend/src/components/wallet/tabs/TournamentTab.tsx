@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   HEROES, COIN_TICKERS, COIN_ICONS, PLAYER_TEAMS,
@@ -94,7 +94,17 @@ export function TournamentTab({
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [coinListOpen, setCoinListOpen] = useState(true);
   const [coinCategoryFilter, setCoinCategoryFilter] = useState<number | "all">("all");
+  const [coinCatOpen, setCoinCatOpen] = useState(false);
+  const coinCatRef = useRef<HTMLDivElement>(null);
   const [nowMs, setNowMs] = useState(() => Date.now());
+
+  useEffect(() => {
+    function handleCoinCatClick(e: MouseEvent) {
+      if (coinCatRef.current && !coinCatRef.current.contains(e.target as Node)) setCoinCatOpen(false);
+    }
+    document.addEventListener("mousedown", handleCoinCatClick);
+    return () => document.removeEventListener("mousedown", handleCoinCatClick);
+  }, []);
 
   useEffect(() => {
     const id = setInterval(() => setNowMs(Date.now()), 1000);
@@ -328,7 +338,7 @@ export function TournamentTab({
           <div className="rounded-2xl p-4 space-y-4" style={{ border: "2.5px solid var(--ink)", background: "var(--my-lots-bg)", boxShadow: "4px 4px 0 var(--card-shadow)" }} data-tour="invest-portfolio">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm font-semibold">
+                <div className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
                   {lang === "ru" ? `День ${tnState.currentDay} · Взвешивание` : `Day ${tnState.currentDay} · Weigh-in`}
                 </div>
                 <div className="text-xs text-zinc-500 mt-0.5">
@@ -342,6 +352,7 @@ export function TournamentTab({
 
             <div className="grid grid-cols-5 gap-2">
               {SLOT_ROLES.map((role, slotIdx) => {
+                const firstEmptySlot = tnSelectedCards.findIndex(addr => !addr);
                 const addr = tnSelectedCards[slotIdx];
                 const card = addr ? flCards.find((c) => c.cardAddr === addr) : null;
                 const isRoleMatch = card ? PLAYER_ROLE_IDS[card.playerId] === slotIdx : false;
@@ -350,7 +361,7 @@ export function TournamentTab({
                 return (
                   <button key={role}
                     onClick={() => { setLineupPickerSlot(isOpen ? null : slotIdx); setLineupPickerSearch(""); }}
-                    className={`relative flex flex-col items-center gap-1.5 rounded-xl border p-2 text-center transition ${card ? tc!.border : ""}`}
+                    className={`relative flex flex-col items-center gap-1 rounded-xl border p-2 text-center transition ${card ? tc!.border : ""}${slotIdx === firstEmptySlot && !card && lineupPickerSlot === null ? " slot-invite" : ""}`}
                     style={isOpen
                       ? { borderColor: "var(--panel-border)", background: "var(--slot-empty-bg)" }
                       : card
@@ -361,16 +372,19 @@ export function TournamentTab({
                     {card ? (
                       <>
                         <div className="text-[9px] font-semibold text-zinc-400 uppercase tracking-wider leading-tight">{role}</div>
-                        <div className="relative w-full aspect-square rounded-lg overflow-hidden">
-                          <img src={COIN_ICONS[card.playerId]} alt="" className="w-full h-full object-contain p-1 opacity-90" />
+                        {/* Egg + coin overlay */}
+                        <div className="relative w-full aspect-square flex items-center justify-center">
+                          <img src="/egg.webp" alt="" className="w-full h-full object-contain" style={{ filter: `drop-shadow(0 2px 8px ${CARD_TIER_STYLES[card.tier]?.glow ?? "rgba(168,85,247,0.4)"})` }} />
+                          <img src={COIN_ICONS[card.playerId]} alt="" className="absolute" style={{ width: "42%", height: "42%", objectFit: "contain", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
                           {isRoleMatch && <div className="absolute top-0.5 right-0.5 text-[10px] leading-none">⚡</div>}
                         </div>
                         <div className="text-[10px] font-semibold text-white leading-tight truncate w-full">{HEROES[card.playerId]}</div>
                         <span className={`text-[9px] rounded px-1 py-0.5 font-bold ${tc!.badge}`}>{TIER_NAMES[card.tier]}</span>
                       </>
                     ) : (
-                      <div className="w-full aspect-square rounded-lg bg-white/5 flex items-center justify-center relative">
-                        <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-zinc-400 uppercase tracking-wider text-center px-1 z-0 leading-tight">{role}</span>
+                      <div className="relative w-full aspect-square flex items-center justify-center">
+                        <img src="/egg.webp" alt="" className="w-full h-full object-contain opacity-30" />
+                        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold uppercase tracking-wider text-center px-1 leading-tight" style={{ color: "#3A4049" }}>{role}</span>
                       </div>
                     )}
                   </button>
@@ -476,10 +490,10 @@ export function TournamentTab({
             <button
               onClick={() => setLineupConfirmOpen(true)}
               disabled={busy !== null || tnSelectedCards.some((c) => c === null)}
-              className="disabled:opacity-40"
+              className={`disabled:opacity-40${busy === null && !tnSelectedCards.some(c => c === null) ? " btn-glow" : ""}`}
               style={{
                 width: "100%", padding: "12px 20px", whiteSpace: "nowrap",
-                background: "var(--paper-3)", color: "var(--header-btn-color)",
+                background: "var(--header-btn-bg)", color: "var(--header-btn-color)",
                 border: "2.5px solid var(--ink)", borderRadius: 999,
                 fontSize: 13, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
                 boxShadow: "4px 4px 0 var(--card-shadow)", transition: "background .12s",
@@ -748,16 +762,36 @@ export function TournamentTab({
                         <th className="px-3 py-2 text-left w-7">#</th>
                         <th className="px-2 py-2 text-left">{lang === "ru" ? "Монета" : "Coin"}</th>
                         <th className="px-2 py-2 text-center">
-                          <select
-                            aria-label={lang === "ru" ? "Категория" : "Category"}
-                            value={coinCategoryFilter}
-                            onChange={(e) => setCoinCategoryFilter(e.target.value === "all" ? "all" : Number(e.target.value))}
-                            className="mx-auto h-7 max-w-[130px] rounded-md px-2 text-[10px] font-semibold outline-none transition focus:border-cyan-400/50"
-                            style={{ border: "2.5px solid var(--ink)", background: "var(--my-lots-bg)", boxShadow: "4px 4px 0 var(--card-shadow)", color: "var(--panel-text)" }}>
-                            {coinCategoryOptions.map((option) => (
-                              <option key={option.value} value={option.value}>{option.label}</option>
-                            ))}
-                          </select>
+                          <div ref={coinCatRef} style={{ position: "relative", display: "inline-block" }}>
+                            <button type="button" className="btn-sticker-outline flex items-center gap-1.5 px-3 py-1.5"
+                              onClick={() => setCoinCatOpen(v => !v)}>
+                              <span className="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">
+                                {coinCategoryOptions.find(o => o.value === coinCategoryFilter)?.label ?? (lang === "ru" ? "Все категории" : "All categories")}
+                              </span>
+                              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="opacity-50" style={{ transform: coinCatOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform .2s" }}>
+                                <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </button>
+                            {coinCatOpen && (
+                              <div style={{ position: "absolute", left: 0, top: "calc(100% + 6px)", zIndex: 50, background: "var(--paper-2)", border: "2.5px solid var(--ink)", borderRadius: 14, boxShadow: "4px 4px 0 var(--shadow-sticker-color)", minWidth: 150 }}>
+                                {coinCategoryOptions.map(({ value, label }, i, arr) => (
+                                  <button key={String(value)} type="button"
+                                    onClick={() => { setCoinCategoryFilter(value); setCoinCatOpen(false); }}
+                                    className="flex w-full items-center px-4 py-2.5 text-xs font-bold transition-colors"
+                                    style={{
+                                      color: coinCategoryFilter === value ? "var(--ink)" : "var(--ink-2)",
+                                      background: coinCategoryFilter === value ? "var(--mint-soft)" : "transparent",
+                                      borderBottom: i < arr.length - 1 ? "1.5px solid rgba(15,17,21,0.12)" : "none",
+                                      borderRadius: i === 0 ? "11px 11px 0 0" : i === arr.length - 1 ? "0 0 11px 11px" : 0,
+                                    }}
+                                    onMouseEnter={e => { if (coinCategoryFilter !== value) e.currentTarget.style.background = "var(--filter-btn-hover-bg)"; }}
+                                    onMouseLeave={e => { e.currentTarget.style.background = coinCategoryFilter === value ? "var(--mint-soft)" : "transparent"; }}>
+                                    {label}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </th>
                         {marketData && (<>
                           <th className="px-2 py-2 text-right text-emerald-500/80">{lang === "ru" ? "Цена%" : "Price%"}</th>

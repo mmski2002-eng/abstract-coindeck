@@ -97,6 +97,10 @@ export const NFT_NICKNAME_ABI = [
     inputs: [{ name: "", type: "address" }],
     outputs: [{ name: "", type: "string" }],
   },
+  { name: "setNickname", type: "function", stateMutability: "nonpayable",
+    inputs: [{ name: "nick", type: "string" }],
+    outputs: [],
+  },
 ] as const;
 
 export const MARKETPLACE_ABI = [
@@ -351,6 +355,17 @@ export async function readEvmInventory(
   );
 
   return { cards, chests };
+}
+
+export async function readEvmNickname(config: Config, addr: `0x${string}`): Promise<string> {
+  const addrs = getRuntimeProjectAddresses();
+  const nick = await readContract(config, {
+    address: addrs.coinDeckNFT as `0x${string}`,
+    abi: NFT_NICKNAME_ABI,
+    functionName: "nicknames",
+    args: [addr],
+  });
+  return nick as string;
 }
 
 export async function readEvmTournamentState(config: Config): Promise<{
@@ -846,6 +861,13 @@ export async function submitEvmTx(
       abi: ADMIN_CONTROL_ABI,
       functionName: "setWithdrawalPolicy",
       args: [Boolean(args[0]), BigInt(args[1] as string | number | bigint), BigInt(args[2] as string | number | bigint)],
+    });
+  } else if (fn.includes("::fantasy_league::set_nickname")) {
+    hash = await wc(config, {
+      address: addrs.coinDeckNFT as `0x${string}`,
+      abi: NFT_NICKNAME_ABI,
+      functionName: "setNickname",
+      args: [args[0] as string],
     });
   } else if (
     fn.includes("::fantasy_league::add_admin") ||

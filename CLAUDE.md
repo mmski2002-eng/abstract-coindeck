@@ -191,10 +191,40 @@ scripts/                 Утилиты (oracle_post.js, daily_lineup_bot.js, et
 - `database/schema.sql` — PostgreSQL схема
 
 ## Deployment
-- Server: `216.173.70.241`, domain: `https://escape.isgood.host`
+
+### Server
+- IP: `216.173.70.241`, domain: `https://escape.isgood.host`
+- SSH: `ssh root@216.173.70.241` (password: `REDACTED`)
+- App dir: `/var/www/abstract-coindeck`
 - PM2 process: `abstract-coindeck` (id=5), port `3003`
-- DB: PostgreSQL `abstract`, user `abstract_app`
-- Deploy: build standalone locally → rsync → pm2 restart
+- DB: PostgreSQL, db=`abstract`, user=`abstract_app`
+
+### Подключение из агента (Windows, нет sshpass)
+Используй Python + paramiko (установлен):
+```python
+import paramiko
+client = paramiko.SSHClient()
+client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+client.connect('216.173.70.241', username='root', password='REDACTED')
+# выполнить команду:
+stdin, stdout, stderr = client.exec_command('pm2 list')
+print(stdout.read().decode())
+# загрузить файл:
+sftp = client.open_sftp()
+sftp.put('local/path/file', '/remote/path/file')
+client.close()
+```
+
+### Deploy flow
+1. `cd frontend && npm run build` — собрать standalone
+2. Загрузить `.next/standalone/`, `.next/static/`, `public/` на сервер через paramiko SFTP
+3. `pm2 restart abstract-coindeck`
+
+### Статические файлы
+- `/var/www/abstract-coindeck/public/cards/` — NFT карты (`0_0.png` … `49_0.png`)
+- `/var/www/abstract-coindeck/public/coins/` — иконки монет
+- `/var/www/abstract-coindeck/public/chests/` — сундуки
+- Nginx раздаёт `/cards/`, `/coins/`, `/chests/` напрямую из `public/`, остальное → proxy `localhost:3003`
 
 ## Notes
 - AGW (Abstract Global Wallet) — смарт-контракт кошельки с native AA; используй `useAbstractClient` для транзакций

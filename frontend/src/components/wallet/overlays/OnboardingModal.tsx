@@ -32,8 +32,8 @@ export function OnboardingModal({
       icon: "🚀",
       title: ru ? "Добро пожаловать в CoinDeck" : "Welcome to CoinDeck",
       body: ru
-        ? "Крипто-фэнтези лига на блокчейне Abstract.\nСобирай карточки топ-50 криптовалют, составляй команду и побеждай в ежедневных турнирах."
-        : "A crypto fantasy league on the Abstract blockchain.\nCollect cards of top-50 crypto coins, build your team, and win daily tournaments.",
+        ? "Крипто-фэнтези лига на блокчейне Movement.\nСобирай карточки топ-50 криптовалют, составляй команду и побеждай в ежедневных турнирах."
+        : "A crypto fantasy league on the Movement blockchain.\nCollect cards of top-50 crypto coins, build your team, and win daily tournaments.",
     },
     {
       icon: "🃏",

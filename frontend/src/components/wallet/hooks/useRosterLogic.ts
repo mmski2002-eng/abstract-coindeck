@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Config } from "@wagmi/core";
 import type { TransactionPayload, TxOptions } from "../types";
 import { getErrorMessage } from "../utils";
-import { readEvmChestPrices, readEvmInventory } from "@/lib/evmContracts";
+import { readEvmChestPrices, readEvmInventory, readEvmNickname } from "@/lib/evmContracts";
 
 type Card = { playerId: number; tier: number; cardAddr: string };
 const MAX_NICKNAME_BYTES = 14;
@@ -39,8 +39,8 @@ export function useRosterLogic({ restUrl, moduleAddress, wagmiConfig, submitTx, 
   const [freeClaimed, setFreeClaimed] = useState(false);
   const [flCards, setFlCards] = useState<Card[]>([]);
   const [flChests, setFlChests] = useState(0);
-  const [flInitialized, setFlInitialized] = useState(true);
-  const [flInventoryChecked, setFlInventoryChecked] = useState(true);
+  const [flInitialized, setFlInitialized] = useState(false);
+  const [flInventoryChecked, setFlInventoryChecked] = useState(false);
   const [flError, setFlError] = useState("");
   const [flRefreshing, setFlRefreshing] = useState(false);
   const [openingChest, setOpeningChest] = useState(false);
@@ -71,45 +71,19 @@ export function useRosterLogic({ restUrl, moduleAddress, wagmiConfig, submitTx, 
     // EVM: no inventory initialization needed — ERC-721 native
   }
 
-  async function hasInventoryOnChain(): Promise<boolean> {
-    if (!walletAccount) return false;
-    try {
-      const addr = String(walletAccount.address ?? "").trim();
-      if (!addr.startsWith("0x")) return false;
-      const inventory = await readEvmInventory(wagmiConfig, addr as `0x${string}`);
-      return inventory.cards.length > 0 || inventory.chests.length > 0;
-    } catch {
-      return false;
-    }
-  }
-
   async function handleOnboardingCreate(nickname: string) {
     setOnboardingBusy(true);
     try {
-      await ensureInitialized(nickname);
+      await submitTx({
+        function: `${moduleAddress}::fantasy_league::set_nickname`,
+        typeArguments: [],
+        functionArguments: [nickname],
+      });
+      const addr = String(walletAccount?.address ?? "").trim();
       try {
         localStorage.setItem("player_nickname", nickname);
-        const addr = String(walletAccount?.address ?? "").trim();
         if (addr) localStorage.setItem(nicknameStorageKey(addr), nickname);
       } catch {}
-
-      let initialized = false;
-      for (let i = 0; i < 5; i++) {
-        await new Promise((r) => setTimeout(r, i === 0 ? 800 : 1200));
-        initialized = await hasInventoryOnChain();
-        if (initialized) {
-          await refreshInventory();
-          initialized = true;
-          break;
-        }
-      }
-
-      if (!initialized) {
-        throw new Error(lang === "ru"
-          ? "Транзакция отправлена, но аккаунт пока не появился в сети. Попробуй ещё раз через пару секунд."
-          : "The transaction was sent, but the account is not visible on-chain yet. Please try again in a few seconds.");
-      }
-
       setFlInitialized(true);
     } finally {
       setOnboardingBusy(false);
@@ -133,8 +107,12 @@ export function useRosterLogic({ restUrl, moduleAddress, wagmiConfig, submitTx, 
 
         const inventory = await readEvmInventory(wagmiConfig, addr as `0x${string}`);
 
-        setFlInitialized(true);
         setFlInventoryChecked(true);
+        const onChainNick = await readEvmNickname(wagmiConfig, addr as `0x${string}`).catch(() => "");
+        if (onChainNick) {
+          try { localStorage.setItem(nicknameStorageKey(addr), onChainNick); } catch {}
+          setFlInitialized(true);
+        }
 
         const cards = inventory.cards.map((card) => ({
           playerId: card.playerId,

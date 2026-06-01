@@ -259,6 +259,11 @@ export function RankingsTab({
         </div>
       )}
 
+      {/* Table header */}
+      <div className="flex items-center gap-2 px-1">
+        <span className="text-base font-bold" style={{ color: "var(--panel-text)" }}>{lang === "ru" ? "🏆 Топ тяжеловесов" : "🏆 Top Heavyweights"}</span>
+      </div>
+
       {/* Table */}
       {lbLoading && lbRows.length === 0 ? (
         <div className="rounded-2xl p-10 text-center text-sm" style={{ border: "1px solid var(--panel-border)", background: "var(--my-lots-bg)", color: "var(--panel-text-muted)" }}>

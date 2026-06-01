@@ -113,13 +113,13 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
               <button
                 onClick={() => handleQtyChange(-1)}
                 className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90"
-                style={{ background: t.accent + "30", border: "1.5px solid var(--ink)", color: "var(--ink)" }}
+                style={{ background: t.accent, border: "1.5px solid var(--ink)", color: "#111" }}
               >−</button>
               <span className="w-10 text-center font-bold text-base tabular-nums" style={{ color: "var(--panel-text)" }}>{chestBuyQty}</span>
               <button
                 onClick={() => handleQtyChange(1)}
                 className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90"
-                style={{ background: t.accent + "30", border: "1.5px solid var(--ink)", color: "var(--ink)" }}
+                style={{ background: t.accent, border: "1.5px solid var(--ink)", color: "#111" }}
               >+</button>
             </div>
           </div>

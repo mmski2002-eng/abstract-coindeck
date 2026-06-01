@@ -68,7 +68,7 @@ export const ASSETS: Asset[] = [
   { name: "Pepe",              ticker: "PEPE",  cgkId: "pepe",                     roleId: 4, team: "Meme",           role: "Meme",       brandColor: "#ED1EFF", cgkSlug: "29850/small/pepe-token.jpeg",                       iconPath: "/coins/46_PEPE.webp", githubRepo: null },
   { name: "Bonk",              ticker: "BONK",  cgkId: "bonk",                     roleId: 4, team: "Meme",           role: "Meme",       brandColor: "#FF9900", cgkSlug: "28600/small/bonk.jpg",                              iconPath: "/coins/47_BONK.webp", githubRepo: null },
   { name: "dogwifhat",         ticker: "WIF",   cgkId: "dogwifcoin",               roleId: 4, team: "Meme",           role: "Meme",       brandColor: "#FF6B35", cgkSlug: "33566/small/dogwifhat.jpg",                         iconPath: "/coins/48_WIF.webp",  githubRepo: null },
-  { name: "Abstract",          ticker: "ABS",   cgkId: "movement",                 roleId: 0, team: "Layer 1",        role: "Move VM",    brandColor: "#00c2d7", cgkSlug: "32452/small/movement.jpg",                          iconPath: "/coins/49_MOVE.webp", githubRepo: "movementlabsxyz/movement" },
+  { name: "Movement",          ticker: "MOVE",  cgkId: "movement",                 roleId: 0, team: "Layer 1",        role: "Move VM",    brandColor: "#00c2d7", cgkSlug: "32452/small/movement.jpg",                          iconPath: "/coins/49_MOVE.webp", githubRepo: "movementlabsxyz/movement" },
 ];
 
 // Derived flat arrays — used as backward-compat exports and by workers.

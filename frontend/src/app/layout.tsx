@@ -27,7 +27,12 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "CoinDeck",
-  description: "CoinDeck dApp on Abstract with wallet connect",
+  description: "CoinDeck dApp on Movement with wallet connect",
+  twitter: {
+    site: "@MrHeavyEggs",
+    creator: "@MrHeavyEggs",
+    card: "summary_large_image",
+  },
 };
 
 const suppressMetaMaskConnectNoise = `
@@ -80,6 +85,20 @@ const initThemeScript = `
 })();
 `;
 
+async function loadPaletteCSS(): Promise<string> {
+  try {
+    const { readFile } = await import("fs/promises");
+    const { join } = await import("path");
+    const raw = await readFile(join(process.cwd(), "data", "palette.json"), "utf-8");
+    const pal = JSON.parse(raw) as { light?: Record<string, string>; dark?: Record<string, string> };
+    const lv = Object.entries(pal.light ?? {}).filter(([, v]) => v).map(([k, v]) => `${k}:${v}`).join(";");
+    const dv = Object.entries(pal.dark ?? {}).filter(([, v]) => v).map(([k, v]) => `${k}:${v}`).join(";");
+    return (lv ? `:root{${lv}}` : "") + (dv ? `html[data-theme="dark"]{${dv}}` : "");
+  } catch {
+    return "";
+  }
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -88,6 +107,7 @@ export default async function RootLayout({
   const cookieStore = await cookies();
   const storedTheme = cookieStore.get("cd_theme")?.value;
   const initialTheme = storedTheme === "dark" || storedTheme === "light" ? storedTheme : "light";
+  const paletteCSS = await loadPaletteCSS();
 
   return (
     <html
@@ -104,6 +124,7 @@ export default async function RootLayout({
         <Script id="suppress-metamask-noise" strategy="beforeInteractive">
           {suppressMetaMaskConnectNoise}
         </Script>
+        {paletteCSS && <style id="cd-palette" dangerouslySetInnerHTML={{ __html: paletteCSS }} />}
       </head>
       <body className="min-h-full flex flex-col font-body">
         <SuppressExtensionErrors />

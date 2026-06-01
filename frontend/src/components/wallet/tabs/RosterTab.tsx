@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import {
   HEROES, COIN_TICKERS, COIN_ICONS, COIN_BRAND_COLORS,
   CARD_TIER_STYLES, PLAYER_ROLES, ALL_TEAMS,
@@ -63,6 +64,36 @@ export function RosterTab({
   setSellModal, setSellPrice, setTransferModal, setTransferRecipient, setQuickBuyMergeModal, onMerge,
   lockedCardAddrs,
 }: Props) {
+  const [tierOpen, setTierOpen] = useState(false);
+  const [teamOpen, setTeamOpen] = useState(false);
+  const tierRef = useRef<HTMLDivElement>(null);
+  const teamRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (tierRef.current && !tierRef.current.contains(e.target as Node)) setTierOpen(false);
+      if (teamRef.current && !teamRef.current.contains(e.target as Node)) setTeamOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const TIER_OPTIONS = [
+    { id: null,  label: lang === "ru" ? "Все редкости" : "All rarities" },
+    { id: 0,     label: lang === "ru" ? "Маленькое" : "Small" },
+    { id: 1,     label: lang === "ru" ? "Среднее" : "Medium" },
+    { id: 2,     label: lang === "ru" ? "Тяжелое" : "Heavy" },
+    { id: 3,     label: lang === "ru" ? "Супер Тяжелое" : "Super Heavy" },
+  ] as { id: number | null; label: string }[];
+
+  const TEAM_OPTIONS = [
+    { id: null, label: lang === "ru" ? "Все типы" : "All types" },
+    ...ALL_TEAMS.map(t => ({ id: t, label: t })),
+  ];
+
+  const tierLabel = TIER_OPTIONS.find(o => o.id === filterTier)?.label ?? (lang === "ru" ? "Все редкости" : "All rarities");
+  const teamLabel = TEAM_OPTIONS.find(o => o.id === filterTeam)?.label ?? (lang === "ru" ? "Все типы" : "All types");
+
   return (
     <>
       {/* Stats bar */}
@@ -71,9 +102,9 @@ export function RosterTab({
           <div className="relative grid grid-cols-2 gap-3 rounded-3xl p-3 lg:grid-cols-4" style={{ border: "2.5px solid var(--ink)", background: "var(--info-block-shell)", boxShadow: "4px 4px 0 var(--info-shell-shadow)" }}>
             {([
               { label: lang === "ru" ? "НФТ" : "NFTs", value: String(flCards.length + chestCounts.wooden + chestCounts.iron + chestCounts.silver), unit: lang === "ru" ? "шт" : "pcs", accent: "from-violet-400/40 to-violet-600/10", delta: `${new Set(flCards.map((c) => c.playerId)).size} ${lang === "ru" ? "монет" : "coins"}`, rot: -4.5 },
-              { label: lang === "ru" ? "Сундуков" : "Chests", value: String(chestCounts.wooden + chestCounts.iron + chestCounts.silver), unit: lang === "ru" ? "шт" : "pcs", accent: "from-amber-400/40 to-amber-600/10", delta: `🪵×${chestCounts.wooden} 🪨×${chestCounts.iron} 🪙×${chestCounts.silver}`, rot: 2.4 },
+              { label: lang === "ru" ? "Яиц" : "Eggs", value: String(chestCounts.wooden + chestCounts.iron + chestCounts.silver), unit: lang === "ru" ? "шт" : "pcs", accent: "from-amber-400/40 to-amber-600/10", delta: `🪵×${chestCounts.wooden} 🪨×${chestCounts.iron} 🪙×${chestCounts.silver}`, rot: 2.4 },
               { label: lang === "ru" ? "Готово к слиянию" : "Merge ready", value: String(mergeReadyCount), unit: lang === "ru" ? "стаков" : "stacks", accent: "from-fuchsia-400/40 to-fuchsia-600/10", delta: lang === "ru" ? "×5 → уровень выше" : "×5 → tier up", rot: -1.8 },
-              { label: lang === "ru" ? "Эпик / Легенда" : "Epic / Legend", value: String(flCards.filter((c) => c.tier >= 2).length), unit: lang === "ru" ? "карт" : "cards", accent: "from-blue-400/40 to-blue-600/10", delta: lang === "ru" ? "редкие карточки" : "rare cards", rot: 3.6 },
+              { label: lang === "ru" ? "Тяжелое / Супер тяжелое" : "Heavy / Super Heavy", value: String(flCards.filter((c) => c.tier >= 2).length), unit: lang === "ru" ? "яиц" : "eggs", accent: "from-blue-400/40 to-blue-600/10", delta: lang === "ru" ? "Тяжелые яйца" : "Heavy eggs", rot: 3.6 },
             ] as const).map((s, i) => (
               <div key={i} style={{ transform: `rotate(${s.rot}deg)` }}>
                 <div className="relative group overflow-hidden rounded-2xl p-5 anim-card-entry" style={{ animationDelay: `${i * 80}ms`, border: "2.5px solid var(--ink)", background: "var(--info-block-card)", boxShadow: "2px 2px 0 var(--card-shadow)" }}>
@@ -162,9 +193,9 @@ export function RosterTab({
               },
               {
                 type: 2 as const,
-                label:     lang === "ru" ? "Большое яйцо" : "Large Egg",
-                tierLabel: lang === "ru" ? "Большое" : "Heavy",
-                rarity:    lang === "ru" ? "Большое" : "Heavy",
+                label:     lang === "ru" ? "Тяжелое яйцо" : "Large Egg",
+                tierLabel: lang === "ru" ? "Тяжелое" : "Heavy",
+                rarity:    lang === "ru" ? "Тяжелое" : "Heavy",
                 dropLabel: lang === "ru" ? "Большие карточки" : "Large cards",
                 accent:    "#26C6A8",
                 accentSoft:"rgba(38,198,168,0.18)",
@@ -329,75 +360,78 @@ export function RosterTab({
           .card-legendary-border > * { position:relative; z-index:1; }
         `}</style>
         {flCards.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide flex-1">
-                {[null, ...ALL_TEAMS].map((team) => {
-                  const active = filterTeam === team;
-                  return (
-                    <button key={team ?? "all"} onClick={() => setFilterTeam(team)}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", paddingBottom: 4 }}>
+            {/* Tier filter */}
+            <div ref={tierRef} style={{ position: "relative" }}>
+              <button type="button" className="btn-sticker-outline flex items-center gap-1.5 px-3 py-2"
+                onClick={() => { setTierOpen(v => !v); setTeamOpen(false); }}>
+                <span className="text-xs font-bold uppercase tracking-widest">{tierLabel}</span>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="opacity-50" style={{ transform: tierOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform .2s" }}>
+                  <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              {tierOpen && (
+                <div className="absolute left-0 top-full z-50 mt-2" style={{ background: "var(--paper-2)", border: "2.5px solid var(--ink)", borderRadius: 14, boxShadow: "4px 4px 0 var(--shadow-sticker-color)", minWidth: 160 }}>
+                  {TIER_OPTIONS.map(({ id, label }, i, arr) => (
+                    <button key={String(id)} type="button"
+                      onClick={() => { setFilterTier(id); setTierOpen(false); }}
+                      className="flex w-full items-center px-4 py-3 text-sm font-bold transition-colors"
                       style={{
-                        padding: "8px 14px", whiteSpace: "nowrap",
-                        background: active ? "var(--mint)" : "var(--paper-3)",
-                        color: "var(--header-btn-color)", border: "2.5px solid var(--ink)", borderRadius: 999,
-                        fontSize: 11, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
-                        boxShadow: active ? "4px 4px 0 var(--card-shadow)" : "2px 2px 0 var(--card-shadow)",
-                        transition: "background .12s",
+                        color: filterTier === id ? "var(--ink)" : "var(--ink-2)",
+                        background: filterTier === id ? "var(--mint-soft)" : "transparent",
+                        borderBottom: i < arr.length - 1 ? "1.5px solid rgba(15,17,21,0.12)" : "none",
+                        borderRadius: i === 0 ? "11px 11px 0 0" : i === arr.length - 1 ? "0 0 11px 11px" : 0,
                       }}
-                      onMouseEnter={e => { if (!active) e.currentTarget.style.background = "var(--sky-soft)"; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = active ? "var(--mint)" : "var(--paper-3)"; }}>
-                      {team ?? (lang === "ru" ? "Все" : "All")}
+                      onMouseEnter={e => { if (filterTier !== id) e.currentTarget.style.background = "var(--filter-btn-hover-bg)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = filterTier === id ? "var(--mint-soft)" : "transparent"; }}>
+                      {label}
                     </button>
-                  );
-                })}
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
-                {([
-                  { value: "progress" as const, labelRu: "ПРОГРЕСС", labelEn: "PROGRESS" },
-                  { value: "rarity" as const,   labelRu: "РЕДКОСТЬ", labelEn: "RARITY" },
-                ]).map(({ value, labelRu, labelEn }) => {
-                  const active = sortBy === value;
-                  return (
-                    <button key={value} type="button" onClick={() => setSortBy(value)}
-                      style={{
-                        padding: "8px 14px", whiteSpace: "nowrap",
-                        background: active ? "var(--mint)" : "var(--paper-3)",
-                        color: "var(--header-btn-color)", border: "2.5px solid var(--ink)", borderRadius: 999,
-                        fontSize: 11, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
-                        boxShadow: active ? "4px 4px 0 var(--card-shadow)" : "2px 2px 0 var(--card-shadow)",
-                        transition: "background .12s",
-                      }}
-                      onMouseEnter={e => { if (!active) e.currentTarget.style.background = "var(--sky-soft)"; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = active ? "var(--mint)" : "var(--paper-3)"; }}
-                      aria-pressed={active}>
-                      {lang === "ru" ? labelRu : labelEn}
-                    </button>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="flex gap-2 flex-wrap pb-1">
+            {/* Team filter */}
+            <div ref={teamRef} style={{ position: "relative" }}>
+              <button type="button" className="btn-sticker-outline flex items-center gap-1.5 px-3 py-2"
+                onClick={() => { setTeamOpen(v => !v); setTierOpen(false); }}>
+                <span className="text-xs font-bold uppercase tracking-widest">{teamLabel}</span>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="opacity-50" style={{ transform: teamOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform .2s" }}>
+                  <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              {teamOpen && (
+                <div className="absolute left-0 top-full z-50 mt-2" style={{ background: "var(--paper-2)", border: "2.5px solid var(--ink)", borderRadius: 14, boxShadow: "4px 4px 0 var(--shadow-sticker-color)", minWidth: 160 }}>
+                  {TEAM_OPTIONS.map(({ id, label }, i, arr) => (
+                    <button key={String(id)} type="button"
+                      onClick={() => { setFilterTeam(id); setTeamOpen(false); }}
+                      className="flex w-full items-center px-4 py-3 text-sm font-bold transition-colors"
+                      style={{
+                        color: filterTeam === id ? "var(--ink)" : "var(--ink-2)",
+                        background: filterTeam === id ? "var(--mint-soft)" : "transparent",
+                        borderBottom: i < arr.length - 1 ? "1.5px solid rgba(15,17,21,0.12)" : "none",
+                        borderRadius: i === 0 ? "11px 11px 0 0" : i === arr.length - 1 ? "0 0 11px 11px" : 0,
+                      }}
+                      onMouseEnter={e => { if (filterTeam !== id) e.currentTarget.style.background = "var(--filter-btn-hover-bg)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = filterTeam === id ? "var(--mint-soft)" : "transparent"; }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            {/* Sort */}
+            <div style={{ marginLeft: "auto", display: "flex", gap: 8, flexShrink: 0 }}>
               {([
-                { id: null, label: lang === "ru" ? "Все" : "All" },
-                { id: 0,    label: lang === "ru" ? "Маленькое" : "Small" },
-                { id: 1,    label: lang === "ru" ? "Среднее" : "Medium" },
-                { id: 2,    label: lang === "ru" ? "Большое" : "Heavy" },
-                { id: 3,    label: lang === "ru" ? "Тяжёлое" : "Super Heavy" },
-              ] as { id: number | null; label: string }[]).map(({ id, label }) => {
-                const active = filterTier === id;
+                { value: "rarity" as const,   labelRu: "РЕДКОСТЬ",  labelEn: "RARITY" },
+                { value: "progress" as const, labelRu: "ПРОГРЕСС",  labelEn: "PROGRESS" },
+              ]).map(({ value, labelRu, labelEn }) => {
+                const active = sortBy === value;
                 return (
-                  <button key={id ?? "all"} onClick={() => setFilterTier(id)}
-                    style={{
-                      padding: "8px 14px", whiteSpace: "nowrap",
-                      background: active ? "var(--mint)" : "var(--paper-3)",
-                      color: "var(--header-btn-color)", border: "2.5px solid var(--ink)", borderRadius: 999,
-                      fontSize: 11, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
-                      boxShadow: active ? "4px 4px 0 var(--card-shadow)" : "2px 2px 0 var(--card-shadow)",
-                      transition: "background .12s",
-                    }}
-                    onMouseEnter={e => { if (!active) e.currentTarget.style.background = "var(--sky-soft)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = active ? "var(--mint)" : "var(--paper-3)"; }}>
-                    {label}
+                  <button key={value} type="button" onClick={() => setSortBy(value)}
+                    className="btn-sticker-outline"
+                    style={{ padding: "8px 14px", fontSize: 11, letterSpacing: 1.4, fontWeight: 800, background: active ? "var(--header-btn-active-bg)" : undefined }}
+                    aria-pressed={active}>
+                    {lang === "ru" ? labelRu : labelEn}
                   </button>
                 );
               })}
@@ -420,7 +454,7 @@ export function RosterTab({
               </div>
             ))}
             <div className="col-span-2 sm:col-span-3 md:col-span-4 lg:col-span-5 text-center text-sm text-zinc-500 pt-2">
-              {lang === "ru" ? "Открой сундук чтобы получить первую карточку" : "Open a chest to get your first card"}
+              {lang === "ru" ? "Почеши яйцо, чтобы получить первое нфт" : "Scratch an egg to get your first NFT"}
             </div>
           </div>
         ) : flGroups.length === 0 && (filterTeam !== null || filterTier !== null) ? (
@@ -437,15 +471,15 @@ export function RosterTab({
         ) : (
           <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5" data-tour="roster-cards">
             {/* Chest items in the grid */}
-            {!filterTeam && !filterTier && ([
+            {!filterTeam && ([
               { type: 0 as const, label: lang === "ru" ? "Маленькое яйцо" : "Small Egg", grad: "from-sky-900/50 to-cyan-900/30",    ring: "ring-sky-500/60",    buyBg: "bg-sky-700/70 hover:bg-sky-700",       count: chestCounts.wooden, tier: 0, emoji: "🐹" },
               { type: 1 as const, label: lang === "ru" ? "Среднее яйцо" : "Medium Egg",   grad: "from-slate-700/50 to-blue-900/30",  ring: "ring-blue-500/60",   buyBg: "bg-blue-700/70 hover:bg-blue-700",     count: chestCounts.iron,   tier: 1, emoji: "🐻" },
-              { type: 2 as const, label: lang === "ru" ? "Большое яйцо" : "Large Egg",      grad: "from-purple-900/50 to-violet-900/30", ring: "ring-purple-500/60", buyBg: "bg-purple-700/70 hover:bg-purple-700", count: chestCounts.silver, tier: 2, emoji: "🐂" },
-            ]).filter(c => c.count > 0).map(({ type, label, grad, ring, buyBg, count, tier, emoji }) => {
+              { type: 2 as const, label: lang === "ru" ? "Тяжелое яйцо" : "Large Egg",      grad: "from-purple-900/50 to-violet-900/30", ring: "ring-purple-500/60", buyBg: "bg-purple-700/70 hover:bg-purple-700", count: chestCounts.silver, tier: 2, emoji: "🐂" },
+            ]).filter(c => c.count > 0 && (filterTier === null || filterTier === c.tier)).map(({ type, label, grad, ring, buyBg, count, tier, emoji }) => {
               const isOpening = busy === `fl_open_${type}`;
               const chestImg = ["/chests/wooden_closed.webp", "/chests/iron_closed.webp", "/chests/silver_closed.webp"][type];
               const chestFill = (["#D9D3C2","#7AC7E8","#26C6A8"] as const)[type] ?? "#D9D3C2";
-              const tierLabel = type === 0 ? (lang === "ru" ? "Маленькое" : "Small") : type === 1 ? (lang === "ru" ? "Среднее" : "Medium") : (lang === "ru" ? "Большое" : "Heavy");
+              const tierLabel = type === 0 ? (lang === "ru" ? "Маленькое" : "Small") : type === 1 ? (lang === "ru" ? "Среднее" : "Medium") : (lang === "ru" ? "Тяжелое" : "Heavy");
               return (
                 <article key={`chest_${type}`} className="anim-card-entry select-none" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
                   <div style={{
@@ -539,7 +573,7 @@ export function RosterTab({
               const unlockedCardAddr = lockedCount > 0
                 ? (flCards.find(c => c.playerId === playerId && c.tier === tier && !lockedCardAddrs.includes(c.cardAddr))?.cardAddr ?? "")
                 : cardAddr;
-              const isNew = newCardKeys.has(`${playerId}_${tier}`);
+
               const ts = CARD_TIER_STYLES[tier] ?? CARD_TIER_STYLES[0];
               const brand = COIN_BRAND_COLORS[playerId] ?? "#6B7280";
               const ticker = COIN_TICKERS[playerId];
@@ -567,13 +601,6 @@ export function RosterTab({
                         {lang === "ru" ? ts.label : ts.enLabel}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                        {isNew && (
-                          <div style={{
-                            fontSize: 9, letterSpacing: 1.5, fontWeight: 800, padding: "3px 8px",
-                            borderRadius: 999, background: "var(--lime-pop)", color: "var(--ink)",
-                            border: "2.5px solid var(--ink)", boxShadow: "2px 2px 0 var(--card-shadow)",
-                          }}>NEW</div>
-                        )}
                         <div style={{
                           fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 999,
                           background: primerFill, color: "var(--ink)",

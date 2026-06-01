@@ -156,7 +156,7 @@ function Inner({
   // ── filter / sort state ───────────────────────────────────────────────────────
   const [filterTeam, setFilterTeam] = useState<string | null>(null);
   const [filterTier, setFilterTier] = useState<number | null>(null);
-  const [sortBy, setSortBy] = useState<"rarity" | "progress">("progress");
+  const [sortBy, setSortBy] = useState<"rarity" | "progress">("rarity");
   const [rosterPage, setRosterPage] = useState(0);
   const ROSTER_PAGE_SIZE = 15;
 

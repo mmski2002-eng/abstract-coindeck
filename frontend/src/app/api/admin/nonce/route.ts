@@ -14,6 +14,7 @@ import {
   LEADERBOARD_REFRESH_ACTION,
   MARKET_DATA_PARSE_ACTION,
   MARKET_SNAPSHOT_SAVE_ACTION,
+  PALETTE_ACTION,
 } from "@/lib/adminAuth";
 import { cleanupExpiredNonces } from "@/lib/storage/adminAuth";
 import { cleanupRateLimitCounters } from "@/lib/storage/rateLimit";
@@ -26,6 +27,7 @@ const ALLOWED_ACTIONS = new Set([
   LEADERBOARD_REFRESH_ACTION,
   MARKET_DATA_PARSE_ACTION,
   MARKET_SNAPSHOT_SAVE_ACTION,
+  PALETTE_ACTION,
 ]);
 
 export async function GET(req: NextRequest) {

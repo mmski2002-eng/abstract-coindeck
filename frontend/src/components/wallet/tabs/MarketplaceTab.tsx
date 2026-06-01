@@ -138,22 +138,22 @@ export function MarketplaceTab({
             { t: null, label: lang === "ru" ? "Все" : "All" },
             { t: 0,    label: lang === "ru" ? "Маленькое" : "Small" },
             { t: 1,    label: lang === "ru" ? "Среднее" : "Medium" },
-            { t: 2,    label: lang === "ru" ? "Большое" : "Heavy" },
-            { t: 3,    label: lang === "ru" ? "Тяжёлое" : "Super Heavy" },
+            { t: 2,    label: lang === "ru" ? "Тяжелое" : "Heavy" },
+            { t: 3,    label: lang === "ru" ? "Супер Тяжелое" : "Super Heavy" },
           ] as { t: number | null; label: string }[]).map(({ t, label }) => {
             const active = mpFilterTier === t;
             return (
               <button key={t ?? "all"} onClick={() => setMpFilterTier(t)}
                 style={{
                   padding: "8px 14px", whiteSpace: "nowrap",
-                  background: active ? "var(--mint)" : "var(--paper-3)",
+                  background: active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)",
                   color: "var(--header-btn-color)", border: "2.5px solid var(--ink)", borderRadius: 999,
                   fontSize: 11, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
-                  boxShadow: active ? "4px 4px 0 var(--card-shadow)" : "2px 2px 0 var(--card-shadow)",
+                  boxShadow: active ? "var(--filter-btn-shadow-active)" : "var(--filter-btn-shadow)",
                   transition: "background .12s",
                 }}
-                onMouseEnter={e => { if (!active) e.currentTarget.style.background = "var(--sky-soft)"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = active ? "var(--mint)" : "var(--paper-3)"; }}>
+                onMouseEnter={e => { if (!active) e.currentTarget.style.background = "var(--filter-btn-hover-bg)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)"; }}>
                 {label}
               </button>
             );
@@ -166,14 +166,14 @@ export function MarketplaceTab({
               <button key={team ?? "all"} onClick={() => setMpFilterTeam(team)}
                 style={{
                   padding: "8px 14px", whiteSpace: "nowrap",
-                  background: active ? "var(--mint)" : "var(--paper-3)",
+                  background: active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)",
                   color: "var(--header-btn-color)", border: "2.5px solid var(--ink)", borderRadius: 999,
                   fontSize: 11, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
-                  boxShadow: active ? "4px 4px 0 var(--card-shadow)" : "2px 2px 0 var(--card-shadow)",
+                  boxShadow: active ? "var(--filter-btn-shadow-active)" : "var(--filter-btn-shadow)",
                   transition: "background .12s",
                 }}
-                onMouseEnter={e => { if (!active) e.currentTarget.style.background = "var(--sky-soft)"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = active ? "var(--mint)" : "var(--paper-3)"; }}>
+                onMouseEnter={e => { if (!active) e.currentTarget.style.background = "var(--filter-btn-hover-bg)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)"; }}>
                 {team ?? (lang === "ru" ? "Все" : "All")}
               </button>
             );

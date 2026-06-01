@@ -97,22 +97,22 @@ export function MarketingHome() {
   const langRef = React.useRef<HTMLDivElement>(null);
 
   const tabs: { id: Tab; ru: string; en: string; icon: React.ElementType; adminOnly?: boolean }[] = [
-    { id: "roster", ru: "Мои яйца", en: "My Eggs", icon: Wallet },
+    { id: "roster", ru: "Мои Яйца", en: "My Eggs", icon: Wallet },
     { id: "marketplace", ru: "Магазин Яиц", en: "Egg Market", icon: Store },
     { id: "tournament", ru: "Взвешивание", en: "Weigh-in", icon: TrendingUp },
-    { id: "rankings", ru: "Тяжеловесы", en: "Heavyweights", icon: Trophy },
+    { id: "rankings", ru: "Топ Тяжеловесов", en: "Top Heavyweights", icon: Trophy },
     { id: "admin", ru: "Админ", en: "Admin", icon: Shield, adminOnly: true },
   ];
 
   const stepsRu = [
-    { icon: "🎁", title: "Открой сундуки", desc: "Купи сундук и получи случайную карточку криптоактива: Bitcoin, Ethereum, Solana и других монет." },
-    { icon: "🔮", title: "Объединяй карты", desc: "5 одинаковых карточек одного тира превращаются в 1 карту следующего уровня: Common → Rare → Epic → Legendary." },
+    { icon: "🥚", title: "Яиц можно почесать", desc: "Купи яйцо и получи случайный криптоактив: Bitcoin, Ethereum, Solana и другие монеты." },
+    { icon: "🔮", title: "Объединяй яйца", desc: "5 одинаковых яиц одного тира превращаются в 1 яйцо следующего уровня: Малое → Среднее → Тяжелое → Супер тяжелое." },
     { icon: "💼", title: "Собери портфель", desc: "Выбери 5 карточек на день. Лига зависит от редкости твоего состава: Bronze, Silver или Gold." },
     { icon: "📈", title: "Зарабатывай очки", desc: "Очки начисляются по реальным движениям рынка. Лучшие игроки получают призы в ETH." },
   ];
   const stepsEn = [
-    { icon: "🎁", title: "Open chests", desc: "Buy a chest and get a random crypto asset card: Bitcoin, Ethereum, Solana and more." },
-    { icon: "🔮", title: "Merge cards", desc: "5 identical cards of one tier become 1 card of the next tier: Common → Rare → Epic → Legendary." },
+    { icon: "🥚", title: "Scratch an egg", desc: "Buy an egg and get a random crypto asset: Bitcoin, Ethereum, Solana and more." },
+    { icon: "🔮", title: "Merge eggs", desc: "5 identical eggs of one tier become 1 egg of the next tier: Small → Heavy → Big → Super Heavy." },
     { icon: "💼", title: "Build portfolio", desc: "Pick 5 cards for the day. Your league depends on rarity: Bronze, Silver or Gold." },
     { icon: "📈", title: "Earn prizes", desc: "Points come from real market moves. Top players earn ETH prizes." },
   ];
@@ -166,9 +166,16 @@ export function MarketingHome() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("active_tab") as Tab | null;
-      const valid: Tab[] = ["roster", "marketplace", "tournament", "rankings"];
+      const valid: Tab[] = ["roster", "marketplace", "tournament", "rankings", "admin"];
       if (saved && valid.includes(saved)) queueMicrotask(() => setActiveTab(saved));
     } catch {}
+    try {
+      const y = parseInt(localStorage.getItem("scroll_y") ?? "0", 10);
+      if (y > 0) requestAnimationFrame(() => window.scrollTo(0, y));
+    } catch {}
+    const onScroll = () => { try { localStorage.setItem("scroll_y", String(window.scrollY)); } catch {} };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
@@ -328,10 +335,10 @@ export function MarketingHome() {
                   className="flex items-center gap-1.5 transition-all"
                   style={{
                     padding: "6px 14px", whiteSpace: "nowrap",
-                    background: active ? "var(--mint)" : "var(--paper-3)",
+                    background: active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)",
                     color: "var(--header-btn-color)", border: "2.5px solid var(--ink)", borderRadius: 999,
                     fontSize: 11, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
-                    boxShadow: active ? "4px 4px 0 var(--card-shadow)" : "2px 2px 0 var(--card-shadow)",
+                    boxShadow: active ? "var(--filter-btn-shadow-active)" : "var(--filter-btn-shadow)",
                   }}
                 >
                   <Icon size={13} strokeWidth={2} />
@@ -352,10 +359,10 @@ export function MarketingHome() {
                   className="flex items-center justify-center transition-all"
                   style={{
                     width: 36, height: 36,
-                    background: active ? "var(--mint)" : "var(--paper-3)",
+                    background: active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)",
                     color: "var(--ink)", border: "2.5px solid var(--ink)", borderRadius: 999,
                     cursor: "pointer",
-                    boxShadow: active ? "4px 4px 0 var(--card-shadow)" : "2px 2px 0 var(--card-shadow)",
+                    boxShadow: active ? "var(--filter-btn-shadow-active)" : "var(--filter-btn-shadow)",
                   }}
                 >
                   <Icon size={15} strokeWidth={2} />
@@ -368,7 +375,7 @@ export function MarketingHome() {
             <div id="network-badge" />
             <div className="hidden items-center gap-2 md:flex">
               <a
-                href="https://x.com/CoinDeck"
+                href="https://x.com/MrHeavyEggs"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-sticker-outline h-9 w-9 p-0"
@@ -412,7 +419,7 @@ export function MarketingHome() {
                     background: "var(--paper-2)",
                     border: "2.5px solid var(--ink)",
                     borderRadius: 14,
-                    boxShadow: "4px 4px 0 var(--ink)",
+                    boxShadow: "4px 4px 0 var(--shadow-sticker-color)",
                   }}
                 >
                   {([
@@ -430,7 +437,7 @@ export function MarketingHome() {
                         borderBottom: i < arr.length - 1 ? "1.5px solid rgba(15,17,21,0.12)" : "none",
                         borderRadius: i === 0 ? "11px 11px 0 0" : i === arr.length - 1 ? "0 0 11px 11px" : 0,
                       }}
-                      onMouseEnter={e => { if (lang !== code) e.currentTarget.style.background = "var(--sky-soft)"; }}
+                      onMouseEnter={e => { if (lang !== code) e.currentTarget.style.background = "var(--filter-btn-hover-bg)"; }}
                       onMouseLeave={e => { e.currentTarget.style.background = lang === code ? "var(--mint-soft)" : "transparent"; }}
                     >
                       <span className="text-base leading-none">{flag}</span>
@@ -548,9 +555,9 @@ export function MarketingHome() {
               </div>
             </div>
             <div className="grid gap-3 p-5">
-              <MergeRow from={{ label: "Common (L1)", color: "var(--rarity-common)", count: 5 }} to={{ label: "Rare (L2)", color: "var(--rarity-rare)", count: 1 }} />
-              <MergeRow from={{ label: "Rare (L2)", color: "var(--rarity-rare)", count: 5 }} to={{ label: "Epic (L3)", color: "var(--rarity-epic)", count: 1 }} />
-              <MergeRow from={{ label: "Epic (L3)", color: "var(--rarity-epic)", count: 5 }} to={{ label: "Legendary (L4)", color: "var(--rarity-legendary)", count: 1 }} />
+              <MergeRow from={{ label: "Small (L1)", color: "var(--rarity-common)", count: 5 }} to={{ label: "Heavy (L2)", color: "var(--rarity-rare)", count: 1 }} />
+              <MergeRow from={{ label: "Heavy (L2)", color: "var(--rarity-rare)", count: 5 }} to={{ label: "Big (L3)", color: "var(--rarity-epic)", count: 1 }} />
+              <MergeRow from={{ label: "Big (L3)", color: "var(--rarity-epic)", count: 5 }} to={{ label: "Super Heavy (L4)", color: "var(--rarity-legendary)", count: 1 }} />
               <div className="rounded-xl border p-4 text-xs" style={{ borderColor: "var(--soft-border)", background: "var(--soft-surface-2)", color: "var(--panel-text-muted)" }}>{t("merge.note")}</div>
             </div>
           </Card>
@@ -560,10 +567,10 @@ export function MarketingHome() {
               <div className="mb-3 text-xs font-semibold tracking-wide" style={{ color: "var(--panel-text-muted)" }}>{t("rarity.kicker")}</div>
               <div className="grid gap-2">
                 {[
-                  { label: "Common • L1", color: "var(--rarity-common)", cls: "border-zinc-500/30 bg-zinc-800/30 text-zinc-300" },
-                  { label: "Rare • L2", color: "var(--rarity-rare)", cls: "border-blue-500/30 bg-blue-900/20 text-blue-300" },
-                  { label: "Epic • L3", color: "var(--rarity-epic)", cls: "border-purple-500/30 bg-purple-900/20 text-purple-300" },
-                  { label: "Legendary • L4", color: "var(--rarity-legendary)", cls: "border-amber-500/30 bg-amber-900/20 text-amber-300" },
+                  { label: lang === "ru" ? "Малое • L1" : "Small • L1", color: "var(--rarity-common)", cls: "border-zinc-500/30 bg-zinc-800/30 text-zinc-300" },
+                  { label: lang === "ru" ? "Тяжелое яйцо • L2" : "Heavy Egg • L2", color: "var(--rarity-rare)", cls: "border-blue-500/30 bg-blue-900/20 text-blue-300" },
+                  { label: lang === "ru" ? "Тяжелое • L3" : "Big • L3", color: "var(--rarity-epic)", cls: "border-purple-500/30 bg-purple-900/20 text-purple-300" },
+                  { label: lang === "ru" ? "Супер тяжелое • L4" : "Super Heavy • L4", color: "var(--rarity-legendary)", cls: "border-amber-500/30 bg-amber-900/20 text-amber-300" },
                 ].map(({ label, color, cls }) => (
                   <div key={label} className={`flex items-center justify-between rounded-xl border px-4 py-2.5 ${cls}`}>
                     <div className="text-sm font-semibold">{label}</div>
@@ -593,7 +600,7 @@ export function MarketingHome() {
                       <div className="text-sm font-black text-zinc-200">Silver</div>
                       <div className="rounded bg-zinc-700/60 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-400">35%</div>
                     </div>
-                    <div className="mt-0.5 text-[10px] text-zinc-400/70">{lang === "ru" ? "1–2 карты Rare (T2) в любой день" : "1–2 Rare (T2) cards on any day"}</div>
+                    <div className="mt-0.5 text-[10px] text-zinc-400/70">{lang === "ru" ? "1–2 Тяжелых яйца (T2) в любой день" : "1–2 Heavy Eggs (T2) on any day"}</div>
                   </div>
                   <span className="text-lg">🥈</span>
                 </div>
@@ -603,7 +610,7 @@ export function MarketingHome() {
                       <div className="text-sm font-black text-violet-300">Gold</div>
                       <div className="rounded bg-violet-900/60 px-1.5 py-0.5 text-[10px] font-semibold text-violet-400">40%</div>
                     </div>
-                    <div className="mt-0.5 text-[10px] text-violet-300/60">{lang === "ru" ? "Epic (T3) в любой день или 3+ Rare за день" : "Epic (T3) on any day, or 3+ Rare on any day"}</div>
+                    <div className="mt-0.5 text-[10px] text-violet-300/60">{lang === "ru" ? "Тяжелое (T3) в любой день или 3+ Тяжелых за день" : "Big (T3) on any day, or 3+ Heavy on any day"}</div>
                   </div>
                   <span className="text-lg">🥇</span>
                 </div>
@@ -647,7 +654,7 @@ export function MarketingHome() {
             <div className="mb-3 text-xs font-semibold tracking-wide" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Технология" : "Technology"}</div>
             <div className="grid gap-3 sm:grid-cols-3">
               {[
-                { icon: "⚡", title: lang === "ru" ? "Быстрые транзакции" : "Fast transactions", desc: "Abstract Mainnet-ready stack" },
+                { icon: "⚡", title: lang === "ru" ? "Быстрые транзакции" : "Fast transactions", desc: "Movement Mainnet-ready stack" },
                 { icon: "🔒", title: lang === "ru" ? "NFT-объекты" : "NFT objects", desc: "aptos_token_objects" },
                 { icon: "💎", title: "ETH", desc: lang === "ru" ? "Призы в ETH" : "ETH prizes" },
               ].map(({ icon, title, desc }) => (

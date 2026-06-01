@@ -119,7 +119,7 @@ function WalletButton({ lang }: { lang: string }) {
             background: "var(--paper-2)",
             border: "2.5px solid var(--ink)",
             borderRadius: 14,
-            boxShadow: "4px 4px 0 var(--ink)",
+            boxShadow: "4px 4px 0 var(--shadow-sticker-color)",
           }}
         >
           {/* network row */}
@@ -141,7 +141,7 @@ function WalletButton({ lang }: { lang: string }) {
             ) : (
               <>
                 <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                <span className="text-xs font-bold" style={{ color: "var(--ink-2)" }}>Abstract Testnet</span>
+                <span className="text-xs font-bold" style={{ color: "var(--ink-2)" }}>Movement Testnet</span>
               </>
             )}
           </div>
@@ -338,8 +338,8 @@ export function WrongNetworkBlocker({ lang }: { lang: string }) {
         </h2>
         <p className="mb-6 text-sm text-zinc-400">
           {lang === "ru"
-            ? "Подключите кошелёк к сети Abstract Testnet, чтобы продолжить."
-            : "Please switch your wallet to Abstract Testnet to continue."}
+            ? "Подключите кошелёк к сети Movement Testnet, чтобы продолжить."
+            : "Please switch your wallet to Movement Testnet to continue."}
         </p>
         <button
           onClick={() => switchChain({ chainId: abstractTestnet.id })}

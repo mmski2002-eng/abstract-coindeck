@@ -38,13 +38,6 @@ function RosterCard({ card, isNew }: { card: { playerId: number; tier: number };
           padding: "3px 9px", fontSize: 9, letterSpacing: 1.6, fontWeight: 800,
           boxShadow: "2px 2px 0 var(--card-shadow)",
         }}>{label.toUpperCase()}</div>
-        {isNew && (
-          <div style={{
-            fontSize: 9, letterSpacing: 1.5, fontWeight: 800, padding: "3px 8px",
-            borderRadius: 999, background: "var(--lime-pop)", color: "var(--ink)",
-            border: "2.5px solid var(--ink)", boxShadow: "2px 2px 0 var(--card-shadow)",
-          }}>NEW</div>
-        )}
       </div>
 
       {/* image plate */}

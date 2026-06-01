@@ -7,6 +7,12 @@ export const MARKET_DATA_PARSE_ACTION = "market-data-parse";
 export const MARKET_SNAPSHOT_SAVE_ACTION = "market-snapshot-save";
 export const BOT_CONTROL_ACTION = "bot-control";
 export const CLAIM_LIST_PREVIEW_ACTION = "claim-list-preview";
+export const PALETTE_ACTION = "admin-palette";
+
+export type AdminAuthResult = {
+  action: string; nonce: string; timestamp: number; domain: string;
+  chainId: number; payloadHash: string; signature: string; publicKey: string; fullMessage: string;
+};
 
 export function normalizeAdminDomain(value: string): string {
   return value.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/+$/, "");

@@ -12,6 +12,7 @@ import type {
 import { ROLE_NAMES, ROLE_FULL } from "../types";
 import { getErrorMessage } from "../utils";
 import { AdminInfoPanel } from "./AdminInfoPanel";
+import { PaletteSettingsBlock } from "./PaletteSettingsBlock";
 
 type HeroStats = { priceChg: number; vol24h: number; high24h: number; low24h: number; tempRatio: number; hype: boolean };
 type TransactionPayload = { function: string; typeArguments: unknown[]; functionArguments: unknown[] };
@@ -1244,8 +1245,8 @@ export function AdminTab({
                 {([
                   { label: "Маленькое",  color: "text-zinc-300",   idx: 0 },
                   { label: "Среднее",    color: "text-blue-300",   idx: 1 },
-                  { label: "Большое",    color: "text-purple-300", idx: 2 },
-                  { label: "Тяжёлое", color: "text-amber-300",  idx: 3 },
+                  { label: "Тяжелое",    color: "text-purple-300", idx: 2 },
+                  { label: "Супер Тяжелое", color: "text-amber-300",  idx: 3 },
                 ] as const).map(({ label, color, idx }) => (
                   <div key={label} className="flex gap-2 items-center">
                     <label className={`text-xs font-semibold w-24 shrink-0 ${color}`}>{label}</label>
@@ -1545,6 +1546,13 @@ export function AdminTab({
             </button>
             <AdminTip text={lang === "ru" ? "Полный сброс. NFT-карточки и кошельки игроков НЕ затрагиваются. Необратимо." : "Full reset. Player NFT cards and wallets are NOT affected. Irreversible."} />
           </div>
+
+          <PaletteSettingsBlock
+            lang={lang}
+            buildAdminAuth={buildSignedAdminAction}
+            setAdminError={setAdminError}
+            setAdminOk={setAdminOk}
+          />
         </div>
       )}
     </div>

@@ -45,7 +45,7 @@ ICONS   = ["/coins/0_BTC.webp","/coins/1_ETH.webp","/coins/2_BNB.webp",
            "/coins/39_THETA.webp","/coins/40_EOS.webp","/coins/41_AAVE.webp",
            "/coins/42_MKR.webp","/coins/43_LDO.webp","/coins/44_SEI.webp",
            "/coins/45_KAS.webp","/coins/46_PEPE.webp","/coins/47_BONK.webp",
-           "/coins/48_WIF.webp","/coins/49_MOVE.webp"]
+           "/coins/48_WIF.webp","/coins/49_ABS.png"]
 
 COLORS  = ["#F7931A","#627EEA","#F3BA2F","#00AAE4","#9945FF","#C2A633","#0033AD",
            "#EF0027","#E84142","#FFA409","#E6007A","#4CC947","#375BD2","#00C08B",

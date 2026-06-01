@@ -7,7 +7,7 @@ import { getErrorMessage } from "../utils";
 import { buildAdminActionMessage, buildWalletFullMessage, stableStringify, MARKET_DATA_PARSE_ACTION } from "@/lib/adminAuth";
 import { calcOraclePoints } from "@/lib/oracleScoring";
 import { buildMarketDataQuery, resolveOracleWindow } from "@/lib/oracleWindow";
-import { readBaseUris } from "@/lib/evmContracts";
+import { readBaseUris, readEvmGovernanceState } from "@/lib/evmContracts";
 import type { Config } from "@wagmi/core";
 
 interface Deps {
@@ -281,92 +281,33 @@ export function useAdminLogic({ submitTx, refreshTournament, refreshInventory, r
 
   async function fetchGovernanceState() {
     try {
-      const [
-        initialized,
-        actionDelays,
-        withdrawPolicy,
-        epochGuard,
-        pending,
-        uris,
-        admins,
-        roleListRaw,
-      ] = await Promise.all([
-        view<unknown>("admin_control::is_initialized"),
-        view<unknown[]>("admin_control::get_action_delays"),
-        view<[unknown, string, string, string, string]>("admin_control::get_withdrawal_policy"),
-        view<[unknown, unknown]>("admin_control::get_epoch_guard"),
-        view<[unknown, unknown, unknown]>("admin_control::get_pending_actions"),
+      const [evmState, uris] = await Promise.all([
+        readEvmGovernanceState(wagmiConfig),
         readBaseUris(wagmiConfig).catch(() => null),
-        view<string[]>("fantasy_league::get_admins"),
-        view<[string[], string[]]>("admin_control::get_role_list"),
       ]);
 
-      const normalizedActionDelays = singleReturnVector(actionDelays);
-      if (normalizedActionDelays.length > 0) {
-        setGovernancePolicy((prev) => ({
-          ...prev,
-          initialized: initialized === true || String(initialized) === "true",
-          actionDelays: normalizedActionDelays.map((item) => Number(item ?? 0)),
-        }));
-      } else {
-        setGovernancePolicy((prev) => ({
-          ...prev,
-          initialized: initialized === true || String(initialized) === "true",
-        }));
-      }
+      setGovernancePolicy((prev) => ({
+        ...prev,
+        initialized: true,
+        actionDelays: evmState.actionDelays,
+        withdrawEnabled: evmState.withdrawalPolicy.enabled,
+        perTxLimit: Number(evmState.withdrawalPolicy.perTxLimit),
+        dailyLimit: Number(evmState.withdrawalPolicy.dailyLimit),
+        spentToday: Number(evmState.withdrawalPolicy.spentToday),
+        dayIndex: Number(evmState.withdrawalPolicy.dayIndex),
+        freezeDuringEpoch: evmState.epochGuard.freezeDuringEpoch,
+        epochActive: evmState.epochGuard.epochActive,
+      }));
 
-      if (withdrawPolicy && Array.isArray(withdrawPolicy)) {
-        const [enabled, perTxLimit, dailyLimit, spentToday, dayIndex] = withdrawPolicy;
-        setGovernancePolicy((prev) => ({
-          ...prev,
-          withdrawEnabled: enabled === true || enabled === "true",
-          perTxLimit: Number(perTxLimit),
-          dailyLimit: Number(dailyLimit),
-          spentToday: Number(spentToday),
-          dayIndex: Number(dayIndex),
-        }));
-      }
-
-      if (epochGuard && Array.isArray(epochGuard)) {
-        const [freezeDuringEpoch, epochActive] = epochGuard;
-        setGovernancePolicy((prev) => ({
-          ...prev,
-          freezeDuringEpoch: freezeDuringEpoch === true || freezeDuringEpoch === "true",
-          epochActive: epochActive === true || epochActive === "true",
-        }));
-      }
-
-      if (pending && Array.isArray(pending) && pending.length === 3) {
-        const [actionTypes, executeAfters, payloadHashes] = pending;
-        const next: PendingAdminAction[] = Array.isArray(actionTypes) && Array.isArray(executeAfters) && Array.isArray(payloadHashes)
-          ? actionTypes.map((item, idx) => ({
-              actionType: Number(item),
-              executeAfter: Number(executeAfters[idx] ?? 0),
-              payloadHashHex: bytesToHex(payloadHashes[idx]),
-            }))
-          : [];
-        setPendingAdminActions(next);
-      }
+      setPendingAdminActions(
+        evmState.pending.actionTypes.map((actionType, idx) => ({
+          actionType,
+          executeAfter: evmState.pending.executeAfters[idx] ?? 0,
+          payloadHashHex: evmState.pending.hashes[idx] ?? "0x",
+        }))
+      );
 
       if (uris) setBaseUris(uris);
-      const normalizedAdmins = singleReturnVector(admins)
-        .map((item) => String(item))
-        .filter((addr) => addr.length > 0);
-      if (Array.isArray(admins)) {
-        setAdminAddresses(normalizedAdmins);
-      }
-      if (Array.isArray(roleListRaw) && roleListRaw.length === 2) {
-        const [addrs, roles] = roleListRaw;
-        const normalizedRoleAddrs = singleReturnVector(addrs)
-          .map((item) => String(item))
-          .filter((addr) => addr.length > 0);
-        const normalizedRoles = u8Vector(roles);
-        if (normalizedRoleAddrs.length > 0) {
-          setAdminRoles(normalizedRoleAddrs.map((addr, i) => ({ addr, roles: normalizedRoles[i] ?? 0 })));
-        } else {
-          setAdminRoles([]);
-        }
-      }
     } catch {
       // ignore view refresh errors in the admin dashboard
     }

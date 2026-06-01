@@ -189,7 +189,7 @@ async function fetchLineupSlotsForAddresses(
       const [playerIds, tiers] = await client.readContract({
         address: runtimeAddresses.tournament as `0x${string}`,
         abi: TOURNAMENT_VIEW_ABI,
-        functionName: "getLineupSlots",
+        functionName: "getWeighingSlots",
         args: [addr as `0x${string}`, BigInt(epoch), BigInt(day)],
       });
       const pids = Array.from(playerIds as readonly number[]);
@@ -225,7 +225,7 @@ async function fetchDayLineupsBulk(
       const res = await client.readContract({
         address: runtimeAddresses.tournament as `0x${string}`,
         abi: TOURNAMENT_VIEW_ABI,
-        functionName: "getDayLineupsPaginated",
+        functionName: "getDayWeighingsPaginated",
         args: [BigInt(epoch), BigInt(day), BigInt(offset), BigInt(BULK_PAGE_SIZE)],
       });
       addrsArr = res[0] as readonly `0x${string}`[];

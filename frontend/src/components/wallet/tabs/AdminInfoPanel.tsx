@@ -49,7 +49,7 @@ function fmt(ts: number) {
   });
 }
 
-function fmtMove(wei: number) {
+function fmtEth(wei: number) {
   return (wei / 1e18).toFixed(4);
 }
 
@@ -280,15 +280,15 @@ export function AdminInfoPanel({
 
             <div className="grid grid-cols-3 gap-3 mb-4">
               <div className="rounded-xl bg-white/[0.03] border border-white/5 p-3 text-center">
-                <div className="text-base font-black font-mono" style={{ color: "var(--panel-text)" }}>{fmtMove(governancePolicy.perTxLimit)}</div>
+                <div className="text-base font-black font-mono" style={{ color: "var(--panel-text)" }}>{fmtEth(governancePolicy.perTxLimit)}</div>
                 <div className="text-[9px] text-zinc-500 mt-0.5">{ru ? "лимит / tx" : "limit / tx"} ETH</div>
               </div>
               <div className="rounded-xl bg-white/[0.03] border border-white/5 p-3 text-center">
-                <div className="text-base font-black font-mono" style={{ color: "var(--panel-text)" }}>{fmtMove(governancePolicy.dailyLimit)}</div>
+                <div className="text-base font-black font-mono" style={{ color: "var(--panel-text)" }}>{fmtEth(governancePolicy.dailyLimit)}</div>
                 <div className="text-[9px] text-zinc-500 mt-0.5">{ru ? "лимит / день" : "limit / day"} ETH</div>
               </div>
               <div className="rounded-xl bg-amber-500/5 border border-amber-500/15 p-3 text-center">
-                <div className="text-base font-black text-amber-300 font-mono">{fmtMove(governancePolicy.spentToday)}</div>
+                <div className="text-base font-black text-amber-300 font-mono">{fmtEth(governancePolicy.spentToday)}</div>
                 <div className="text-[9px] text-zinc-500 mt-0.5">{ru ? "потрачено сегодня" : "spent today"} ETH</div>
               </div>
             </div>
@@ -366,8 +366,8 @@ export function AdminInfoPanel({
           <div className="rounded-xl bg-emerald-500/5 border border-emerald-500/20 p-3 flex flex-col justify-between">
             <div className="text-[10px] text-zinc-500 mb-1">{ru ? "Баланс клейм-кошелька" : "Vault balance"}</div>
             <div>
-              <span className="text-2xl font-black text-emerald-300">{claimState ? fmtMove(claimState.vaultBalance) : "—"}</span>
-              <span className="text-sm text-zinc-500 ml-1">MOVE</span>
+              <span className="text-2xl font-black text-emerald-300">{claimState ? fmtEth(claimState.vaultBalance) : "—"}</span>
+              <span className="text-sm text-zinc-500 ml-1">ETH</span>
             </div>
           </div>
 
@@ -420,7 +420,7 @@ export function AdminInfoPanel({
         {botStatus?.state.lastClaimList && (
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-zinc-500">
             <span>{ru ? "Сумма клейм-листа" : "Total in list"}:
-              <span className="ml-1 font-mono text-zinc-300">{fmtMove(botStatus.state.lastClaimList.totalOctas)} ETH</span>
+              <span className="ml-1 font-mono text-zinc-300">{fmtEth(botStatus.state.lastClaimList.totalOctas)} ETH</span>
             </span>
             <span>{ru ? "Список создан" : "Generated"}:
               <span className="ml-1 font-mono text-zinc-400">{fmt(botStatus.state.lastClaimList.generatedAt)}</span>
@@ -447,7 +447,7 @@ export function AdminInfoPanel({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <Stat label={ru ? "День" : "Day"} value={tnState?.currentDay ?? "—"} sub={tnState ? `/ ${tnState.totalDays}` : ""} />
           <Stat label={ru ? "Эпоха" : "Epoch"} value={epochNum ?? "—"} />
-          <Stat label={ru ? "Призовой пул" : "Prize pool"} value={tnState ? fmtMove(tnState.prizePool) : "—"} sub="ETH" />
+          <Stat label={ru ? "Призовой пул" : "Prize pool"} value={tnState ? fmtEth(tnState.prizePool) : "—"} sub="ETH" />
           <Stat label={ru ? "Участники" : "Players"} value={lbRows.length} />
         </div>
       </CardShell>

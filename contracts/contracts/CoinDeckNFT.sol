@@ -8,19 +8,18 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "./AdminControl.sol";
 
 /**
- * Migrated from fantasy_league.move
- * ERC-721 РєР°СЂС‚С‹ + СЃСѓРЅРґСѓРєРё, merge, open_chest, inventory
+ * ERC-721 EggMonets + Eggs, merge, scratchEgg, inventory
  */
 contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
     using Strings for uint256;
 
-    // в"Ђв"Ђ Constants в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+    // ── Constants ──────────────────────────────────────────────────────────────
     uint64 public constant MERGE_COUNT    = 5;
-    uint8  public constant MAX_CHEST_TYPE = 2;
+    uint8  public constant MAX_EGG_TYPE   = 2;
 
     uint8 public maxTier    = 3;
     uint8 public maxPlayers = 50;
-    uint64 public constant MAX_CHEST_BATCH = 100;
+    uint64 public constant MAX_EGG_BATCH     = 100;
     uint256 public constant MAX_NICKNAME_LEN = 30;
 
     uint256 public constant DEFAULT_WOODEN_PRICE = 0.01 ether;
@@ -28,68 +27,68 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
     uint256 public constant DEFAULT_SILVER_PRICE = 0.09 ether;
 
     // token types
-    uint8 public constant TYPE_CARD  = 0;
-    uint8 public constant TYPE_CHEST = 1;
+    uint8 public constant TYPE_EGGMONET = 0;
+    uint8 public constant TYPE_EGG      = 1;
 
-    // в"Ђв"Ђ Structs в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
-    struct CardData {
+    // ── Structs ────────────────────────────────────────────────────────────────
+    struct EggMonetData {
         uint8 playerId;
         uint8 tier;
     }
 
-    struct ChestData {
-        uint8 chestType; // 0=Wooden 1=Iron 2=Silver
+    struct EggData {
+        uint8 eggType; // 0=Wooden 1=Iron 2=Silver
     }
 
-    // в"Ђв"Ђ State в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+    // ── State ──────────────────────────────────────────────────────────────────
     AdminControl public adminControl;
 
     uint256 private _nextTokenId;
 
-    // tokenId в†' card data (only for TYPE_CARD tokens)
-    mapping(uint256 => CardData) public cards;
-    // tokenId в†' chest data (only for TYPE_CHEST tokens)
-    mapping(uint256 => ChestData) public chests;
-    // tokenId в†' token type (0=card, 1=chest)
+    // tokenId → EggMonet data (only for TYPE_EGGMONET tokens)
+    mapping(uint256 => EggMonetData) public eggMonets;
+    // tokenId → Egg data (only for TYPE_EGG tokens)
+    mapping(uint256 => EggData) public eggs;
+    // tokenId → token type (0=eggMonet, 1=egg)
     mapping(uint256 => uint8) public tokenType;
 
-    // card locking: tokenId в†' unlock timestamp (0 = unlocked)
-    // written by Tournament contract only
+    // eggMonet locking: tokenId → unlock timestamp (0 = unlocked)
     mapping(uint256 => uint256) public lockUntil;
 
-    // inventory: owner в†' tokenIds[]
-    mapping(address => uint256[]) private _userCards;
-    mapping(address => uint256[]) private _userChests;
+    // inventory: owner → tokenIds[]
+    mapping(address => uint256[]) private _userEggMonets;
+    mapping(address => uint256[]) private _userEggs;
     // reverse index for O(1) swap-remove
-    mapping(uint256 => uint256) private _cardIndex;
-    mapping(uint256 => uint256) private _chestIndex;
+    mapping(uint256 => uint256) private _eggMonetIndex;
+    mapping(uint256 => uint256) private _eggIndex;
 
     // nicknames
     mapping(address => string) public nicknames;
 
-    // chest prices
+    // egg prices
     uint256 public woodenPrice;
     uint256 public ironPrice;
     uint256 public silverPrice;
 
     // base URIs
-    string public cardBaseUri;
-    string public chestBaseUri;
+    string public eggMonetBaseUri;
+    string public eggBaseUri;
 
     // extension data for players beyond id 49 and tiers beyond 3
     mapping(uint8 => string) private _extPlayerName;
     mapping(uint8 => string) private _extPlayerSlug;
     mapping(uint8 => string) private _extTierName;
 
-    // tournament contract address вЂ" only it may lock/unlock cards
+    // tournament contract address — only it may lock/unlock eggMonets
     address public tournamentContract;
 
-    // в"Ђв"Ђ Events в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
-    event CardMinted(address indexed to, uint256 indexed tokenId, uint8 playerId, uint8 tier);
-    event ChestMinted(address indexed to, uint256 indexed tokenId, uint8 chestType);
-    event ChestOpened(address indexed opener, uint256 indexed chestId, uint256 indexed cardId);
-    event CardsMerged(address indexed owner, uint256 indexed newTokenId, uint8 playerId, uint8 newTier);
-    event ChestPricesUpdated(uint256 wooden, uint256 iron, uint256 silver);
+    // ── Events ─────────────────────────────────────────────────────────────────
+    event EggMonetMinted(address indexed to, uint256 indexed tokenId, uint8 playerId, uint8 tier);
+    event EggMinted(address indexed to, uint256 indexed tokenId, uint8 eggType);
+    event EggScratched(address indexed scratcher, uint256 indexed eggId, uint256 indexed eggMonetId);
+    event EggMonetReissued(address indexed owner, uint256 indexed oldTokenId, uint256 indexed newTokenId, uint8 playerId, uint8 tier);
+    event EggMonetsMerged(address indexed owner, uint256 indexed newTokenId, uint8 playerId, uint8 newTier);
+    event EggPricesUpdated(uint256 wooden, uint256 iron, uint256 silver);
     event BaseUrisUpdated();
     event TournamentSet(address indexed tournament);
     event NicknameSet(address indexed user, string nickname);
@@ -98,22 +97,24 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
     event PlayerAdded(uint8 indexed id, string name);
     event TierNameSet(uint8 indexed tier, string name);
 
-    // в"Ђв"Ђ Errors в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+    // ── Errors ─────────────────────────────────────────────────────────────────
     error NotAdmin();
     error NotNFTAdmin();
     error NotTournament();
-    error CardLocked();
+    error EggMonetLocked();
+    error TournamentNotSet();
+    error ZeroAddress();
     error MaxTier();
     error NotOwnerOfToken();
-    error WrongCard();
+    error WrongEggMonet();
     error BatchTooLarge();
-    error InvalidChestType();
+    error InvalidEggType();
     error NicknameTooLong();
     error InsufficientPayment();
     error InvalidTier();
     error DuplicateToken();
 
-    // в"Ђв"Ђ Modifiers в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+    // ── Modifiers ──────────────────────────────────────────────────────────────
     modifier onlyNFTAdmin() {
         if (!adminControl.hasRole(msg.sender, adminControl.ROLE_NFT()) &&
             msg.sender != adminControl.owner())
@@ -126,42 +127,43 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
         _;
     }
 
-    // в"Ђв"Ђ Constructor в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+    // ── Constructor ────────────────────────────────────────────────────────────
     constructor(address _adminControl) ERC721("CoinDeck Portfolio", "CDECK") {
-        adminControl = AdminControl(_adminControl);
-        woodenPrice  = DEFAULT_WOODEN_PRICE;
-        ironPrice    = DEFAULT_IRON_PRICE;
-        silverPrice  = DEFAULT_SILVER_PRICE;
-        cardBaseUri  = "https://assets.coingecko.com/coins/images/";
-        chestBaseUri = "https://coindeck.app/nft/chest/";
+        adminControl    = AdminControl(_adminControl);
+        woodenPrice     = DEFAULT_WOODEN_PRICE;
+        ironPrice       = DEFAULT_IRON_PRICE;
+        silverPrice     = DEFAULT_SILVER_PRICE;
+        eggMonetBaseUri = "https://assets.coingecko.com/coins/images/";
+        eggBaseUri      = "https://coindeck.app/nft/chest/";
     }
 
-    // в"Ђв"Ђ Admin setup в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+    // ── Admin setup ────────────────────────────────────────────────────────────
     function setTournamentContract(address _tournament) external {
+        if (_tournament == address(0)) revert ZeroAddress();
         if (msg.sender != adminControl.owner()) revert NotAdmin();
         tournamentContract = _tournament;
         emit TournamentSet(_tournament);
     }
 
-    function setChestPrices(uint256 wooden, uint256 iron, uint256 silver) external onlyNFTAdmin {
+    function setEggPrices(uint256 wooden, uint256 iron, uint256 silver) external onlyNFTAdmin {
         adminControl.assertEpochSettingsMutable();
         adminControl.consumeAction(
-            adminControl.ACTION_SET_CHEST_PRICES(),
+            adminControl.ACTION_SET_EGG_PRICES(),
             keccak256(abi.encode(wooden, iron, silver))
         );
         woodenPrice = wooden;
         ironPrice   = iron;
         silverPrice = silver;
-        emit ChestPricesUpdated(wooden, iron, silver);
+        emit EggPricesUpdated(wooden, iron, silver);
     }
 
-    function setBaseUris(string calldata cardUri, string calldata chestUri) external onlyNFTAdmin {
+    function setBaseUris(string calldata eggMonetUri, string calldata eggUri) external onlyNFTAdmin {
         adminControl.consumeAction(
             adminControl.ACTION_SET_BASE_URIS(),
-            keccak256(abi.encodePacked(cardUri, chestUri))
+            keccak256(abi.encodePacked(eggMonetUri, eggUri))
         );
-        cardBaseUri  = cardUri;
-        chestBaseUri = chestUri;
+        eggMonetBaseUri = eggMonetUri;
+        eggBaseUri      = eggUri;
         emit BaseUrisUpdated();
     }
 
@@ -192,15 +194,15 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
         emit TierNameSet(tier, name);
     }
 
-    // в"Ђв"Ђ Nickname в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+    // ── Nickname ───────────────────────────────────────────────────────────────
     function setNickname(string calldata nick) external {
         if (bytes(nick).length > MAX_NICKNAME_LEN) revert NicknameTooLong();
         nicknames[msg.sender] = nick;
         emit NicknameSet(msg.sender, nick);
     }
 
-    // в"Ђв"Ђ Admin mint в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
-    function adminMintCard(
+    // ── Admin mint ─────────────────────────────────────────────────────────────
+    function adminMintEggMonet(
         address recipient,
         uint8   playerId,
         uint8   tier,
@@ -212,20 +214,21 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
             keccak256(abi.encode(recipient, playerId, tier, count))
         );
         for (uint256 i = 0; i < count; i++) {
-            _mintCard(recipient, playerId, tier);
+            _mintEggMonet(recipient, playerId, tier);
         }
     }
 
-    // в"Ђв"Ђ Buy chest в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
-    function buyChest(uint8 chestType, uint64 count) external payable nonReentrant {
-        if (chestType > MAX_CHEST_TYPE) revert InvalidChestType();
-        if (count == 0 || count > MAX_CHEST_BATCH) revert BatchTooLarge();
+    // ── Buy egg ────────────────────────────────────────────────────────────────
+    function buyEgg(uint8 eggType, uint64 count) external payable nonReentrant {
+        if (tournamentContract == address(0)) revert TournamentNotSet();
+        if (eggType > MAX_EGG_TYPE) revert InvalidEggType();
+        if (count == 0 || count > MAX_EGG_BATCH) revert BatchTooLarge();
 
-        uint256 unitPrice = _chestPrice(chestType);
+        uint256 unitPrice = _eggPrice(eggType);
         if (msg.value < unitPrice * count) revert InsufficientPayment();
 
         for (uint64 i = 0; i < count; i++) {
-            _mintChest(msg.sender, chestType);
+            _mintEgg(msg.sender, eggType);
         }
 
         uint256 total = unitPrice * count;
@@ -242,56 +245,56 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
         }
     }
 
-    // в"Ђв"Ђ Open chest в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
-    function openChest(uint256 chestId) external nonReentrant {
-        if (ownerOf(chestId) != msg.sender) revert NotOwnerOfToken();
-        if (tokenType[chestId] != TYPE_CHEST) revert InvalidChestType();
+    // ── Scratch egg ────────────────────────────────────────────────────────────
+    function scratchEgg(uint256 eggId) external nonReentrant {
+        if (ownerOf(eggId) != msg.sender) revert NotOwnerOfToken();
+        if (tokenType[eggId] != TYPE_EGG) revert InvalidEggType();
 
-        uint8 chestType = chests[chestId].chestType;
+        uint8 eggType = eggs[eggId].eggType;
 
-        _burn(chestId); // _afterTokenTransfer handles inventory removal
+        _burn(eggId);
 
-        uint8 tier     = chestType; // Woodenв†'Common, Ironв†'Rare, Silverв†'Epic
-        uint8 playerId = _pseudoRand(msg.sender, chestId, 0, maxPlayers);
-        uint256 newId  = _mintCard(msg.sender, playerId, tier);
+        uint8 tier     = eggType; // Wooden→Common, Iron→Rare, Silver→Epic
+        uint8 playerId = _pseudoRand(msg.sender, eggId, 0, maxPlayers);
+        uint256 newId  = _mintEggMonet(msg.sender, playerId, tier);
 
-        emit ChestOpened(msg.sender, chestId, newId);
+        emit EggScratched(msg.sender, eggId, newId);
     }
 
-    function openChestBatch(uint256[] calldata chestIds) external nonReentrant {
-        uint256 count = chestIds.length;
-        if (count == 0 || count > MAX_CHEST_BATCH) revert BatchTooLarge();
+    function scratchEggBatch(uint256[] calldata eggIds) external nonReentrant {
+        uint256 count = eggIds.length;
+        if (count == 0 || count > MAX_EGG_BATCH) revert BatchTooLarge();
 
         // Dedup check
         for (uint256 i = 0; i < count; i++) {
             for (uint256 j = i + 1; j < count; j++) {
-                if (chestIds[i] == chestIds[j]) revert DuplicateToken();
+                if (eggIds[i] == eggIds[j]) revert DuplicateToken();
             }
         }
 
         for (uint256 i = 0; i < count; i++) {
-            uint256 chestId = chestIds[i];
-            if (ownerOf(chestId) != msg.sender) revert NotOwnerOfToken();
-            if (tokenType[chestId] != TYPE_CHEST) revert InvalidChestType();
+            uint256 eggId = eggIds[i];
+            if (ownerOf(eggId) != msg.sender) revert NotOwnerOfToken();
+            if (tokenType[eggId] != TYPE_EGG) revert InvalidEggType();
 
-            uint8 chestType = chests[chestId].chestType;
-            _burn(chestId); // _afterTokenTransfer handles inventory removal
+            uint8 eggType = eggs[eggId].eggType;
+            _burn(eggId);
 
-            uint8 tier     = chestType;
-            uint8 playerId = _pseudoRand(msg.sender, chestId, uint8(i), maxPlayers);
-            uint256 newId  = _mintCard(msg.sender, playerId, tier);
-            emit ChestOpened(msg.sender, chestId, newId);
+            uint8 tier     = eggType;
+            uint8 playerId = _pseudoRand(msg.sender, eggId, uint8(i), maxPlayers);
+            uint256 newId  = _mintEggMonet(msg.sender, playerId, tier);
+            emit EggScratched(msg.sender, eggId, newId);
         }
     }
 
-    // в"Ђв"Ђ Merge cards в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
-    function mergeCards(
+    // ── Merge eggMonets ────────────────────────────────────────────────────────
+    function mergeEggMonets(
         uint8     playerId,
         uint8     tier,
         uint256[] calldata tokenIds
     ) external nonReentrant {
         if (tier >= maxTier) revert MaxTier();
-        if (tokenIds.length != MERGE_COUNT) revert WrongCard();
+        if (tokenIds.length != MERGE_COUNT) revert WrongEggMonet();
 
         // Dedup
         for (uint256 i = 0; i < MERGE_COUNT; i++) {
@@ -302,101 +305,120 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
 
         for (uint256 i = 0; i < MERGE_COUNT; i++) {
             uint256 tid = tokenIds[i];
-            if (ownerOf(tid) != msg.sender)             revert NotOwnerOfToken();
-            if (isCardLocked(tid))                      revert CardLocked();
-            if (tokenType[tid] != TYPE_CARD)            revert WrongCard();
-            CardData memory c = cards[tid];
-            if (c.playerId != playerId || c.tier != tier) revert WrongCard();
+            if (ownerOf(tid) != msg.sender)               revert NotOwnerOfToken();
+            if (isEggMonetLocked(tid))                    revert EggMonetLocked();
+            if (tokenType[tid] != TYPE_EGGMONET)          revert WrongEggMonet();
+            EggMonetData memory c = eggMonets[tid];
+            if (c.playerId != playerId || c.tier != tier) revert WrongEggMonet();
 
-            _burn(tid); // _afterTokenTransfer handles inventory removal
+            _burn(tid);
         }
 
-        uint256 newId = _mintCard(msg.sender, playerId, tier + 1);
-        emit CardsMerged(msg.sender, newId, playerId, tier + 1);
+        uint256 newId = _mintEggMonet(msg.sender, playerId, tier + 1);
+        emit EggMonetsMerged(msg.sender, newId, playerId, tier + 1);
     }
 
-    // в"Ђв"Ђ Card transfers в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
-    function transferCard(address to, uint256 tokenId) external nonReentrant {
+    // ── EggMonet transfers ─────────────────────────────────────────────────────
+    function transferEggMonet(address to, uint256 tokenId) external nonReentrant {
         if (ownerOf(tokenId) != msg.sender) revert NotOwnerOfToken();
-        if (isCardLocked(tokenId)) revert CardLocked();
-        _transfer(msg.sender, to, tokenId); // _afterTokenTransfer handles inventory
+        if (isEggMonetLocked(tokenId)) revert EggMonetLocked();
+        _transfer(msg.sender, to, tokenId);
     }
 
-    // в"Ђв"Ђ Card locking (tournament only) в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
-    function lockCard(uint256 tokenId, uint256 unlockTs) external onlyTournament {
+    // ── EggMonet locking (tournament only) ────────────────────────────────────
+    function lockEggMonet(uint256 tokenId, uint256 unlockTs) external onlyTournament {
         lockUntil[tokenId] = unlockTs;
     }
 
-    function unlockCard(uint256 tokenId) external onlyTournament {
+    function unlockEggMonet(uint256 tokenId) external onlyTournament {
         delete lockUntil[tokenId];
     }
 
-    function isCardLocked(uint256 tokenId) public view returns (bool) {
+    function isEggMonetLocked(uint256 tokenId) public view returns (bool) {
         return block.timestamp < lockUntil[tokenId];
     }
 
-    // в"Ђв"Ђ Admin reissue в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
-    function adminReissueCard(uint256 tokenId) external onlyNFTAdmin {
-        if (isCardLocked(tokenId)) revert CardLocked();
+    // ── Admin reissue ──────────────────────────────────────────────────────────
+    // MAINNET: adminReissueEggMonet has no timelock (NFT-07, accepted for operational speed).
+    // Add consumeAction(ACTION_ADMIN_MINT_TO, ...) here if abuse risk increases with real funds.
+    function adminReissueEggMonet(uint256 tokenId) external onlyNFTAdmin {
+        if (isEggMonetLocked(tokenId)) revert EggMonetLocked();
         address owner_ = ownerOf(tokenId);
-        CardData memory c = cards[tokenId];
-        _removeCardFromInventory(owner_, tokenId);
+        EggMonetData memory c = eggMonets[tokenId];
+        _removeEggMonetFromInventory(owner_, tokenId);
         _burn(tokenId);
         delete lockUntil[tokenId];
-        _mintCard(owner_, c.playerId, c.tier);
+        uint256 newTokenId = _mintEggMonet(owner_, c.playerId, c.tier);
+        emit EggMonetReissued(owner_, tokenId, newTokenId, c.playerId, c.tier);
     }
 
-    // в"Ђв"Ђ Internal mints в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
-    function _mintCard(address to, uint8 playerId, uint8 tier) internal returns (uint256) {
+    // ── Internal mints ─────────────────────────────────────────────────────────
+    function _mintEggMonet(address to, uint8 playerId, uint8 tier) internal returns (uint256) {
         if (tier > maxTier) revert InvalidTier();
         uint256 id = _nextTokenId++;
         // Set metadata BEFORE _safeMint so _afterTokenTransfer can read tokenType
-        tokenType[id] = TYPE_CARD;
-        cards[id]     = CardData({ playerId: playerId, tier: tier });
+        tokenType[id]  = TYPE_EGGMONET;
+        eggMonets[id]  = EggMonetData({ playerId: playerId, tier: tier });
         _safeMint(to, id);
-        emit CardMinted(to, id, playerId, tier);
+        emit EggMonetMinted(to, id, playerId, tier);
         return id;
     }
 
-    function _mintChest(address to, uint8 chestType) internal returns (uint256) {
+    function _mintEgg(address to, uint8 eggType) internal returns (uint256) {
         uint256 id = _nextTokenId++;
-        tokenType[id] = TYPE_CHEST;
-        chests[id]    = ChestData({ chestType: chestType });
+        tokenType[id] = TYPE_EGG;
+        eggs[id]      = EggData({ eggType: eggType });
         _safeMint(to, id);
-        emit ChestMinted(to, id, chestType);
+        emit EggMinted(to, id, eggType);
         return id;
     }
 
-    // в"Ђв"Ђ Inventory helpers в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
-    function _addCardToInventory(address owner_, uint256 tokenId) internal {
-        _cardIndex[tokenId] = _userCards[owner_].length;
-        _userCards[owner_].push(tokenId);
+    // ── Inventory helpers ──────────────────────────────────────────────────────
+    function _addEggMonetToInventory(address owner_, uint256 tokenId) internal {
+        _eggMonetIndex[tokenId] = _userEggMonets[owner_].length;
+        _userEggMonets[owner_].push(tokenId);
     }
 
-    function _removeCardFromInventory(address owner_, uint256 tokenId) internal {
-        uint256 idx  = _cardIndex[tokenId];
-        uint256 last = _userCards[owner_][_userCards[owner_].length - 1];
-        _userCards[owner_][idx] = last;
-        _cardIndex[last]        = idx;
-        _userCards[owner_].pop();
-        delete _cardIndex[tokenId];
+    function _removeEggMonetFromInventory(address owner_, uint256 tokenId) internal {
+        uint256 idx  = _eggMonetIndex[tokenId];
+        uint256 last = _userEggMonets[owner_][_userEggMonets[owner_].length - 1];
+        _userEggMonets[owner_][idx] = last;
+        _eggMonetIndex[last]        = idx;
+        _userEggMonets[owner_].pop();
+        delete _eggMonetIndex[tokenId];
     }
 
-    function _addChestToInventory(address owner_, uint256 tokenId) internal {
-        _chestIndex[tokenId] = _userChests[owner_].length;
-        _userChests[owner_].push(tokenId);
+    function _addEggToInventory(address owner_, uint256 tokenId) internal {
+        _eggIndex[tokenId] = _userEggs[owner_].length;
+        _userEggs[owner_].push(tokenId);
     }
 
-    function _removeChestFromInventory(address owner_, uint256 tokenId) internal {
-        uint256 idx  = _chestIndex[tokenId];
-        uint256 last = _userChests[owner_][_userChests[owner_].length - 1];
-        _userChests[owner_][idx] = last;
-        _chestIndex[last]        = idx;
-        _userChests[owner_].pop();
-        delete _chestIndex[tokenId];
+    function _removeEggFromInventory(address owner_, uint256 tokenId) internal {
+        uint256 idx  = _eggIndex[tokenId];
+        uint256 last = _userEggs[owner_][_userEggs[owner_].length - 1];
+        _userEggs[owner_][idx] = last;
+        _eggIndex[last]        = idx;
+        _userEggs[owner_].pop();
+        delete _eggIndex[tokenId];
     }
 
-    // OZ v4 hook вЂ" syncs inventory on mint and transfer (burn handled before _burn call)
+    // Prevents transfer of locked EggMonets via any ERC721 path (transferFrom, safeTransferFrom, _transfer).
+    // mint (from==0) and burn (to==0) are explicitly excluded.
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 firstTokenId,
+        uint256 batchSize
+    ) internal override {
+        super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
+        if (from != address(0) && to != address(0)) {
+            if (tokenType[firstTokenId] == TYPE_EGGMONET && isEggMonetLocked(firstTokenId)) {
+                revert EggMonetLocked();
+            }
+        }
+    }
+
+    // OZ v4 hook — syncs inventory on mint and transfer (burn handled before _burn call)
     function _afterTokenTransfer(
         address from,
         address to,
@@ -404,29 +426,33 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
         uint256 batchSize
     ) internal override {
         super._afterTokenTransfer(from, to, firstTokenId, batchSize);
-        bool isCard = tokenType[firstTokenId] == TYPE_CARD;
+        bool isEggMonet = tokenType[firstTokenId] == TYPE_EGGMONET;
         if (from == address(0)) {
             // mint
-            if (isCard) _addCardToInventory(to, firstTokenId);
-            else        _addChestToInventory(to, firstTokenId);
+            if (isEggMonet) _addEggMonetToInventory(to, firstTokenId);
+            else            _addEggToInventory(to, firstTokenId);
         } else if (to == address(0)) {
             // burn
-            if (isCard) _removeCardFromInventory(from, firstTokenId);
-            else        _removeChestFromInventory(from, firstTokenId);
+            if (isEggMonet) _removeEggMonetFromInventory(from, firstTokenId);
+            else            _removeEggFromInventory(from, firstTokenId);
         } else {
             // transfer
-            if (isCard) {
-                _removeCardFromInventory(from, firstTokenId);
-                _addCardToInventory(to, firstTokenId);
+            if (isEggMonet) {
+                _removeEggMonetFromInventory(from, firstTokenId);
+                _addEggMonetToInventory(to, firstTokenId);
             } else {
-                _removeChestFromInventory(from, firstTokenId);
-                _addChestToInventory(to, firstTokenId);
+                _removeEggFromInventory(from, firstTokenId);
+                _addEggToInventory(to, firstTokenId);
             }
         }
     }
 
-    // в"Ђв"Ђ Pseudorandomness в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
-    // Same weakness as Move version (timestamp-based). Acceptable for MVP.
+    // ── Pseudorandomness ───────────────────────────────────────────────────────
+    // NFT-03 (accepted risk): fully deterministic from public inputs — a motivated
+    // player can simulate and time scratchEgg to get a desired playerId.
+    // Acceptable for MVP/testnet.
+    // MAINNET: replace with commit-reveal or Chainlink VRF. With real money, grinding
+    // scratchEgg to cherry-pick high-tier players breaks game economy.
     function _pseudoRand(
         address user,
         uint256 tokenId,
@@ -439,31 +465,31 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
         return uint8(h % maxVal);
     }
 
-    function _chestPrice(uint8 chestType) internal view returns (uint256) {
-        if (chestType == 0) return woodenPrice;
-        if (chestType == 1) return ironPrice;
+    function _eggPrice(uint8 eggType) internal view returns (uint256) {
+        if (eggType == 0) return woodenPrice;
+        if (eggType == 1) return ironPrice;
         return silverPrice;
     }
 
-    // в"Ђв"Ђ Views в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
-    function getUserCards(address owner_) external view returns (uint256[] memory) {
-        return _userCards[owner_];
+    // ── Views ──────────────────────────────────────────────────────────────────
+    function getUserEggMonets(address owner_) external view returns (uint256[] memory) {
+        return _userEggMonets[owner_];
     }
 
-    function getUserChests(address owner_) external view returns (uint256[] memory) {
-        return _userChests[owner_];
+    function getUserEggs(address owner_) external view returns (uint256[] memory) {
+        return _userEggs[owner_];
     }
 
-    function getCardInfo(uint256 tokenId) external view returns (uint8 playerId, uint8 tier) {
-        CardData memory c = cards[tokenId];
+    function getEggMonetInfo(uint256 tokenId) external view returns (uint8 playerId, uint8 tier) {
+        EggMonetData memory c = eggMonets[tokenId];
         return (c.playerId, c.tier);
     }
 
-    function getChestPrices() external view returns (uint256 wooden, uint256 iron, uint256 silver) {
+    function getEggPrices() external view returns (uint256 wooden, uint256 iron, uint256 silver) {
         return (woodenPrice, ironPrice, silverPrice);
     }
 
-    // в"Ђв"Ђ Coin/name tables в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+    // ── Coin/name tables ───────────────────────────────────────────────────────
     function playerName(uint8 id) public view returns (string memory) {
         if (id < 50) {
             string[50] memory names = [
@@ -484,28 +510,28 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
     }
 
     function tierName(uint8 tier) public view returns (string memory) {
-        if (tier == 0) return "Common";
-        if (tier == 1) return "Rare";
-        if (tier == 2) return "Epic";
-        if (tier == 3) return "Legendary";
+        if (tier == 0) return "Small";
+        if (tier == 1) return "Medium";
+        if (tier == 2) return "Heavy";
+        if (tier == 3) return "SuperHeavy";
         return _extTierName[tier];
     }
 
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         require(_exists(tokenId), "ERC721: invalid token ID");
-        if (tokenType[tokenId] == TYPE_CARD) {
-            CardData memory c = cards[tokenId];
+        if (tokenType[tokenId] == TYPE_EGGMONET) {
+            EggMonetData memory c = eggMonets[tokenId];
             return string(abi.encodePacked(
-                cardBaseUri,
+                eggMonetBaseUri,
                 uint256(c.playerId).toString(),
                 "/",
                 uint256(c.tier).toString()
             ));
         } else {
-            ChestData memory ch = chests[tokenId];
+            EggData memory e = eggs[tokenId];
             return string(abi.encodePacked(
-                chestBaseUri,
-                uint256(ch.chestType).toString()
+                eggBaseUri,
+                uint256(e.eggType).toString()
             ));
         }
     }
@@ -569,6 +595,8 @@ contract CoinDeckNFT is ERC721, ERC721Burnable, ReentrancyGuard {
         return _extPlayerSlug[id];
     }
 
-    // в"Ђв"Ђ ETH receive (prize vault) в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+    // ── ETH receive (prize vault) ──────────────────────────────────────────────
+    // MAINNET: direct ETH sent here (not via buyEgg) is permanently locked — no withdrawal function (NFT-02 partial).
+    // Add withdrawStuckETH(address to) onlyOwner before launch if operational risk is a concern.
     receive() external payable {}
 }

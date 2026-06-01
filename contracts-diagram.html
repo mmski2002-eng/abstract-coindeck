@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abstract CoinDeck — Contract Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0d1117;
+    color: #c9d1d9;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 20px;
+    color: #58a6ff;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 12px;
+    color: #6e7681;
+    margin-bottom: 30px;
+    letter-spacing: 1px;
+  }
+
+  /* ── Diagram container ── */
+  .diagram-wrap {
+    position: relative;
+    width: 1100px;
+    margin: 0 auto;
+  }
+
+  svg.arrows {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  /* ── Contract boxes ── */
+  .contract {
+    position: absolute;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid;
+    backdrop-filter: blur(4px);
+    min-width: 0;
+  }
+
+  .contract-name {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .contract-name .badge {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .fn-group { margin-top: 8px; }
+  .fn-group-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    opacity: 0.55;
+  }
+
+  .fn {
+    font-size: 11px;
+    padding: 2px 0;
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    line-height: 1.5;
+  }
+
+  .fn .fname { color: #e6edf3; }
+  .fn .fargs { color: #6e7681; font-size: 10px; }
+  .fn .tag {
+    font-size: 8px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .tag-payable  { background: #1a3a1a; color: #56d364; border: 1px solid #2ea043; }
+  .tag-view     { background: #1a2a3a; color: #58a6ff; border: 1px solid #1f6feb; }
+  .tag-admin    { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+  .tag-owner    { background: #3a2a1a; color: #e3b341; border: 1px solid #9e6a03; }
+  .tag-ext      { background: #2a1a3a; color: #a371f7; border: 1px solid #8957e5; }
+
+  /* ── Color themes per contract ── */
+  .c-admin    { background: rgba(88,166,255,0.06); border-color: #1f6feb; }
+  .c-admin .contract-name { color: #58a6ff; }
+  .c-admin .badge { background: #1f6feb33; color: #58a6ff; border: 1px solid #1f6feb; }
+
+  .c-oracle   { background: rgba(227,179,65,0.06); border-color: #9e6a03; }
+  .c-oracle .contract-name { color: #e3b341; }
+  .c-oracle .badge { background: #9e6a0333; color: #e3b341; border: 1px solid #9e6a03; }
+
+  .c-nft      { background: rgba(163,113,247,0.06); border-color: #8957e5; }
+  .c-nft .contract-name { color: #a371f7; }
+  .c-nft .badge { background: #8957e533; color: #a371f7; border: 1px solid #8957e5; }
+
+  .c-tournament { background: rgba(86,211,100,0.06); border-color: #2ea043; }
+  .c-tournament .contract-name { color: #56d364; }
+  .c-tournament .badge { background: #2ea04333; color: #56d364; border: 1px solid #2ea043; }
+
+  .c-marketplace { background: rgba(248,81,73,0.06); border-color: #da3633; }
+  .c-marketplace .contract-name { color: #f85149; }
+  .c-marketplace .badge { background: #da363333; color: #f85149; border: 1px solid #da3633; }
+
+  .c-claim    { background: rgba(240,136,62,0.06); border-color: #bd561d; }
+  .c-claim .contract-name { color: #f0883e; }
+  .c-claim .badge { background: #bd561d33; color: #f0883e; border: 1px solid #bd561d; }
+
+  /* ── Roles section ── */
+  .roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+  }
+  .role-pill {
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    border: 1px solid #30363d;
+    background: #161b22;
+    color: #8b949e;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    width: 1100px;
+    margin: 20px auto 0;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    background: #161b22;
+    border-radius: 8px;
+    border: 1px solid #30363d;
+  }
+  .legend-title { font-size: 10px; color: #6e7681; text-transform: uppercase; letter-spacing: 1px; margin-right: 8px; }
+  .legend-item  { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #8b949e; }
+  .legend-line  { width: 24px; height: 2px; }
+  .leg-role  { background: #58a6ff; }
+  .leg-nft   { background: #a371f7; }
+  .leg-eth   { background: #56d364; }
+  .leg-event { background: #e3b341; }
+
+  /* ── Arrow label ── */
+  .arrow-label {
+    font-size: 9px;
+    fill: #6e7681;
+    font-family: monospace;
+  }
+</style>
+</head>
+<body>
+
+<h1>Abstract CoinDeck — Smart Contract Architecture</h1>
+<p class="subtitle">Abstract Network (zkSync Era L2) · Solidity ^0.8.24 · 6 contracts</p>
+
+<div class="diagram-wrap" style="height: 820px;">
+
+  <!-- ═══════════════════ ADMIN CONTROL ═══════════════════ -->
+  <div class="contract c-admin" id="box-admin" style="left:330px; top:0; width:440px;">
+    <div class="contract-name">
+      <span>🔐</span> AdminControl
+      <span class="badge">ACCESS LAYER</span>
+    </div>
+
+    <div class="roles">
+      <span class="role-pill">ORACLE = 1</span>
+      <span class="role-pill">TREASURY = 2</span>
+      <span class="role-pill">NFT = 4</span>
+      <span class="role-pill">CLAIM = 8</span>
+      <span class="role-pill">EMERGENCY = 16</span>
+      <span class="role-pill">FULL = 31</span>
+    </div>
+
+    <div class="fn-group">
+      <div class="fn-group-label">Роли</div>
+      <div class="fn"><span class="fname">grantRole</span><span class="fargs">(addr, roleMask)</span><span class="tag tag-owner">onlyOwner</span></div>
+      <div class="fn"><span class="fname">revokeRole</span><span class="fargs">(addr, roleMask)</span><span class="tag tag-owner">onlyOwner</span></div>
+      <div class="fn"><span class="fname">hasRole</span><span class="fargs">(addr, role) → bool</span><span class="tag tag-view">view</span></div>
+    </div>
+
+    <div class="fn-group">
+      <div class="fn-group-label">Timelock очередь (11 action types)</div>
+      <div class="fn"><span class="fname">queueAction</span><span class="fargs">(actionType, payloadHash)</span></div>
+      <div class="fn"><span class="fname">consumeAction</span><span class="fargs">(actionType, payloadHash)</span></div>
+      <div class="fn"><span class="fname">setActionDelay</span><span class="fargs">(actionType, delaySecs)</span><span class="tag tag-owner">onlyOwner</span></div>
+      <div class="fn"><span class="fname">getPendingActions</span><span class="fargs">() → []</span><span class="tag tag-view">view</span></div>
+    </div>
+
+    <div class="fn-group" style="display:flex; gap:30px;">
+      <div>
+        <div class="fn-group-label">Withdrawal Policy</div>
+        <div class="fn"><span class="fname">setWithdrawalPolicy</span><span class="fargs">(enabled, perTx, daily)</span></div>
+        <div class="fn"><span class="fname">checkWithdrawal</span><span class="fargs">(amount)</span></div>
+      </div>
+      <div>
+        <div class="fn-group-label">Epoch Guard</div>
+        <div class="fn"><span class="fname">setEpochGuard</span><span class="fargs">(freeze)</span></div>
+        <div class="fn"><span class="fname">onEpochStarted</span><span class="fargs">()</span></div>
+        <div class="fn"><span class="fname">onEpochStopped</span><span class="fargs">()</span></div>
+        <div class="fn"><span class="fname">assertEpochSettingsMutable</span><span class="fargs">()</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ ORACLE ═══════════════════ -->
+  <div class="contract c-oracle" id="box-oracle" style="left:0; top:290px; width:220px;">
+    <div class="contract-name">
+      <span>📡</span> Oracle
+      <span class="badge">DATA FEED</span>
+    </div>
+    <div class="fn-group">
+      <div class="fn-group-label">Admin</div>
+      <div class="fn"><span class="fname">postDayScores</span><span class="fargs">(day, ids[], pts[])</span><span class="tag tag-admin">ORACLE</span></div>
+      <div class="fn"><span class="fname">setPosted</span><span class="fargs">(day, posted)</span><span class="tag tag-admin">ORACLE</span></div>
+      <div class="fn"><span class="fname">resetAllDays</span><span class="fargs">(days[])</span><span class="tag tag-admin">ORACLE</span></div>
+    </div>
+    <div class="fn-group">
+      <div class="fn-group-label">Views</div>
+      <div class="fn"><span class="fname">getDayScores</span><span class="fargs">(day)</span><span class="tag tag-view">view</span></div>
+      <div class="fn"><span class="fname">isDayPosted</span><span class="fargs">(day)</span><span class="tag tag-view">view</span></div>
+    </div>
+    <div style="margin-top:8px; font-size:10px; color:#6e7681; line-height:1.5;">
+      Storage: day → playerId → basePoints<br>
+      Max score: 10 000 bp/player/day
+    </div>
+  </div>
+
+  <!-- ═══════════════════ COINDECK NFT ═══════════════════ -->
+  <div class="contract c-nft" id="box-nft" style="left:245px; top:270px; width:310px;">
+    <div class="contract-name">
+      <span>🃏</span> CoinDeckNFT
+      <span class="badge">ERC-721</span>
+    </div>
+    <div class="fn-group" style="display:flex; gap:16px;">
+      <div>
+        <div class="fn-group-label">Пользователь</div>
+        <div class="fn"><span class="fname">buyEgg</span><span class="fargs">(eggType, count)</span><span class="tag tag-payable">payable</span></div>
+        <div class="fn"><span class="fname">scratchEgg</span><span class="fargs">(eggId)</span></div>
+        <div class="fn"><span class="fname">scratchEggBatch</span><span class="fargs">(eggIds[])</span></div>
+        <div class="fn"><span class="fname">mergeEggMonets</span><span class="fargs">(pid, tier, ids[5])</span></div>
+        <div class="fn"><span class="fname">transferEggMonet</span><span class="fargs">(to, tokenId)</span></div>
+        <div class="fn"><span class="fname">setNickname</span><span class="fargs">(nick)</span></div>
+      </div>
+      <div>
+        <div class="fn-group-label">Admin (NFT role)</div>
+        <div class="fn"><span class="fname">adminMintEggMonet</span><span class="fargs">(to, pid, tier, n)</span><span class="tag tag-admin">NFT</span></div>
+        <div class="fn"><span class="fname">setEggPrices</span><span class="fargs">(w, i, s)</span><span class="tag tag-admin">NFT</span></div>
+        <div class="fn"><span class="fname">setBaseUris</span><span class="fargs">(eggMonet, egg)</span><span class="tag tag-admin">NFT</span></div>
+        <div class="fn"><span class="fname">setTournamentContract</span><span class="fargs">(addr)</span><span class="tag tag-owner">owner</span></div>
+      </div>
+    </div>
+    <div class="fn-group">
+      <div class="fn-group-label">Tournament only</div>
+      <div class="fn"><span class="fname">lockEggMonet</span><span class="fargs">(tokenId, unlockTs)</span><span class="tag tag-ext">Tournament</span></div>
+      <div class="fn"><span class="fname">unlockEggMonet</span><span class="fargs">(tokenId)</span><span class="tag tag-ext">Tournament</span></div>
+    </div>
+    <div class="fn-group">
+      <div class="fn-group-label">Views</div>
+      <div class="fn"><span class="fname">getUserEggMonets / getUserEggs</span><span class="tag tag-view">view</span></div>
+      <div class="fn"><span class="fname">getEggMonetInfo / isEggMonetLocked</span><span class="tag tag-view">view</span></div>
+      <div class="fn"><span class="fname">tokenURI / playerName / tierName</span><span class="tag tag-view">view</span></div>
+    </div>
+    <div style="margin-top:8px; font-size:10px; color:#6e7681; line-height:1.5;">
+      Egg types: Wooden 0.01Ξ · Iron 0.03Ξ · Silver 0.09Ξ<br>
+      Tiers: Small · Medium · Heavy · SuperHeavy (merge only)<br>
+      Merge: 5 × tier N → 1 × tier N+1
+    </div>
+  </div>
+
+  <!-- ═══════════════════ TOURNAMENT ═══════════════════ -->
+  <div class="contract c-tournament" id="box-tournament" style="left:580px; top:270px; width:260px;">
+    <div class="contract-name">
+      <span>🏆</span> Tournament
+      <span class="badge">GAME CORE</span>
+    </div>
+    <div class="fn-group">
+      <div class="fn-group-label">Эпохи (Admin)</div>
+      <div class="fn"><span class="fname">startEpoch</span><span class="fargs">(startTs)</span><span class="tag tag-admin">FULL</span></div>
+      <div class="fn"><span class="fname">stopAndReset</span><span class="fargs">()</span><span class="tag tag-admin">EMERG</span></div>
+      <div class="fn"><span class="fname">adminClearEpochs</span><span class="fargs">()</span><span class="tag tag-admin">FULL</span></div>
+      <div class="fn"><span class="fname">setConfig</span><span class="fargs">(changeFee, cancelFee)</span><span class="tag tag-admin">FULL</span></div>
+    </div>
+    <div class="fn-group">
+      <div class="fn-group-label">Пользователь</div>
+      <div class="fn"><span class="fname">submitWeighing</span><span class="fargs">(eggMonetIds[5])</span><span class="tag tag-payable">payable</span></div>
+      <div class="fn"><span class="fname">cancelWeighing</span><span class="fargs">()</span><span class="tag tag-payable">payable</span></div>
+    </div>
+    <div class="fn-group">
+      <div class="fn-group-label">Призовой пул</div>
+      <div class="fn"><span class="fname">depositPrize</span><span class="fargs">()</span><span class="tag tag-payable">payable</span></div>
+      <div class="fn"><span class="fname">withdrawTo</span><span class="fargs">(recipient, amount)</span><span class="tag tag-admin">TREASURY</span></div>
+    </div>
+    <div class="fn-group">
+      <div class="fn-group-label">Views</div>
+      <div class="fn"><span class="fname">getState</span><span class="fargs">() → epoch, day, pool</span><span class="tag tag-view">view</span></div>
+      <div class="fn"><span class="fname">getWeighingSlots</span><span class="fargs">(player, epoch, day)</span><span class="tag tag-view">view</span></div>
+      <div class="fn"><span class="fname">getDayWeighingsPaginated</span><span class="fargs">(...)</span><span class="tag tag-view">view</span></div>
+      <div class="fn"><span class="fname">getParticipantsPage</span><span class="fargs">(offset, limit)</span><span class="tag tag-view">view</span></div>
+    </div>
+    <div style="margin-top:8px; font-size:10px; color:#6e7681; line-height:1.5;">
+      Epoch: 6 active + 1 rest = 7 days<br>
+      Leagues: Bronze · Silver · Gold<br>
+      EggMonets locked per day until end of day
+    </div>
+  </div>
+
+  <!-- ═══════════════════ MARKETPLACE ═══════════════════ -->
+  <div class="contract c-marketplace" id="box-marketplace" style="left:0; top:580px; width:260px;">
+    <div class="contract-name">
+      <span>🏪</span> Marketplace
+      <span class="badge">P2P TRADE</span>
+    </div>
+    <div class="fn-group">
+      <div class="fn-group-label">Пользователь</div>
+      <div class="fn"><span class="fname">listEggMonet</span><span class="fargs">(eggMonetId, price)</span></div>
+      <div class="fn"><span class="fname">buyEggMonet</span><span class="fargs">(listingId)</span><span class="tag tag-payable">payable</span></div>
+      <div class="fn"><span class="fname">buyEggMonetsBatch</span><span class="fargs">(ids[])</span><span class="tag tag-payable">payable</span></div>
+      <div class="fn"><span class="fname">cancelListing</span><span class="fargs">(listingId)</span></div>
+    </div>
+    <div class="fn-group">
+      <div class="fn-group-label">Admin</div>
+      <div class="fn"><span class="fname">adminClearListings</span><span class="fargs">()</span><span class="tag tag-admin">EMERG</span></div>
+      <div class="fn"><span class="fname">withdrawFees</span><span class="fargs">(to)</span><span class="tag tag-owner">owner</span></div>
+    </div>
+    <div class="fn-group">
+      <div class="fn-group-label">Views</div>
+      <div class="fn"><span class="fname">getListingsPage</span><span class="fargs">(offset, limit)</span><span class="tag tag-view">view</span></div>
+      <div class="fn"><span class="fname">listingCount / getFeesBps</span><span class="tag tag-view">view</span></div>
+    </div>
+    <div style="margin-top:8px; font-size:10px; color:#6e7681; line-height:1.5;">
+      Fee: 5% · Escrow: NFT → contract → buyer<br>
+      Min price: 0.00002 Ξ · Batch max: 20
+    </div>
+  </div>
+
+  <!-- ═══════════════════ CLAIM ═══════════════════ -->
+  <div class="contract c-claim" id="box-claim" style="left:580px; top:580px; width:260px;">
+    <div class="contract-name">
+      <span>🎁</span> Claim
+      <span class="badge">PRIZE CLAIM</span>
+    </div>
+    <div class="fn-group">
+      <div class="fn-group-label">Admin (CLAIM role)</div>
+      <div class="fn"><span class="fname">setClaimDays</span><span class="fargs">(numDays)</span><span class="tag tag-admin">CLAIM</span></div>
+      <div class="fn"><span class="fname">setClaimList</span><span class="fargs">(addrs[], amounts[])</span><span class="tag tag-admin">CLAIM</span></div>
+      <div class="fn"><span class="fname">startClaim</span><span class="fargs">(returnAddr)</span><span class="tag tag-admin">CLAIM</span></div>
+      <div class="fn"><span class="fname">closeClaim</span><span class="fargs">()</span><span class="tag tag-admin">CLAIM</span></div>
+    </div>
+    <div class="fn-group">
+      <div class="fn-group-label">Пользователь</div>
+      <div class="fn"><span class="fname">claim</span><span class="fargs">()</span></div>
+    </div>
+    <div class="fn-group">
+      <div class="fn-group-label">Views</div>
+      <div class="fn"><span class="fname">getClaimState</span><span class="fargs">() → active, times, balance</span><span class="tag tag-view">view</span></div>
+      <div class="fn"><span class="fname">getClaimable</span><span class="fargs">(addr) → amount</span><span class="tag tag-view">view</span></div>
+    </div>
+    <div style="margin-top:8px; font-size:10px; color:#6e7681; line-height:1.5;">
+      Window: 6 days default · Pull payment<br>
+      Остаток → returnAddr после дедлайна
+    </div>
+  </div>
+
+  <!-- ═══════════════════ SVG ARROWS ═══════════════════ -->
+  <svg class="arrows" viewBox="0 0 1100 820" preserveAspectRatio="none">
+    <defs>
+      <!-- Arrow markers -->
+      <marker id="arr-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#1f6feb"/>
+      </marker>
+      <marker id="arr-purple" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#8957e5"/>
+      </marker>
+      <marker id="arr-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#2ea043"/>
+      </marker>
+      <marker id="arr-orange" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#bd561d"/>
+      </marker>
+      <marker id="arr-red" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#da3633"/>
+      </marker>
+      <marker id="arr-yellow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#9e6a03"/>
+      </marker>
+    </defs>
+
+    <!-- ① Oracle → AdminControl (hasRole ORACLE) -->
+    <path d="M110,290 L110,240 L330,130"
+          fill="none" stroke="#9e6a03" stroke-width="1.5" stroke-dasharray="4,3"
+          marker-end="url(#arr-yellow)" opacity="0.7"/>
+    <text class="arrow-label" x="130" y="245">hasRole(ORACLE)</text>
+    <text class="arrow-label" x="130" y="256">consumeAction</text>
+
+    <!-- ② CoinDeckNFT → AdminControl (hasRole NFT) -->
+    <path d="M400,270 L400,200 L440,155"
+          fill="none" stroke="#8957e5" stroke-width="1.5" stroke-dasharray="4,3"
+          marker-end="url(#arr-purple)" opacity="0.7"/>
+    <text class="arrow-label" x="405" y="218">hasRole(NFT)</text>
+    <text class="arrow-label" x="405" y="229">consumeAction</text>
+
+    <!-- ③ Tournament → AdminControl (hasRole, epoch callbacks) -->
+    <path d="M710,270 L710,200 L680,155"
+          fill="none" stroke="#2ea043" stroke-width="1.5" stroke-dasharray="4,3"
+          marker-end="url(#arr-green)" opacity="0.7"/>
+    <text class="arrow-label" x="716" y="215">hasRole / checkWithdrawal</text>
+    <text class="arrow-label" x="716" y="226">onEpochStarted/Stopped</text>
+
+    <!-- ④ Marketplace → AdminControl -->
+    <path d="M130,580 L130,530 L380,155"
+          fill="none" stroke="#da3633" stroke-width="1.5" stroke-dasharray="4,3"
+          marker-end="url(#arr-red)" opacity="0.6"/>
+    <text class="arrow-label" x="138" y="540">hasRole(EMERG)</text>
+    <text class="arrow-label" x="138" y="551">consumeAction</text>
+
+    <!-- ⑤ Claim → AdminControl -->
+    <path d="M840,580 L840,530 L730,155"
+          fill="none" stroke="#bd561d" stroke-width="1.5" stroke-dasharray="4,3"
+          marker-end="url(#arr-orange)" opacity="0.6"/>
+    <text class="arrow-label" x="845" y="540">hasRole(CLAIM)</text>
+    <text class="arrow-label" x="845" y="551">consumeAction</text>
+
+    <!-- ⑥ Tournament → CoinDeckNFT (lockEggMonet / unlockEggMonet) -->
+    <path d="M580,360 L555,360"
+          fill="none" stroke="#a371f7" stroke-width="2"
+          marker-end="url(#arr-purple)" opacity="0.9"/>
+    <text class="arrow-label" x="474" y="348">lockEggMonet</text>
+    <text class="arrow-label" x="470" y="360">unlockEggMonet</text>
+
+    <!-- ⑦ CoinDeckNFT → Tournament (egg ETH forwarded) -->
+    <path d="M555,400 L580,400"
+          fill="none" stroke="#56d364" stroke-width="2"
+          marker-end="url(#arr-green)" opacity="0.9"/>
+    <text class="arrow-label" x="487" y="396">fwd egg ETH</text>
+    <text class="arrow-label" x="488" y="407">→ prize pool</text>
+
+    <!-- ⑧ Marketplace → CoinDeckNFT (transferFrom, isEggMonetLocked, getEggMonetInfo) -->
+    <path d="M260,620 L280,520 L310,510"
+          fill="none" stroke="#da3633" stroke-width="1.5"
+          marker-end="url(#arr-red)" opacity="0.8"/>
+    <text class="arrow-label" x="268" y="556">transferFrom</text>
+    <text class="arrow-label" x="262" y="568">isEggMonetLocked</text>
+    <text class="arrow-label" x="263" y="580">getEggMonetInfo</text>
+  </svg>
+
+</div><!-- end diagram-wrap -->
+
+<!-- ── Legend ── -->
+<div class="legend">
+  <span class="legend-title">Легенда:</span>
+  <div class="legend-item"><div class="legend-line" style="background:#8957e5;height:2px;"></div>роль / контроль доступа</div>
+  <div class="legend-item"><div class="legend-line" style="background:#a371f7;height:2px;"></div>вызов NFT функций</div>
+  <div class="legend-item"><div class="legend-line" style="background:#56d364;height:2px;"></div>передача ETH</div>
+  <div class="legend-item" style="margin-left:20px; border-left:1px solid #30363d; padding-left:20px;">
+    <span class="tag tag-payable" style="font-size:9px;">payable</span> — принимает ETH
+  </div>
+  <div class="legend-item">
+    <span class="tag tag-admin" style="font-size:9px;">ROLE</span> — требует роль
+  </div>
+  <div class="legend-item">
+    <span class="tag tag-view" style="font-size:9px;">view</span> — read-only
+  </div>
+  <div class="legend-item">
+    <span class="tag tag-ext" style="font-size:9px;">ext</span> — вызов внешнего контракта
+  </div>
+  <div class="legend-item" style="margin-left:auto; color:#6e7681; font-size:10px;">
+    Abstract Network · chainId 11124 (testnet) / 2741 (mainnet)
+  </div>
+</div>
+
+<!-- ── Flow summary ── -->
+<div style="width:1100px; margin:16px auto 0; display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+
+  <div style="background:#161b22; border:1px solid #30363d; border-radius:8px; padding:14px;">
+    <div style="font-size:11px; color:#58a6ff; font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">🎮 Game Flow</div>
+    <div style="font-size:11px; color:#8b949e; line-height:1.8;">
+      1. Купить яйцо → buyEgg()<br>
+      2. Почесать яйцо → scratchEgg() → EggMonet<br>
+      3. Улучшить EggMonet → mergeEggMonets() × 5<br>
+      4. Подать взвешивание → submitWeighing()<br>
+      5. EggMonets блокируются на день<br>
+      6. Oracle постит очки ежедневно<br>
+      7. Off-chain leaderboard считает баллы<br>
+      8. Admin → Claim: startClaim(winners)<br>
+      9. Победители → claim() → ETH
+    </div>
+  </div>
+
+  <div style="background:#161b22; border:1px solid #30363d; border-radius:8px; padding:14px;">
+    <div style="font-size:11px; color:#a371f7; font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">🔒 Security Model</div>
+    <div style="font-size:11px; color:#8b949e; line-height:1.8;">
+      AdminControl — единый центр доступа<br>
+      Timelock: 11 типов действий с задержкой<br>
+      EpochGuard: заморозка настроек во время эпохи<br>
+      WithdrawalPolicy: лимит per-tx и daily<br>
+      ReentrancyGuard: все write-функции<br>
+      lockEggMonet: Tournament блокирует EggMonets<br>
+      Escrow: Marketplace держит NFT<br>
+      Pull payment: пользователи забирают сами
+    </div>
+  </div>
+
+  <div style="background:#161b22; border:1px solid #30363d; border-radius:8px; padding:14px;">
+    <div style="font-size:11px; color:#56d364; font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">💰 ETH Flows</div>
+    <div style="font-size:11px; color:#8b949e; line-height:1.8;">
+      buyEgg() → Tournament (prize pool)<br>
+      submitWeighing() → Tournament (resubmit fee)<br>
+      cancelWeighing() → Tournament (cancel fee)<br>
+      depositPrize() → Tournament (external)<br>
+      Tournament.withdrawTo() → Claim vault<br>
+      Claim.claim() → winner wallet<br>
+      Marketplace.buyEggMonet() → seller (95%)<br>
+      Marketplace.withdrawFees() → owner (5%)
+    </div>
+  </div>
+
+</div>
+
+<div style="text-align:center; margin:20px auto; font-size:10px; color:#30363d; letter-spacing:1px;">
+  Abstract CoinDeck · contracts-diagram.html · Auto-generated from source
+</div>
+
+</body>
+</html>

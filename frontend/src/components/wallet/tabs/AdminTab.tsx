@@ -342,15 +342,14 @@ export function AdminTab({
   async function saveGovernanceSettings() {
     const freeze = (document.getElementById("admin-freeze-during-epoch") as HTMLInputElement | null)?.checked ?? false;
     const withdrawEnabled = (document.getElementById("admin-withdraw-enabled") as HTMLInputElement | null)?.checked ?? false;
-    const perTxLimitMove = parseFloat((document.getElementById("admin-withdraw-per-tx") as HTMLInputElement | null)?.value ?? "0");
-    const dailyLimitMove = parseFloat((document.getElementById("admin-withdraw-daily") as HTMLInputElement | null)?.value ?? "0");
+    const perTxLimitEth = parseFloat((document.getElementById("admin-withdraw-per-tx") as HTMLInputElement | null)?.value ?? "0");
+    const dailyLimitEth = parseFloat((document.getElementById("admin-withdraw-daily") as HTMLInputElement | null)?.value ?? "0");
     const delayIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-    if (Number.isNaN(perTxLimitMove) || Number.isNaN(dailyLimitMove) || perTxLimitMove < 0 || dailyLimitMove < 0) {
+    if (Number.isNaN(perTxLimitEth) || Number.isNaN(dailyLimitEth) || perTxLimitEth < 0 || dailyLimitEth < 0) {
       setAdminError(lang === "ru" ? "Проверь лимиты вывода" : "Check withdrawal limits");
       return;
     }
-
     for (const actionType of delayIds) {
       const input = document.getElementById(`admin-delay-${actionType}`) as HTMLInputElement | null;
       const hours = parseFloat(input?.value ?? "0");
@@ -360,24 +359,55 @@ export function AdminTab({
       }
     }
 
-    const delaysSecs: string[] = [];
+    let sent = 0;
+
+    // Send only changed delays
     for (const actionType of delayIds) {
       const input = document.getElementById(`admin-delay-${actionType}`) as HTMLInputElement | null;
-      const hours = parseFloat(input?.value ?? "0");
-      delaysSecs.push(String(Math.round(hours * 3600)));
+      const newSecs = Math.round(parseFloat(input?.value ?? "0") * 3600);
+      const currentSecs = governancePolicy.actionDelays[actionType] ?? 0;
+      if (newSecs !== currentSecs) {
+        await adminTx(`set_action_delay_${actionType}`, {
+          function: `${MODULE_ADDRESS}::admin_control::set_action_delay`,
+          typeArguments: [],
+          functionArguments: [String(actionType), String(newSecs)],
+        });
+        sent++;
+      }
     }
-    await adminTx("configure_governance", {
-      function: `${MODULE_ADDRESS}::admin_control::configure_governance`,
-      typeArguments: [],
-      functionArguments: [
-        freeze,
-        withdrawEnabled,
-        String(BigInt(Math.round(perTxLimitMove * 1e18))),
-        String(BigInt(Math.round(dailyLimitMove * 1e18))),
-        delaysSecs,
-      ],
-    });
-    setAdminOk(lang === "ru" ? "Governance-настройки сохранены одной транзакцией" : "Governance settings saved in one transaction");
+
+    // Epoch guard — send if changed
+    if (freeze !== governancePolicy.freezeDuringEpoch) {
+      await adminTx("set_epoch_guard", {
+        function: `${MODULE_ADDRESS}::admin_control::set_epoch_guard`,
+        typeArguments: [],
+        functionArguments: [freeze],
+      });
+      sent++;
+    }
+
+    // Withdrawal policy — send if any field changed
+    const newPerTx = BigInt(Math.round(perTxLimitEth * 1e18));
+    const newDaily = BigInt(Math.round(dailyLimitEth * 1e18));
+    const wpChanged =
+      withdrawEnabled !== governancePolicy.withdrawEnabled ||
+      newPerTx !== BigInt(governancePolicy.perTxLimit ?? 0) ||
+      newDaily !== BigInt(governancePolicy.dailyLimit ?? 0);
+    if (wpChanged) {
+      await adminTx("set_withdrawal_policy", {
+        function: `${MODULE_ADDRESS}::admin_control::set_withdrawal_policy`,
+        typeArguments: [],
+        functionArguments: [withdrawEnabled, String(newPerTx), String(newDaily)],
+      });
+      sent++;
+    }
+
+    if (sent === 0) {
+      setAdminOk(lang === "ru" ? "Нет изменений" : "No changes");
+    } else {
+      await fetchGovernanceState();
+      setAdminOk(lang === "ru" ? `Сохранено (${sent} транзакций)` : `Saved (${sent} transactions)`);
+    }
   }
 
   const adminDirectory = (() => {
@@ -1002,9 +1032,9 @@ export function AdminTab({
             </div>
             <div className="flex gap-2 items-center">
               <label className="text-xs text-zinc-400 shrink-0">{lang === "ru" ? "Плата за отмену лайнапа" : "Cancel lineup fee"}</label>
-              <input type="number" min="0" step="0.01" defaultValue="0.50" id="admin-cancel-fee"
+              <input type="number" min="0" step="0.0001" defaultValue="0.0005" id="admin-cancel-fee"
                 className="w-24 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-white/20" />
-              <span className="text-xs text-zinc-400">MOVE</span>
+              <span className="text-xs text-zinc-400">ETH</span>
               <button onClick={() => {
                 const val = parseFloat((document.getElementById("admin-cancel-fee") as HTMLInputElement)?.value);
                 if (isNaN(val) || val < 0) return;
@@ -1450,7 +1480,7 @@ export function AdminTab({
                 {adminBusy === "set_claim_list" ? "…" : (lang === "ru" ? "Сохранить список" : "Save list")}
               </button>
               </div>
-              <AdminTip text={lang === "ru" ? "Загружает список победителей на блокчейн. Формат: адрес пробел сумма_в_MOVE." : "Uploads the winners list to the blockchain. Format: address space amount_in_MOVE."} />
+              <AdminTip text={lang === "ru" ? "Загружает список победителей на блокчейн. Формат: адрес пробел сумма_в_ETH." : "Uploads the winners list to the blockchain. Format: address space amount_in_ETH."} />
             </div>
 
             <div className="space-y-2">

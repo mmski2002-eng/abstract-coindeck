@@ -6,12 +6,11 @@ import "./AdminControl.sol";
 import "./CoinDeckNFT.sol";
 
 /**
- * Migrated from tournament.move
- * Р­РїРѕС…Рё/РґРЅРё, lineup submission, card locking, prize vault
+ * Эпохи/дни, weighing submission, eggMonet locking, prize vault
  */
 contract Tournament is ReentrancyGuard {
 
-    // в”Ђв”Ђ Constants в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── Constants ──────────────────────────────────────────────────────────────
     uint256 public constant SLOTS      = 5;
     uint256 public constant EPOCH_DAYS = 6;  // active days per epoch
     uint256 public constant WEEK_DAYS  = 7;  // 6 active + 1 rest
@@ -21,13 +20,13 @@ contract Tournament is ReentrancyGuard {
     uint8 public constant LEAGUE_SILVER = 1;
     uint8 public constant LEAGUE_GOLD   = 2;
 
-    // в”Ђв”Ђ Structs в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── Structs ────────────────────────────────────────────────────────────────
     struct SlotEntry {
         uint8 playerId;
         uint8 tier;
     }
 
-    struct DayLineup {
+    struct DayWeighing {
         uint256    epoch;
         uint256    day;      // 1-based, 1..6
         uint8      league;
@@ -41,52 +40,53 @@ contract Tournament is ReentrancyGuard {
         uint256 firstVisibleEpoch;
     }
 
-    // в”Ђв”Ђ State в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── State ──────────────────────────────────────────────────────────────────
     AdminControl public adminControl;
     CoinDeckNFT  public nft;
 
     EpochState public epochState;
 
-    uint256 public changeLineupFee;
-    uint256 public cancelLineupFee;
+    uint256 public changeWeighingFee;
+    uint256 public cancelWeighingFee;
 
-    // player в†’ epoch в†’ day в†’ lineup
-    mapping(address => mapping(uint256 => mapping(uint256 => DayLineup))) public lineups;
-    // player в†’ epoch в†’ days submitted (bitmask, day 1-6)
-    mapping(address => mapping(uint256 => uint64)) public lineupDayMask;
+    // player → epoch → day → weighing
+    mapping(address => mapping(uint256 => mapping(uint256 => DayWeighing))) public weighings;
+    // player → epoch → days submitted (bitmask, day 1-6)
+    mapping(address => mapping(uint256 => uint64)) public weighingDayMask;
 
     // participants registry
     address[] public participants;
     mapping(address => bool) public isParticipant;
 
-    // currently locked cards per player (for unlock on resubmit)
-    mapping(address => uint256[]) private _playerLockedCards;
+    // currently locked eggMonets per player (for unlock on resubmit)
+    mapping(address => uint256[]) private _playerLockedEggMonets;
 
-    // в”Ђв”Ђ Events в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-    event LineupSubmitted(address indexed player, uint256 epoch, uint256 day, uint8 league);
-    event LineupCancelled(address indexed player, uint256 epoch, uint256 day, uint256 fee);
+    // ── Events ─────────────────────────────────────────────────────────────────
+    event WeighingSubmitted(address indexed player, uint256 epoch, uint256 day, uint8 league);
+    event WeighingCancelled(address indexed player, uint256 epoch, uint256 day, uint256 fee);
     event PrizeDeposited(address indexed funder, uint256 amount);
     event PrizeWithdrawn(address indexed recipient, uint256 amount);
     event EpochStarted(uint256 startTimestamp);
     event EpochStopped(uint256 nextEpoch);
     event EpochsCleared(uint256 firstVisibleEpoch);
-    event ConfigUpdated(uint256 changeLineupFee, uint256 cancelLineupFee);
+    event ConfigUpdated(uint256 changeWeighingFee, uint256 cancelWeighingFee);
+    event EmergencyUnlockPage(uint256 offset, uint256 count);
 
-    // в”Ђв”Ђ Errors в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── Errors ─────────────────────────────────────────────────────────────────
     error NotAdmin();
     error NotEmergencyAdmin();
     error NotTreasuryAdmin();
     error NotActive();
     error AlreadyStarted();
-    error InvalidLineup();
+    error InvalidWeighing();
     error DayOutOfRange();
     error RestDay();
-    error NoLineup();
-    error DuplicateCard();
-    error CardLocked();
+    error NoWeighing();
+    error DuplicateEggMonet();
+    error EggMonetLocked();
     error TransferFailed();
 
-    // в”Ђв”Ђ Modifiers в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── Modifiers ──────────────────────────────────────────────────────────────
     modifier onlyAdmin() {
         if (!adminControl.hasRole(msg.sender, adminControl.ROLE_FULL()) &&
             msg.sender != adminControl.owner())
@@ -108,12 +108,12 @@ contract Tournament is ReentrancyGuard {
         _;
     }
 
-    // в”Ђв”Ђ Constructor в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── Constructor ────────────────────────────────────────────────────────────
     constructor(address _adminControl, address _nft) {
-        adminControl    = AdminControl(_adminControl);
-        nft             = CoinDeckNFT(payable(_nft));
-        cancelLineupFee = 0.0005 ether; // ~0.5 MOVE equivalent default
-        epochState      = EpochState({
+        adminControl       = AdminControl(_adminControl);
+        nft                = CoinDeckNFT(payable(_nft));
+        cancelWeighingFee  = 0.0005 ether;
+        epochState         = EpochState({
             running:            false,
             startTimestamp:     0,
             baseEpoch:          1,
@@ -121,15 +121,15 @@ contract Tournament is ReentrancyGuard {
         });
     }
 
-    // в”Ђв”Ђ Config в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-    function setConfig(uint256 _changeLineupFee, uint256 _cancelLineupFee) external onlyAdmin {
+    // ── Config ─────────────────────────────────────────────────────────────────
+    function setConfig(uint256 _changeWeighingFee, uint256 _cancelWeighingFee) external onlyAdmin {
         adminControl.assertEpochSettingsMutable();
-        changeLineupFee = _changeLineupFee;
-        cancelLineupFee = _cancelLineupFee;
-        emit ConfigUpdated(_changeLineupFee, _cancelLineupFee);
+        changeWeighingFee = _changeWeighingFee;
+        cancelWeighingFee = _cancelWeighingFee;
+        emit ConfigUpdated(_changeWeighingFee, _cancelWeighingFee);
     }
 
-    // в”Ђв”Ђ Epoch lifecycle в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── Epoch lifecycle ────────────────────────────────────────────────────────
     function startEpoch(uint256 startTimestamp) external onlyAdmin {
         if (epochState.running) revert AlreadyStarted();
         epochState.running        = true;
@@ -138,6 +138,9 @@ contract Tournament is ReentrancyGuard {
         emit EpochStarted(startTimestamp);
     }
 
+    // MAINNET: after stopAndReset(), call emergencyUnlockPage(offset, 100) repeatedly until
+    // all participants' EggMonets are unlocked (TRN-01). participants[] is never pruned so
+    // page count grows over time — automate this in the emergency runbook.
     function stopAndReset() external onlyEmergency {
         adminControl.consumeAction(adminControl.ACTION_STOP_AND_RESET(), keccak256(""));
         (uint256 curEpoch,,) = _epochDayFrom(
@@ -153,6 +156,18 @@ contract Tournament is ReentrancyGuard {
         emit EpochStopped(curEpoch + 1);
     }
 
+    function emergencyUnlockPage(uint256 offset, uint256 limit) external onlyEmergency {
+        uint256 total = participants.length;
+        if (offset >= total) return;
+        uint256 end = offset + limit > total ? total : offset + limit;
+        uint256 count = 0;
+        for (uint256 i = offset; i < end; i++) {
+            _unlockPlayerEggMonets(participants[i]);
+            count++;
+        }
+        emit EmergencyUnlockPage(offset, count);
+    }
+
     function adminClearEpochs() external onlyAdmin {
         (uint256 curEpoch,,) = _epochDayFrom(
             epochState.startTimestamp,
@@ -163,7 +178,7 @@ contract Tournament is ReentrancyGuard {
         emit EpochsCleared(curEpoch);
     }
 
-    // в”Ђв”Ђ Prize vault в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── Prize vault ────────────────────────────────────────────────────────────
     function depositPrize() external payable {
         emit PrizeDeposited(msg.sender, msg.value);
     }
@@ -179,8 +194,8 @@ contract Tournament is ReentrancyGuard {
         emit PrizeWithdrawn(recipient, amount);
     }
 
-    // в”Ђв”Ђ Lineup submission в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-    function submitLineup(uint256[5] calldata cardIds) external payable nonReentrant {
+    // ── Weighing submission ────────────────────────────────────────────────────
+    function submitWeighing(uint256[5] calldata eggMonetIds) external payable nonReentrant {
         if (!epochState.running) revert NotActive();
 
         (uint256 epoch, uint256 day, bool isRest) = _epochDayFrom(
@@ -191,21 +206,25 @@ contract Tournament is ReentrancyGuard {
         if (isRest)           revert RestDay();
         if (day < 1 || day > EPOCH_DAYS) revert DayOutOfRange();
 
-        // Validate ownership and build slot entries
-        uint8 rare = 0; uint8 epic = 0; uint8 legendary = 0;
+        // Unlock own previously locked eggMonets first so resubmit with same tokens works
+        _unlockPlayerEggMonets(msg.sender);
 
         // Dedup check
         for (uint256 i = 0; i < SLOTS; i++) {
             for (uint256 j = i + 1; j < SLOTS; j++) {
-                if (cardIds[i] == cardIds[j]) revert DuplicateCard();
+                if (eggMonetIds[i] == eggMonetIds[j]) revert DuplicateEggMonet();
             }
         }
 
+        uint8 rare = 0; uint8 epic = 0; uint8 legendary = 0;
+
         SlotEntry[5] memory slots;
         for (uint256 i = 0; i < SLOTS; i++) {
-            uint256 cardId = cardIds[i];
-            if (nft.ownerOf(cardId) != msg.sender) revert InvalidLineup();
-            (uint8 playerId, uint8 tier) = nft.getCardInfo(cardId);
+            uint256 eggMonetId = eggMonetIds[i];
+            if (nft.ownerOf(eggMonetId) != msg.sender) revert InvalidWeighing();
+            if (nft.tokenType(eggMonetId) != nft.TYPE_EGGMONET()) revert InvalidWeighing();
+            if (nft.isEggMonetLocked(eggMonetId)) revert EggMonetLocked();
+            (uint8 playerId, uint8 tier) = nft.getEggMonetInfo(eggMonetId);
             if (tier == 1) rare++;
             if (tier == 2) epic++;
             if (tier == 3) legendary++;
@@ -219,21 +238,20 @@ contract Tournament is ReentrancyGuard {
         else                                league = LEAGUE_BRONZE;
 
         // Resubmit fee
-        bool isResubmit = (lineupDayMask[msg.sender][epoch] & (uint64(1) << uint64(day))) != 0;
-        if (isResubmit && changeLineupFee > 0) {
-            if (msg.value < changeLineupFee) revert InvalidLineup();
-            // keep ETH in contract as prize
+        bool isResubmit = (weighingDayMask[msg.sender][epoch] & (uint64(1) << uint64(day))) != 0;
+        if (isResubmit && changeWeighingFee > 0) {
+            if (msg.value < changeWeighingFee) revert InvalidWeighing();
         }
 
-        // Store lineup
-        DayLineup storage dl = lineups[msg.sender][epoch][day];
-        dl.epoch  = epoch;
-        dl.day    = day;
-        dl.league = league;
+        // Store weighing
+        DayWeighing storage dw = weighings[msg.sender][epoch][day];
+        dw.epoch  = epoch;
+        dw.day    = day;
+        dw.league = league;
         for (uint256 i = 0; i < SLOTS; i++) {
-            dl.slots[i] = slots[i];
+            dw.slots[i] = slots[i];
         }
-        lineupDayMask[msg.sender][epoch] |= uint64(1) << uint64(day);
+        weighingDayMask[msg.sender][epoch] |= uint64(1) << uint64(day);
 
         // Register participant
         if (!isParticipant[msg.sender]) {
@@ -241,23 +259,22 @@ contract Tournament is ReentrancyGuard {
             participants.push(msg.sender);
         }
 
-        // Unlock old cards, lock new ones
-        _unlockPlayerCards(msg.sender);
+        // Lock new eggMonets (own tokens already unlocked at top of function)
         uint256 unlockTs = epochState.startTimestamp + day * 1 days;
         for (uint256 i = 0; i < SLOTS; i++) {
-            nft.lockCard(cardIds[i], unlockTs);
+            nft.lockEggMonet(eggMonetIds[i], unlockTs);
         }
-        // Store locked card list for next unlock
-        delete _playerLockedCards[msg.sender];
+        // Store locked eggMonet list for next unlock
+        delete _playerLockedEggMonets[msg.sender];
         for (uint256 i = 0; i < SLOTS; i++) {
-            _playerLockedCards[msg.sender].push(cardIds[i]);
+            _playerLockedEggMonets[msg.sender].push(eggMonetIds[i]);
         }
 
-        emit LineupSubmitted(msg.sender, epoch, day, league);
+        emit WeighingSubmitted(msg.sender, epoch, day, league);
     }
 
-    // в”Ђв”Ђ Cancel lineup в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-    function cancelLineup() external payable nonReentrant {
+    // ── Cancel weighing ────────────────────────────────────────────────────────
+    function cancelWeighing() external payable nonReentrant {
         if (!epochState.running) revert NotActive();
         (uint256 epoch, uint256 day,) = _epochDayFrom(
             epochState.startTimestamp,
@@ -265,33 +282,33 @@ contract Tournament is ReentrancyGuard {
             epochState.running
         );
 
-        if ((lineupDayMask[msg.sender][epoch] & (uint64(1) << uint64(day))) == 0) revert NoLineup();
+        if ((weighingDayMask[msg.sender][epoch] & (uint64(1) << uint64(day))) == 0) revert NoWeighing();
 
-        if (cancelLineupFee > 0) {
-            if (msg.value < cancelLineupFee) revert NoLineup();
+        if (cancelWeighingFee > 0) {
+            if (msg.value < cancelWeighingFee) revert NoWeighing();
         }
 
-        // Remove lineup
-        delete lineups[msg.sender][epoch][day];
-        lineupDayMask[msg.sender][epoch] &= ~(uint64(1) << uint64(day));
+        // Remove weighing
+        delete weighings[msg.sender][epoch][day];
+        weighingDayMask[msg.sender][epoch] &= ~(uint64(1) << uint64(day));
 
-        // Unlock cards
-        _unlockPlayerCards(msg.sender);
+        // Unlock eggMonets
+        _unlockPlayerEggMonets(msg.sender);
 
-        emit LineupCancelled(msg.sender, epoch, day, cancelLineupFee);
+        emit WeighingCancelled(msg.sender, epoch, day, cancelWeighingFee);
     }
 
-    // в”Ђв”Ђ Internal helpers в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-    function _unlockPlayerCards(address player) internal {
-        uint256[] storage locked = _playerLockedCards[player];
+    // ── Internal helpers ───────────────────────────────────────────────────────
+    function _unlockPlayerEggMonets(address player) internal {
+        uint256[] storage locked = _playerLockedEggMonets[player];
         uint256 len = locked.length;
         for (uint256 i = 0; i < len; i++) {
-            nft.unlockCard(locked[i]);
+            nft.unlockEggMonet(locked[i]);
         }
-        delete _playerLockedCards[player];
+        delete _playerLockedEggMonets[player];
     }
 
-    // Pure epoch/day computation from stored values вЂ” no state access
+    // Pure epoch/day computation from stored values — no state access
     function _epochDayFrom(
         uint256 startTs,
         uint256 baseEpoch,
@@ -308,7 +325,7 @@ contract Tournament is ReentrancyGuard {
         day    = isRest ? 0 : weekPos + 1;
     }
 
-    // в”Ђв”Ђ Views в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── Views ──────────────────────────────────────────────────────────────────
     function getState() external view returns (
         bool    running,
         uint256 epoch,
@@ -322,7 +339,7 @@ contract Tournament is ReentrancyGuard {
         running           = epochState.running;
         startTimestamp    = epochState.startTimestamp;
         firstVisibleEpoch = epochState.firstVisibleEpoch;
-        changeFee         = changeLineupFee;
+        changeFee         = changeWeighingFee;
         prizePool         = address(this).balance;
         (epoch, day, isRestDay) = _epochDayFrom(
             epochState.startTimestamp,
@@ -335,21 +352,21 @@ contract Tournament is ReentrancyGuard {
         return _epochDayFrom(epochState.startTimestamp, epochState.baseEpoch, epochState.running);
     }
 
-    function getLineupSlots(address player, uint256 epoch, uint256 day)
+    function getWeighingSlots(address player, uint256 epoch, uint256 day)
         external view returns (uint8[5] memory playerIds, uint8[5] memory tiers)
     {
-        DayLineup storage dl = lineups[player][epoch][day];
+        DayWeighing storage dw = weighings[player][epoch][day];
         for (uint256 i = 0; i < SLOTS; i++) {
-            playerIds[i] = dl.slots[i].playerId;
-            tiers[i]     = dl.slots[i].tier;
+            playerIds[i] = dw.slots[i].playerId;
+            tiers[i]     = dw.slots[i].tier;
         }
     }
 
-    function getPlayerLineups(address player, uint256 epoch)
+    function getPlayerWeighings(address player, uint256 epoch)
         external view returns (uint256[] memory epochDays, uint8[] memory leagues)
     {
         uint256 count = 0;
-        uint64 mask = lineupDayMask[player][epoch];
+        uint64 mask = weighingDayMask[player][epoch];
         for (uint256 d = 1; d <= EPOCH_DAYS; d++) {
             if ((mask & (uint64(1) << uint64(d))) != 0) count++;
         }
@@ -359,16 +376,16 @@ contract Tournament is ReentrancyGuard {
         for (uint256 d = 1; d <= EPOCH_DAYS; d++) {
             if ((mask & (uint64(1) << uint64(d))) != 0) {
                 epochDays[idx] = d;
-                leagues[idx]   = lineups[player][epoch][d].league;
+                leagues[idx]   = weighings[player][epoch][d].league;
                 idx++;
             }
         }
     }
 
-    function hasLineupForDay(address player, uint256 epoch, uint256 day)
+    function hasWeighingForDay(address player, uint256 epoch, uint256 day)
         external view returns (bool)
     {
-        return (lineupDayMask[player][epoch] & (uint64(1) << uint64(day))) != 0;
+        return (weighingDayMask[player][epoch] & (uint64(1) << uint64(day))) != 0;
     }
 
     function participantsCount() external view returns (uint256) {
@@ -388,8 +405,8 @@ contract Tournament is ReentrancyGuard {
         return result;
     }
 
-    // Bulk lineup fetch for leaderboard worker вЂ” paginated
-    function getDayLineupsPaginated(
+    // Bulk weighing fetch for leaderboard worker — paginated
+    function getDayWeighingsPaginated(
         uint256 epoch,
         uint256 day,
         uint256 offset,
@@ -410,7 +427,7 @@ contract Tournament is ReentrancyGuard {
         uint256 matchCount = 0;
         for (uint256 i = offset; i < end; i++) {
             address p = participants[i];
-            if ((lineupDayMask[p][epoch] & (uint64(1) << uint64(day))) != 0) matchCount++;
+            if ((weighingDayMask[p][epoch] & (uint64(1) << uint64(day))) != 0) matchCount++;
         }
 
         addrs     = new address[](matchCount);
@@ -419,12 +436,12 @@ contract Tournament is ReentrancyGuard {
         uint256 idx = 0;
         for (uint256 i = offset; i < end; i++) {
             address p = participants[i];
-            if ((lineupDayMask[p][epoch] & (uint64(1) << uint64(day))) != 0) {
+            if ((weighingDayMask[p][epoch] & (uint64(1) << uint64(day))) != 0) {
                 addrs[idx] = p;
-                DayLineup storage dl = lineups[p][epoch][day];
+                DayWeighing storage dw = weighings[p][epoch][day];
                 for (uint256 s = 0; s < SLOTS; s++) {
-                    playerIds[idx * SLOTS + s] = dl.slots[s].playerId;
-                    tiers[idx * SLOTS + s]     = dl.slots[s].tier;
+                    playerIds[idx * SLOTS + s] = dw.slots[s].playerId;
+                    tiers[idx * SLOTS + s]     = dw.slots[s].tier;
                 }
                 idx++;
             }
@@ -432,14 +449,14 @@ contract Tournament is ReentrancyGuard {
     }
 
     function getCancelFee() external view returns (uint256) {
-        return cancelLineupFee;
+        return cancelWeighingFee;
     }
 
-    function isCardLocked(uint256 tokenId) external view returns (bool) {
-        return nft.isCardLocked(tokenId);
+    function isEggMonetLocked(uint256 tokenId) external view returns (bool) {
+        return nft.isEggMonetLocked(tokenId);
     }
 
-    // в”Ђв”Ђ ETH receive в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── ETH receive ────────────────────────────────────────────────────────────
     receive() external payable {
         emit PrizeDeposited(msg.sender, msg.value);
     }

@@ -15,6 +15,7 @@ contract Claim is ReentrancyGuard {
     struct ClaimEntry {
         uint256 amount;
         bool    claimed;
+        bool    registered;
     }
 
     bool    public active;
@@ -43,6 +44,7 @@ contract Claim is ReentrancyGuard {
     error LengthsMismatch();
     error DuplicateAddress();
     error TransferFailed();
+    error ZeroReturnAddr();
 
     modifier onlyClaimAdmin() {
         if (!adminControl.hasRole(msg.sender, adminControl.ROLE_CLAIM()) &&
@@ -88,8 +90,8 @@ contract Claim is ReentrancyGuard {
         // Dedup check + populate
         uint256 total = 0;
         for (uint256 i = 0; i < addrs.length; i++) {
-            if (entries[addrs[i]].amount != 0) revert DuplicateAddress();
-            entries[addrs[i]] = ClaimEntry({ amount: amounts[i], claimed: false });
+            if (entries[addrs[i]].registered) revert DuplicateAddress();
+            entries[addrs[i]] = ClaimEntry({ amount: amounts[i], claimed: false, registered: true });
             _claimAddrs.push(addrs[i]);
             total += amounts[i];
         }
@@ -99,6 +101,7 @@ contract Claim is ReentrancyGuard {
 
     // в”Ђв”Ђ Start/close в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
     function startClaim(address returnAddr) external onlyClaimAdmin {
+        if (returnAddr == address(0)) revert ZeroReturnAddr();
         if (active) revert AlreadyActive();
         adminControl.consumeAction(
             adminControl.ACTION_START_CLAIM(),

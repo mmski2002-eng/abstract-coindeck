@@ -27,6 +27,8 @@ contract Oracle {
     error NotOracleAdmin();
     error WrongLengths();
     error ScoreTooHigh();
+    error DayAlreadyPosted();
+    error CannotUnpostDay();
 
     modifier onlyOracleAdmin() {
         if (!adminControl.hasRole(msg.sender, adminControl.ROLE_ORACLE()) &&
@@ -44,6 +46,7 @@ contract Oracle {
         uint8[]   calldata playerIds,
         uint256[] calldata basePoints
     ) external onlyOracleAdmin {
+        if (dayPosted[day]) revert DayAlreadyPosted();
         uint256 len = playerIds.length;
         if (len != basePoints.length) revert WrongLengths();
 
@@ -66,12 +69,13 @@ contract Oracle {
     }
 
     function setPosted(uint256 day, bool posted) external onlyOracleAdmin {
+        if (!posted && dayPosted[day]) revert CannotUnpostDay();
         dayPosted[day] = posted;
         emit PostedFlagChanged(msg.sender, day, posted);
     }
 
     function resetAllDays(uint256[] calldata daysToReset) external onlyOracleAdmin {
-        adminControl.consumeAction(adminControl.ACTION_RESET_ALL_ORACLE_DAYS(), keccak256(""));
+        adminControl.consumeAction(adminControl.ACTION_RESET_ALL_ORACLE_DAYS(), keccak256(abi.encode(daysToReset)));
         for (uint256 d = 0; d < daysToReset.length; d++) {
             uint256 day = daysToReset[d];
             uint8[] storage pids = _dayPlayerIds[day];

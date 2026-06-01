@@ -6,8 +6,7 @@ import "./AdminControl.sol";
 import "./CoinDeckNFT.sol";
 
 /**
- * Migrated from marketplace.move
- * P2P Р»РёСЃС‚РёРЅРіРё СЃ escrow, 5% fee, batch buy, admin clear
+ * P2P листинги с escrow, 5% fee, batch buy, admin clear
  */
 contract Marketplace is ReentrancyGuard {
 
@@ -22,25 +21,25 @@ contract Marketplace is ReentrancyGuard {
     struct Listing {
         uint256 id;
         address seller;
-        uint256 cardId;
+        uint256 eggMonetId;
         uint8   playerId;
         uint8   tier;
         uint256 price;
         uint256 vecIdx; // position in listingIds for O(1) swap-remove
     }
 
-    mapping(uint256 => Listing) public listings;      // listingId в†’ Listing
-    mapping(uint256 => uint256) public byCard;         // cardId в†’ listingId
+    mapping(uint256 => Listing) public listings;         // listingId → Listing
+    mapping(uint256 => uint256) public byEggMonet;       // eggMonetId → listingId
     uint256[] public listingIds;
     uint256 public nextId;
     bool    public pendingClear;
 
-    // accumulated fees вЂ” owner pulls
+    // accumulated fees — owner pulls
     uint256 public accumulatedFees;
 
-    event CardListed(uint256 indexed listingId, address indexed seller, uint256 cardId, uint8 playerId, uint8 tier, uint256 price);
-    event CardBought(uint256 indexed listingId, address indexed buyer, address indexed seller, uint256 cardId, uint256 price, uint256 fee);
-    event ListingCancelled(uint256 indexed listingId, address indexed seller, uint256 cardId);
+    event EggMonetListed(uint256 indexed listingId, address indexed seller, uint256 eggMonetId, uint8 playerId, uint8 tier, uint256 price);
+    event EggMonetBought(uint256 indexed listingId, address indexed buyer, address indexed seller, uint256 eggMonetId, uint256 price, uint256 fee);
+    event ListingCancelled(uint256 indexed listingId, address indexed seller, uint256 eggMonetId);
     event ListingsCleared(address indexed admin, uint256 count);
     event FeesWithdrawn(address indexed to, uint256 amount);
 
@@ -53,7 +52,7 @@ contract Marketplace is ReentrancyGuard {
     error NotOwner();
     error AlreadyListed();
     error PriceTooLow();
-    error CardLocked();
+    error EggMonetLocked();
     error BatchTooLarge();
     error DuplicateListing();
     error NoPendingClear();
@@ -72,42 +71,42 @@ contract Marketplace is ReentrancyGuard {
         nft          = CoinDeckNFT(payable(_nft));
     }
 
-    // в”Ђв”Ђ List в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-    function listCard(uint256 cardId, uint256 price) external nonReentrant {
+    // ── List ───────────────────────────────────────────────────────────────────
+    function listEggMonet(uint256 eggMonetId, uint256 price) external nonReentrant {
         if (price < MIN_LISTING_PRICE) revert PriceTooLow();
-        if (nft.ownerOf(cardId) != msg.sender) revert NotOwner();
-        if (nft.isCardLocked(cardId)) revert CardLocked();
-        if (byCard[cardId] != 0 || (listingIds.length > 0 && _listingExists(cardId))) revert AlreadyListed();
+        if (nft.ownerOf(eggMonetId) != msg.sender) revert NotOwner();
+        if (nft.isEggMonetLocked(eggMonetId)) revert EggMonetLocked();
+        if (byEggMonet[eggMonetId] != 0 || (listingIds.length > 0 && _listingExists(eggMonetId))) revert AlreadyListed();
 
-        (uint8 playerId, uint8 tier) = nft.getCardInfo(cardId);
+        (uint8 playerId, uint8 tier) = nft.getEggMonetInfo(eggMonetId);
         uint256 id     = nextId++;
         uint256 vecIdx = listingIds.length;
         listingIds.push(id);
 
         listings[id] = Listing({
-            id:       id,
-            seller:   msg.sender,
-            cardId:   cardId,
-            playerId: playerId,
-            tier:     tier,
-            price:    price,
-            vecIdx:   vecIdx
+            id:          id,
+            seller:      msg.sender,
+            eggMonetId:  eggMonetId,
+            playerId:    playerId,
+            tier:        tier,
+            price:       price,
+            vecIdx:      vecIdx
         });
-        byCard[cardId] = id + 1; // +1 so 0 = not listed
+        byEggMonet[eggMonetId] = id + 1; // +1 so 0 = not listed
 
-        // Escrow card to this contract
-        nft.transferFrom(msg.sender, address(this), cardId);
+        // Escrow eggMonet to this contract
+        nft.transferFrom(msg.sender, address(this), eggMonetId);
 
-        emit CardListed(id, msg.sender, cardId, playerId, tier, price);
+        emit EggMonetListed(id, msg.sender, eggMonetId, playerId, tier, price);
     }
 
-    // в”Ђв”Ђ Buy в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-    function buyCard(uint256 listingId) external payable nonReentrant {
+    // ── Buy ────────────────────────────────────────────────────────────────────
+    function buyEggMonet(uint256 listingId) external payable nonReentrant {
         Listing memory l = _getListing(listingId);
         if (l.seller == msg.sender) revert CannotBuyOwn();
         if (msg.value < l.price) revert InsufficientPayment();
 
-        _removeListing(listingId, l.cardId, l.vecIdx);
+        _removeListing(listingId, l.eggMonetId, l.vecIdx);
 
         uint256 fee     = l.price * MARKETPLACE_FEE_BPS / 10_000;
         uint256 payout  = l.price - fee;
@@ -124,13 +123,13 @@ contract Marketplace is ReentrancyGuard {
         (bool ok2,) = payable(l.seller).call{value: payout}("");
         if (!ok2) revert TransferFailed();
 
-        // Transfer card to buyer
-        nft.transferFrom(address(this), msg.sender, l.cardId);
+        // Transfer eggMonet to buyer
+        nft.transferFrom(address(this), msg.sender, l.eggMonetId);
 
-        emit CardBought(listingId, msg.sender, l.seller, l.cardId, l.price, fee);
+        emit EggMonetBought(listingId, msg.sender, l.seller, l.eggMonetId, l.price, fee);
     }
 
-    function buyCardsBatch(uint256[] calldata ids) external payable nonReentrant {
+    function buyEggMonetsBatch(uint256[] calldata ids) external payable nonReentrant {
         uint256 count = ids.length;
         if (count == 0 || count > MAX_BATCH_BUY) revert BatchTooLarge();
 
@@ -152,7 +151,7 @@ contract Marketplace is ReentrancyGuard {
             Listing memory l = _getListing(ids[i]);
             if (l.seller == msg.sender) revert CannotBuyOwn();
 
-            _removeListing(ids[i], l.cardId, l.vecIdx);
+            _removeListing(ids[i], l.eggMonetId, l.vecIdx);
 
             uint256 fee    = l.price * MARKETPLACE_FEE_BPS / 10_000;
             uint256 payout = l.price - fee;
@@ -161,8 +160,8 @@ contract Marketplace is ReentrancyGuard {
             (bool ok,) = payable(l.seller).call{value: payout}("");
             if (!ok) revert TransferFailed();
 
-            nft.transferFrom(address(this), msg.sender, l.cardId);
-            emit CardBought(ids[i], msg.sender, l.seller, l.cardId, l.price, fee);
+            nft.transferFrom(address(this), msg.sender, l.eggMonetId);
+            emit EggMonetBought(ids[i], msg.sender, l.seller, l.eggMonetId, l.price, fee);
         }
 
         // Refund excess
@@ -173,18 +172,18 @@ contract Marketplace is ReentrancyGuard {
         }
     }
 
-    // в”Ђв”Ђ Cancel в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── Cancel ─────────────────────────────────────────────────────────────────
     function cancelListing(uint256 listingId) external nonReentrant {
         Listing memory l = _getListing(listingId);
         if (l.seller != msg.sender) revert NotSeller();
 
-        _removeListing(listingId, l.cardId, l.vecIdx);
-        nft.transferFrom(address(this), msg.sender, l.cardId);
+        _removeListing(listingId, l.eggMonetId, l.vecIdx);
+        nft.transferFrom(address(this), msg.sender, l.eggMonetId);
 
-        emit ListingCancelled(listingId, msg.sender, l.cardId);
+        emit ListingCancelled(listingId, msg.sender, l.eggMonetId);
     }
 
-    // в”Ђв”Ђ Admin clear в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── Admin clear ────────────────────────────────────────────────────────────
     function adminClearListings() external onlyEmergency {
         adminControl.consumeAction(adminControl.ACTION_CLEAR_LISTINGS(), keccak256(""));
         pendingClear = true;
@@ -202,8 +201,8 @@ contract Marketplace is ReentrancyGuard {
         while (listingIds.length > 0 && cleared < MAX_CLEAR_PAGE) {
             uint256 id = listingIds[0];
             Listing memory l = listings[id];
-            _removeListing(id, l.cardId, l.vecIdx);
-            nft.transferFrom(address(this), l.seller, l.cardId);
+            _removeListing(id, l.eggMonetId, l.vecIdx);
+            nft.transferFrom(address(this), l.seller, l.eggMonetId);
             cleared++;
         }
         if (listingIds.length == 0) {
@@ -212,7 +211,7 @@ contract Marketplace is ReentrancyGuard {
         }
     }
 
-    // в”Ђв”Ђ Fee withdrawal в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── Fee withdrawal ─────────────────────────────────────────────────────────
     function withdrawFees(address to) external nonReentrant {
         if (msg.sender != adminControl.owner()) revert NotAdmin();
         uint256 amount  = accumulatedFees;
@@ -222,22 +221,22 @@ contract Marketplace is ReentrancyGuard {
         emit FeesWithdrawn(to, amount);
     }
 
-    // в”Ђв”Ђ Internal helpers в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── Internal helpers ───────────────────────────────────────────────────────
     function _getListing(uint256 listingId) internal view returns (Listing memory) {
         Listing memory l = listings[listingId];
         if (l.seller == address(0)) revert ListingNotFound();
         return l;
     }
 
-    function _listingExists(uint256 cardId) internal view returns (bool) {
-        uint256 raw = byCard[cardId];
+    function _listingExists(uint256 eggMonetId) internal view returns (bool) {
+        uint256 raw = byEggMonet[eggMonetId];
         if (raw == 0) return false;
         return listings[raw - 1].seller != address(0);
     }
 
-    function _removeListing(uint256 id, uint256 cardId, uint256 vecIdx) internal {
+    function _removeListing(uint256 id, uint256 eggMonetId, uint256 vecIdx) internal {
         delete listings[id];
-        delete byCard[cardId];
+        delete byEggMonet[eggMonetId];
 
         uint256 last = listingIds.length - 1;
         if (vecIdx < last) {
@@ -248,7 +247,7 @@ contract Marketplace is ReentrancyGuard {
         listingIds.pop();
     }
 
-    // в”Ђв”Ђ Views в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── Views ──────────────────────────────────────────────────────────────────
     function listingCount() external view returns (uint256) {
         return listingIds.length;
     }
@@ -256,7 +255,7 @@ contract Marketplace is ReentrancyGuard {
     function getListingsPage(uint256 offset, uint256 limit) external view returns (
         uint256[] memory ids,
         address[] memory sellers,
-        uint256[] memory cardIds,
+        uint256[] memory eggMonetIds,
         uint8[]   memory playerIds,
         uint8[]   memory tiers,
         uint256[] memory prices
@@ -264,20 +263,20 @@ contract Marketplace is ReentrancyGuard {
         uint256 total  = listingIds.length;
         uint256 end    = offset + limit > total ? total : offset + limit;
         uint256 len    = end > offset ? end - offset : 0;
-        ids       = new uint256[](len);
-        sellers   = new address[](len);
-        cardIds   = new uint256[](len);
-        playerIds = new uint8[](len);
-        tiers     = new uint8[](len);
-        prices    = new uint256[](len);
+        ids         = new uint256[](len);
+        sellers     = new address[](len);
+        eggMonetIds = new uint256[](len);
+        playerIds   = new uint8[](len);
+        tiers       = new uint8[](len);
+        prices      = new uint256[](len);
         for (uint256 i = 0; i < len; i++) {
             Listing memory l = listings[listingIds[offset + i]];
-            ids[i]       = l.id;
-            sellers[i]   = l.seller;
-            cardIds[i]   = l.cardId;
-            playerIds[i] = l.playerId;
-            tiers[i]     = l.tier;
-            prices[i]    = l.price;
+            ids[i]          = l.id;
+            sellers[i]      = l.seller;
+            eggMonetIds[i]  = l.eggMonetId;
+            playerIds[i]    = l.playerId;
+            tiers[i]        = l.tier;
+            prices[i]       = l.price;
         }
     }
 

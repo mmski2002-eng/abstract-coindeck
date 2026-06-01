@@ -20,7 +20,7 @@ contract AdminControl is Ownable, ReentrancyGuard {
 
     // в”Ђв”Ђ Action types в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
     uint8 public constant ACTION_SET_BASE_URIS          = 0;
-    uint8 public constant ACTION_SET_CHEST_PRICES       = 1;
+    uint8 public constant ACTION_SET_EGG_PRICES          = 1;
     uint8 public constant ACTION_ADMIN_MINT_TO          = 2;
     uint8 public constant ACTION_RESET_ALL_ORACLE_DAYS  = 3;
     uint8 public constant ACTION_TREASURY_WITHDRAW      = 4;
@@ -60,7 +60,9 @@ contract AdminControl is Ownable, ReentrancyGuard {
     WithdrawalPolicy public withdrawalPolicy;
     EpochGuard       public epochGuard;
 
-    mapping(address => uint8) public roles;
+    mapping(address => uint8)    public roles;
+    mapping(address => bool)     public authorizedCallers;
+    address                      public registeredTournament;
 
     // в”Ђв”Ђ Events в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
     event ActionQueued(uint8 indexed actionType, bytes32 payloadHash, uint256 executeAfter);
@@ -70,6 +72,8 @@ contract AdminControl is Ownable, ReentrancyGuard {
     event EpochGuardUpdated(bool freezeDuringEpoch, bool epochActive);
     event RoleGranted(address indexed addr, uint8 roleMask);
     event RoleRevoked(address indexed addr, uint8 roleMask);
+    event AuthorizedCallerUpdated(address indexed caller, bool status);
+    event RegisteredTournamentUpdated(address indexed tournament);
 
     // в”Ђв”Ђ Errors в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
     error NotOwner();
@@ -80,12 +84,32 @@ contract AdminControl is Ownable, ReentrancyGuard {
     error WithdrawOverPerTxLimit();
     error WithdrawOverDailyLimit();
     error Unauthorized();
+    error TreasuryDelayTooShort();
+
+    // MAINNET: raise MIN_TREASURY_DELAY to 24–48h so users have time to react to a suspicious withdrawal.
+    uint256 public constant MIN_TREASURY_DELAY = 1 hours;
 
     constructor(address _owner) {
         _transferOwnership(_owner);
+        // MAINNET: raise ACTION_TREASURY_WITHDRAW to 24–48h; raise claim delays (SET_CLAIM_LIST,
+        // START_CLAIM) to at least 6–12h. Current 30-min values are testnet-only.
+        actionDelays[ACTION_TREASURY_WITHDRAW]     = 1 hours;
+        actionDelays[ACTION_SET_CLAIM_LIST]        = 30 minutes;
+        actionDelays[ACTION_START_CLAIM]           = 30 minutes;
+        actionDelays[ACTION_CLOSE_CLAIM]           = 10 minutes;
+        actionDelays[ACTION_RESET_ALL_ORACLE_DAYS] = 30 minutes;
+        actionDelays[ACTION_STOP_AND_RESET]        = 0;
+        actionDelays[ACTION_CLEAR_LISTINGS]        = 0;
+        actionDelays[ACTION_ADMIN_MINT_TO]         = 30 minutes;
+        actionDelays[ACTION_SET_EGG_PRICES]        = 10 minutes;
+        actionDelays[ACTION_SET_BASE_URIS]         = 10 minutes;
+        actionDelays[ACTION_SET_CLAIM_DAYS]        = 30 minutes;
     }
 
     // в”Ђв”Ђ Role helpers в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // MAINNET: owner bypasses all role checks and can set any non-treasury delay to 0 instantly.
+    // Transfer ownership to a multisig (e.g. Gnosis Safe) with its own timelock before launch
+    // with real funds. A single EOA owner is a centralisation risk and an attack surface.
     function hasRole(address addr, uint8 role) public view returns (bool) {
         if (addr == owner()) return true;
         return (roles[addr] & role) != 0;
@@ -105,9 +129,22 @@ contract AdminControl is Ownable, ReentrancyGuard {
         if (!hasRole(addr, role)) revert Unauthorized();
     }
 
+    // ── Authorized callers ────────────────────────────────────────────────────
+    function setAuthorizedCaller(address caller, bool status) external onlyOwner {
+        authorizedCallers[caller] = status;
+        emit AuthorizedCallerUpdated(caller, status);
+    }
+
+    function setRegisteredTournament(address t) external onlyOwner {
+        registeredTournament = t;
+        emit RegisteredTournamentUpdated(t);
+    }
+
     // в”Ђв”Ђ Timelock config в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
     function setActionDelay(uint8 actionType, uint256 delaySecs) external onlyOwner {
         if (actionType >= ACTION_COUNT) revert BadActionType();
+        if (actionType == ACTION_TREASURY_WITHDRAW && delaySecs < MIN_TREASURY_DELAY)
+            revert TreasuryDelayTooShort();
         actionDelays[actionType] = delaySecs;
         emit ActionDelayUpdated(actionType, delaySecs);
     }
@@ -122,7 +159,7 @@ contract AdminControl is Ownable, ReentrancyGuard {
         if (actionType == ACTION_RESET_ALL_ORACLE_DAYS) return ROLE_ORACLE;
         if (actionType == ACTION_STOP_AND_RESET)      return ROLE_EMERGENCY;
         if (actionType == ACTION_SET_BASE_URIS)       return ROLE_NFT;
-        if (actionType == ACTION_SET_CHEST_PRICES)    return ROLE_NFT;
+        if (actionType == ACTION_SET_EGG_PRICES)      return ROLE_NFT;
         if (actionType == ACTION_ADMIN_MINT_TO)       return ROLE_NFT;
         if (actionType == ACTION_CLEAR_LISTINGS)      return ROLE_NFT;
         return ROLE_FULL;
@@ -155,6 +192,7 @@ contract AdminControl is Ownable, ReentrancyGuard {
     }
 
     function consumeAction(uint8 actionType, bytes32 payloadHash) external {
+        if (!authorizedCallers[msg.sender] && msg.sender != owner()) revert Unauthorized();
         if (actionType >= ACTION_COUNT) revert BadActionType();
 
         uint256 delay = actionDelays[actionType];
@@ -189,6 +227,7 @@ contract AdminControl is Ownable, ReentrancyGuard {
     }
 
     function checkWithdrawal(uint256 amount) external {
+        if (!authorizedCallers[msg.sender] && msg.sender != owner()) revert Unauthorized();
         if (!withdrawalPolicy.enabled) return;
         _maybeResetDailyWindow();
         if (withdrawalPolicy.perTxLimit > 0 && amount > withdrawalPolicy.perTxLimit)
@@ -219,11 +258,13 @@ contract AdminControl is Ownable, ReentrancyGuard {
     }
 
     function onEpochStarted() external {
+        if (msg.sender != registeredTournament && msg.sender != owner()) revert Unauthorized();
         epochGuard.epochActive = true;
         emit EpochGuardUpdated(epochGuard.freezeDuringEpoch, true);
     }
 
     function onEpochStopped() external {
+        if (msg.sender != registeredTournament && msg.sender != owner()) revert Unauthorized();
         epochGuard.epochActive = false;
         emit EpochGuardUpdated(epochGuard.freezeDuringEpoch, false);
     }

@@ -63,6 +63,25 @@ async function main() {
   const marketplaceAddr = await marketplace.getAddress();
   console.log("Marketplace:", marketplaceAddr);
 
+  // ── Wire: AdminControl — register tournament + authorize all callers ─────
+  console.log("\n[post-deploy] AdminControl wiring...");
+
+  console.log("  → setRegisteredTournament...");
+  const txReg = await adminControl.setRegisteredTournament(tournamentAddr);
+  await txReg.wait();
+
+  for (const [name, addr] of [
+    ["Tournament",  tournamentAddr],
+    ["CoinDeckNFT", nftAddr],
+    ["Oracle",      oracleAddr],
+    ["Claim",       claimAddr],
+    ["Marketplace", marketplaceAddr],
+  ]) {
+    console.log(`  → setAuthorizedCaller(${name})...`);
+    const tx = await adminControl.setAuthorizedCaller(addr, true);
+    await tx.wait();
+  }
+
   // ── Wire: NFT needs to approve marketplace for transfers ──────────────────
   // Marketplace calls nft.transferFrom(seller, this, cardId) — needs approval per listing
   // No global approval needed — sellers call approve(marketplace, tokenId) before listing

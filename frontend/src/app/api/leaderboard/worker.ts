@@ -41,6 +41,9 @@ const ORACLE_STALE_MS = 4 * 60 * 60 * 1000;
 const LEAGUE_ALGORITHM_VERSION = 2;
 const LINEUP_CONCURRENCY = 20;
 const LOCK_STALE_MINUTES = 30;
+const RATE_LIMIT_RETENTION_MS = Number(process.env.RATE_LIMIT_RETENTION_MS ?? String(24 * 60 * 60 * 1000));
+const ADMIN_NONCE_RETENTION_MS = Number(process.env.ADMIN_NONCE_RETENTION_MS ?? String(15 * 60 * 1000));
+const MARKET_JOB_RETENTION_HOURS = Number(process.env.MARKET_JOB_RETENTION_HOURS ?? "36");
 
 const PLAYER_ROLE_IDS = ASSET_ROLE_IDS;
 
@@ -67,6 +70,73 @@ async function releaseLock(jobId: string): Promise<void> {
 
 function cacheId(key: CacheKey): string {
   return `epoch-${key.epoch}-days-${key.totalDays}-day-${key.currentDay}-rb-${key.roleBonusPct}`;
+}
+
+async function pruneStaleDerivedData(
+  key: CacheKey,
+  liveState: { epoch: number; closedDay: number } | null,
+): Promise<void> {
+  const nowMs = Date.now();
+  const liveEpoch = liveState?.epoch ?? key.epoch;
+  const closedDay = liveState?.epoch === key.epoch ? liveState.closedDay : Math.max(0, Math.min(key.currentDay - 1, key.totalDays));
+  const allowedOracleDay = Math.max(0, Math.min(closedDay, key.totalDays));
+
+  await dbQuery(
+    `delete from leaderboard_rows lr
+     where not exists (
+       select 1 from leaderboard_cache lc
+       where lc.cache_id = lr.cache_id
+     )`,
+  );
+
+  await dbQuery(
+    `delete from leaderboard_cache
+     where
+       epoch < $1
+       or total_days <> $2
+       or current_day > $3
+       or role_bonus_pct <> $4
+       or updated_at < $5`,
+    [liveEpoch, key.totalDays, key.currentDay, key.roleBonusPct, nowMs - (7 * 24 * 60 * 60 * 1000)],
+  );
+
+  await dbQuery(
+    `delete from oracle_history
+     where epoch = $1 and day > $2`,
+    [key.epoch, allowedOracleDay],
+  );
+
+  await dbQuery(
+    `delete from oracle_scores_cache
+     where epoch = $1 and day > $2`,
+    [key.epoch, allowedOracleDay],
+  );
+
+  await dbQuery(
+    `delete from market_snapshot
+     where epoch = $1 and day > $2`,
+    [key.epoch, allowedOracleDay],
+  );
+
+  await dbQuery(
+    `delete from job_state
+     where
+       (job_type = 'leaderboard-route' and updated_at < now() - interval '1 day')
+       or (job_type = 'market-data' and updated_at < now() - ($1 || ' hours')::interval)`,
+    [String(MARKET_JOB_RETENTION_HOURS)],
+  );
+
+  await dbQuery(
+    `delete from admin_nonces
+     where coalesce(used_at, expires_at) < $1`,
+    [nowMs - ADMIN_NONCE_RETENTION_MS],
+  );
+
+  await dbQuery(
+    `delete from rate_limit_counters
+     where window_start < $1`,
+    [nowMs - RATE_LIMIT_RETENTION_MS],
+  );
 }
 
 async function heroScore(playerId: number, tier: number, slotIdx: number, dayScores: number[], roleBonusPct: number): Promise<number> {
@@ -298,6 +368,8 @@ export async function runJob(epoch: number, totalDays: number, currentDay: numbe
     const finalizedDays = new Set<number>();
     const history = await readHistory();
     const liveState = await getLiveState(abort.signal);
+
+    await pruneStaleDerivedData(key, liveState);
 
     await Promise.all(scoreDays.map(async (day) => {
       const historical = history[key.epoch]?.[day];

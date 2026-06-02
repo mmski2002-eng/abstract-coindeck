@@ -127,7 +127,7 @@ export function RosterTab({
 
       {/* Main roster content */}
       <div className="space-y-4">
-        {/* Chest shop */}
+        {/* Chest shop — секция магазина, отдельный фон */}
         <style>{`
           @keyframes chestBuyPop {
             0%   { opacity: 0; transform: scale(0.8); }
@@ -154,11 +154,22 @@ export function RosterTab({
           .chest-float-up   { animation: floatUp 1.8s ease-out forwards; }
           .chest-buy-bounce { animation: chestBuyBounce 0.65s cubic-bezier(.17,.67,.35,1.3) both; }
         `}</style>
-        <div className="space-y-6" data-tour="roster-chests">
+        {/* Секция Магазин сундуков — отдельная зона с paper-фоном */}
+        <div
+          data-tour="roster-chests"
+          style={{
+            background: "var(--paper)",
+            border: "2.5px solid var(--ink)",
+            borderRadius: 20,
+            boxShadow: "4px 4px 0 var(--card-shadow)",
+            padding: "20px 20px 24px",
+          }}
+        >
+        <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="block h-0.5 w-6 rounded-full" style={{ background: "var(--section-rule)" }} />
-              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.3em]" style={{ color: "var(--section-label)" }}>{lang === "ru" ? "Магазин сундуков" : "Chest Shop"}</span>
+              <span className="font-mono text-[13px] font-black uppercase tracking-[0.2em]" style={{ color: "var(--section-label)" }}>{lang === "ru" ? "Магазин сундуков" : "Chest Shop"}</span>
             </div>
             <div className="hidden items-center gap-2 font-mono text-xs font-bold uppercase tracking-widest md:flex" style={{ color: "var(--section-label)" }}>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -293,6 +304,7 @@ export function RosterTab({
                       setChestBuyModal({ type, label, emoji: d.emoji, rarity, desc: lang === "ru" ? d.ru : d.en, price, buyBg: "" });
                     }}
                     disabled={!hasWalletAccount || busy !== null}
+                    title={!hasWalletAccount ? (lang === "ru" ? "Подключи кошелёк" : "Connect wallet") : undefined}
                     className="btn-sticker-primary"
                     style={{ width: "100%", marginTop: 18, padding: "12px 20px", justifyContent: "center", background: accent, color: "var(--chest-buy-btn-text)" }}
                   >
@@ -319,6 +331,7 @@ export function RosterTab({
             })}
           </div>
         </div>
+        </div>{/* /Магазин сундуков wrapper */}
 
         {flError && (
           <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-200">{flError}</div>
@@ -341,6 +354,17 @@ export function RosterTab({
               className="shrink-0 rounded-xl bg-amber-500 hover:bg-amber-400 px-4 py-2 text-xs font-black text-black transition">
               {lang === "ru" ? "Забрать →" : "Claim →"}
             </button>
+          </div>
+        )}
+
+        {/* Разделитель секций: инвентарь карточек */}
+        {(flCards.length > 0 || chestCounts.wooden + chestCounts.iron + chestCounts.silver > 0) && (
+          <div className="flex items-center gap-3 pt-2">
+            <span className="block h-0.5 w-6 rounded-full" style={{ background: "var(--section-rule)" }} />
+            <span className="font-mono text-[13px] font-black uppercase tracking-[0.2em]" style={{ color: "var(--section-label)" }}>
+              {lang === "ru" ? "Инвентарь карточек" : "Card Inventory"}
+            </span>
+            <span className="block h-px flex-1 rounded-full" style={{ background: "var(--section-rule)", opacity: 0.4 }} />
           </div>
         )}
 
@@ -419,17 +443,24 @@ export function RosterTab({
                 </div>
               )}
             </div>
-            {/* Sort */}
-            <div style={{ marginLeft: "auto", display: "flex", gap: 8, flexShrink: 0 }}>
+            {/* Sort — segmented switch */}
+            <div style={{ marginLeft: "auto", flexShrink: 0, display: "inline-flex", border: "2.5px solid var(--ink)", borderRadius: 12, overflow: "hidden", boxShadow: "2px 2px 0 var(--card-shadow)" }}>
               {([
                 { value: "rarity" as const,   labelRu: "РЕДКОСТЬ",  labelEn: "RARITY" },
                 { value: "progress" as const, labelRu: "ПРОГРЕСС",  labelEn: "PROGRESS" },
-              ]).map(({ value, labelRu, labelEn }) => {
+              ]).map(({ value, labelRu, labelEn }, i) => {
                 const active = sortBy === value;
                 return (
                   <button key={value} type="button" onClick={() => setSortBy(value)}
-                    className="btn-sticker-outline"
-                    style={{ padding: "8px 14px", fontSize: 11, letterSpacing: 1.4, fontWeight: 800, background: active ? "var(--header-btn-active-bg)" : undefined }}
+                    style={{
+                      padding: "7px 12px", fontSize: 10, letterSpacing: 1.4, fontWeight: 800,
+                      textTransform: "uppercase" as const,
+                      background: active ? "var(--ink)" : "transparent",
+                      color: active ? "var(--paper)" : "var(--ink-2)",
+                      borderRight: i === 0 ? "2px solid var(--ink)" : "none",
+                      transition: "background 0.15s, color 0.15s",
+                      cursor: "pointer",
+                    }}
                     aria-pressed={active}>
                     {lang === "ru" ? labelRu : labelEn}
                   </button>
@@ -441,16 +472,26 @@ export function RosterTab({
 
         {/* Card grid */}
         {flCards.length === 0 && chestCounts.wooden + chestCounts.iron + chestCounts.silver === 0 ? (
-          <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5" data-tour="roster-cards">
+          <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 items-stretch" data-tour="roster-cards">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="overflow-hidden rounded-2xl border border-white/5 bg-black/20 opacity-40">
-                <div className="aspect-[3/4] w-full bg-white/5 flex items-center justify-center">
-                  <span className="text-3xl">🔒</span>
+              <div key={i} style={{
+                border: "2.5px solid var(--ink)", borderRadius: 18, background: "var(--paper-2)",
+                boxShadow: "4px 4px 0 var(--card-shadow)", opacity: 0.45, padding: 16,
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                gap: 10, minHeight: 180,
+              }}>
+                <div style={{ position: "relative", display: "inline-flex" }}>
+                  <img src="/egg2.webp" alt="" aria-hidden style={{ width: 48, height: 48, objectFit: "contain", opacity: 0.55 }} />
+                  <div style={{
+                    position: "absolute", bottom: -6, right: -10,
+                    width: 22, height: 22, borderRadius: "50%",
+                    background: "var(--paper)", border: "2px solid var(--ink)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 11, fontWeight: 800, color: "var(--ink-2)",
+                  }}>?</div>
                 </div>
-                <div className="p-3">
-                  <div className="h-2 w-12 rounded-full bg-white/10" />
-                  <div className="mt-2 h-3 w-16 rounded-full bg-white/10" />
-                </div>
+                <div style={{ height: 7, width: 44, background: "var(--ink)", borderRadius: 4, opacity: 0.18 }} />
+                <div style={{ height: 5, width: 30, background: "var(--ink)", borderRadius: 4, opacity: 0.12 }} />
               </div>
             ))}
             <div className="col-span-2 sm:col-span-3 md:col-span-4 lg:col-span-5 text-center text-sm text-zinc-500 pt-2">
@@ -469,7 +510,7 @@ export function RosterTab({
             </button>
           </div>
         ) : (
-          <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5" data-tour="roster-cards">
+          <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 items-stretch" data-tour="roster-cards">
             {/* Chest items in the grid */}
             {!filterTeam && ([
               { type: 0 as const, label: lang === "ru" ? "Маленькое яйцо" : "Small Egg", grad: "from-sky-900/50 to-cyan-900/30",    ring: "ring-sky-500/60",    buyBg: "bg-sky-700/70 hover:bg-sky-700",       count: chestCounts.wooden, tier: 0, emoji: "🐹" },
@@ -539,6 +580,7 @@ export function RosterTab({
                           setChestBuyModal({ type, label, emoji: d.emoji, rarity: tierLabel, desc: lang === "ru" ? d.ru : d.en, price: type === 0 ? chestPrices.wooden : type === 1 ? chestPrices.iron : chestPrices.silver, buyBg });
                         }}
                         disabled={!hasWalletAccount || busy !== null}
+                        title={!hasWalletAccount ? (lang === "ru" ? "Подключи кошелёк" : "Connect wallet") : undefined}
                         className="btn-sticker-primary"
                         style={{ width: "100%", padding: "10px 16px", justifyContent: "center", background: chestFill, color: "var(--chest-buy-btn-text)" }}>
                         {lang === "ru" ? "Купить ещё" : "Buy more"}
@@ -583,7 +625,7 @@ export function RosterTab({
               const isLegendary = tier === 3;
               const primerFill = (["#D9D3C2","#7AC7E8","#26C6A8","#88FC00"] as const)[tier] ?? "#D9D3C2";
               return (
-                <article key={`${playerId}_${tier}`} className="anim-card-entry" style={{ animationDelay: `${cardIdx * 40}ms`, height: "100%", display: "flex", flexDirection: "column" }}>
+                <article key={`${playerId}_${tier}`} className="anim-card-entry" style={{ animationDelay: `${cardIdx * 40}ms`, height: "100%", minHeight: 260, display: "flex", flexDirection: "column" }}>
                   <div style={{
                     background: "var(--paper-2)", border: "2.5px solid var(--ink)", borderRadius: 18,
                     boxShadow: isLegendary ? "4px 4px 0 var(--card-shadow), 8px 8px 0 #88FC00" : "4px 4px 0 var(--card-shadow)",
@@ -595,10 +637,10 @@ export function RosterTab({
                         display: "inline-flex", alignItems: "center", gap: 5,
                         background: primerFill, color: "var(--ink)",
                         border: "2.5px solid var(--ink)", borderRadius: 999,
-                        padding: "3px 9px", fontSize: 9, letterSpacing: 1.6, fontWeight: 800,
+                        padding: "3px 9px", fontSize: 10, letterSpacing: 1.4, fontWeight: 800,
                         boxShadow: "2px 2px 0 var(--card-shadow)",
                       }}>
-                        {lang === "ru" ? ts.label : ts.enLabel}
+                        {(["◇","◈","✦","★"] as const)[tier] ?? "◇"}{" "}{lang === "ru" ? ts.label : ts.enLabel}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                         <div style={{
@@ -632,14 +674,25 @@ export function RosterTab({
                         )}
                       </div>
                       {isAllLocked && (
-                        <div style={{ position: "absolute", inset: 0, background: "rgba(251,247,236,0.88)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                          <span style={{ fontSize: 22 }}>🔒</span>
-                          <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: 1.5, color: "var(--ink-3)", marginTop: 4 }}>{lang === "ru" ? "В ИГРЕ" : "IN PLAY"}</span>
+                        <div style={{ position: "absolute", inset: 0, background: "rgba(251,247,236,0.88)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2A2A2A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <rect x="3" y="11" width="18" height="11" rx="2"/>
+                              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#E25C5C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                          </div>
+                          <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: 1.5, color: "#2A2A2A" }}>{lang === "ru" ? "В ИГРЕ" : "IN PLAY"}</span>
                         </div>
                       )}
                       {isPartialLocked && (
                         <div style={{ position: "absolute", bottom: 6, right: 6, display: "flex", alignItems: "center", gap: 3, background: "rgba(226,92,92,0.15)", borderRadius: 6, padding: "2px 6px" }}>
-                          <span style={{ fontSize: 9 }}>🔒</span>
+                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#E25C5C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                          </svg>
                           <span style={{ fontSize: 9, fontWeight: 800, color: "#E25C5C" }}>{lockedCount}</span>
                         </div>
                       )}
@@ -647,8 +700,8 @@ export function RosterTab({
 
                     {/* name + role */}
                     <div>
-                      <div style={{ color: "var(--ink-2)", fontWeight: 800, fontSize: 15, letterSpacing: -0.2 }}>{HEROES[playerId]}</div>
-                      <div style={{ color: "var(--ink-3)", fontSize: 10, letterSpacing: 1.6, marginTop: 2, fontWeight: 700 }}>{PLAYER_ROLES[playerId]}</div>
+                      <div style={{ color: "var(--ink-2)", fontWeight: 800, fontSize: 17, letterSpacing: -0.2 }}>{HEROES[playerId]}</div>
+                      <div style={{ color: "var(--ink-2)", fontSize: 10, letterSpacing: 1.6, marginTop: 2, fontWeight: 700, textTransform: "uppercase" }}>{PLAYER_ROLES[playerId]}</div>
                     </div>
 
                     {/* progress segments */}
@@ -662,7 +715,7 @@ export function RosterTab({
                           {Array.from({ length: 5 }).map((_, i) => (
                             <div key={i} style={{
                               flex: 1, height: 10, borderRadius: 4,
-                              background: i < Math.min(availableCount, 5) ? (tier === 0 ? "var(--progress-filled)" : primerFill) : "var(--sunken)",
+                              background: i < Math.min(availableCount, 5) ? (tier === 0 ? "var(--progress-filled)" : primerFill) : "var(--ink-3)",
                               border: "2px solid var(--ink)",
                             }} />
                           ))}

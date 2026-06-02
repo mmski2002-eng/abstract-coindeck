@@ -27,19 +27,19 @@ export const GITHUB_REPOS    = ASSET_GITHUB_REPOS;
 export const TIER_MULTS = [100, 140, 190, 250];
 
 export const CARD_TIER_STYLES = [
-  { color: "#9CA3AF", border: "rgba(156,163,175,0.45)", glow: "rgba(156,163,175,0.35)", gradient: "linear-gradient(180deg,rgba(156,163,175,0.18),rgba(156,163,175,0.02))", label: "МАЛЕНЬКОЕ",  enLabel: "SMALL" },
-  { color: "#60A5FA", border: "rgba(59,130,246,0.6)",   glow: "rgba(59,130,246,0.45)",  gradient: "linear-gradient(180deg,rgba(59,130,246,0.25),rgba(59,130,246,0.03))",   label: "СРЕДНЕЕ",    enLabel: "MEDIUM" },
-  { color: "#C084FC", border: "rgba(168,85,247,0.65)",  glow: "rgba(168,85,247,0.55)",  gradient: "linear-gradient(180deg,rgba(168,85,247,0.28),rgba(168,85,247,0.03))",   label: "ТЯЖЕЛОЕ",    enLabel: "HEAVY" },
-  { color: "#FBBF24", border: "rgba(245,158,11,0.85)",  glow: "rgba(245,158,11,0.7)",   gradient: "linear-gradient(180deg,rgba(245,158,11,0.32),rgba(245,158,11,0.04))",   label: "СУПЕР ТЯЖЁЛОЕ",    enLabel: "SUPER HEAVY" },
+  { color: "#D9D3C2", border: "rgba(217,211,194,0.55)", glow: "rgba(217,211,194,0.4)",  gradient: "linear-gradient(180deg,rgba(217,211,194,0.20),rgba(217,211,194,0.02))", label: "МАЛЕНЬКОЕ",     enLabel: "SMALL" },
+  { color: "#7AC7E8", border: "rgba(122,199,232,0.60)", glow: "rgba(122,199,232,0.45)", gradient: "linear-gradient(180deg,rgba(122,199,232,0.25),rgba(122,199,232,0.03))", label: "СРЕДНЕЕ",       enLabel: "MEDIUM" },
+  { color: "#26C6A8", border: "rgba(38,198,168,0.65)",  glow: "rgba(38,198,168,0.50)",  gradient: "linear-gradient(180deg,rgba(38,198,168,0.28),rgba(38,198,168,0.03))",   label: "ТЯЖЕЛОЕ",       enLabel: "HEAVY" },
+  { color: "#88FC00", border: "rgba(136,252,0,0.80)",   glow: "rgba(136,252,0,0.65)",   gradient: "linear-gradient(180deg,rgba(136,252,0,0.30),rgba(136,252,0,0.03))",     label: "СУПЕР ТЯЖЁЛОЕ", enLabel: "SUPER HEAVY" },
 ];
 
 export const TIER_NAMES = ["Маленькое", "Среднее", "Тяжелое", "Супер Тяжелое"];
-export const TIER_HEX = ["#71717a", "#3b82f6", "#a855f7", "#f59e0b"];
+export const TIER_HEX = ["#D9D3C2", "#7AC7E8", "#26C6A8", "#88FC00"];
 export const TIER_COLORS = [
-  { border: "border-zinc-500/40", badge: "bg-zinc-800/80 text-zinc-300", glow: "" },
-  { border: "border-blue-500/40",   badge: "bg-blue-900/80 text-blue-300 ring-1 ring-blue-500/40",     glow: "shadow-[0_0_12px_rgba(59,130,246,0.25)]" },
-  { border: "border-purple-500/40", badge: "bg-purple-900/80 text-purple-300 ring-1 ring-purple-500/40", glow: "shadow-[0_0_16px_rgba(168,85,247,0.3)]" },
-  { border: "border-amber-500/40",  badge: "bg-amber-900/80 text-amber-300 ring-1 ring-amber-500/40",   glow: "shadow-[0_0_20px_rgba(245,158,11,0.4)]" },
+  { border: "border-[#D9D3C2]/60", badge: "bg-[#D9D3C2]/25 text-[var(--ink-2)]",                                        glow: "" },
+  { border: "border-[#7AC7E8]/60", badge: "bg-[#7AC7E8]/20 text-[var(--ink)] ring-1 ring-[#7AC7E8]/40",                 glow: "shadow-[0_0_12px_rgba(122,199,232,0.25)]" },
+  { border: "border-[#26C6A8]/60", badge: "bg-[#26C6A8]/20 text-[var(--ink)] ring-1 ring-[#26C6A8]/40",                 glow: "shadow-[0_0_16px_rgba(38,198,168,0.30)]" },
+  { border: "border-[#88FC00]/60", badge: "bg-[#88FC00]/20 text-[var(--ink)] ring-1 ring-[#88FC00]/40",                 glow: "shadow-[0_0_20px_rgba(136,252,0,0.40)]" },
 ];
 
 export const ALL_TEAMS = Array.from(new Set(PLAYER_TEAMS));

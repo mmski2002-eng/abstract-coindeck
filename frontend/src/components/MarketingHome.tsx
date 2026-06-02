@@ -373,6 +373,7 @@ export function MarketingHome() {
 
           <div className="ml-auto flex shrink-0 items-center gap-3 lg:ml-0">
             <div id="network-badge" />
+            {/* Группа: соцсеть + тема + язык */}
             <div className="hidden items-center gap-2 md:flex">
               <a
                 href="https://x.com/MrHeavyEggs"
@@ -453,6 +454,8 @@ export function MarketingHome() {
               )}
               </div>
             </div>
+            {/* Разделитель между настройками и кнопкой кошелька */}
+            <div className="hidden md:block h-6 w-px" style={{ background: "var(--ink)", opacity: 0.18 }} />
             <div id="wallet-cta" className="flex items-center" />
           </div>
         </div>
@@ -460,8 +463,20 @@ export function MarketingHome() {
       </header>
 
       <div className="sticky top-16 z-[15] overflow-hidden border-b" style={{ borderColor: "var(--header-border)", background: "var(--ticker-bg)" }}>
+        {/* Fade-маски по краям для бесшовного эффекта */}
+        <div aria-hidden style={{
+          position: "absolute", left: 0, top: 0, bottom: 0, width: 64, zIndex: 2,
+          background: "linear-gradient(to right, var(--ticker-bg), transparent)",
+          pointerEvents: "none",
+        }} />
+        <div aria-hidden style={{
+          position: "absolute", right: 0, top: 0, bottom: 0, width: 64, zIndex: 2,
+          background: "linear-gradient(to left, var(--ticker-bg), transparent)",
+          pointerEvents: "none",
+        }} />
         <div className="ticker-marquee flex min-w-max items-center gap-4 px-6 py-1.5">
-          {[...tickerItems, ...tickerItems, ...tickerItems].map((item, idx) => {
+          {/* Два повтора достаточно для seamless loop */}
+          {[...tickerItems, ...tickerItems].map((item, idx) => {
             const positive = item.change.startsWith("+");
             return (
               <div key={`${item.symbol}-${idx}`} className="flex items-center gap-3 rounded-full px-4 py-1.5" style={{ border: "1px solid var(--ticker-pill-border)", background: "var(--ticker-pill-bg)" }}>
@@ -474,7 +489,7 @@ export function MarketingHome() {
         </div>
       </div>
 
-      <main className="relative z-10 overflow-x-hidden">
+      <main className="relative z-10 overflow-x-hidden" style={{ background: isDark ? "rgba(15,17,21,0.70)" : "rgba(250,243,227,0.65)" }}>
         <section id="app" className="container py-6">
           <WalletApp
             activeTab={activeTab}
@@ -567,10 +582,10 @@ export function MarketingHome() {
               <div className="mb-3 text-xs font-semibold tracking-wide" style={{ color: "var(--panel-text-muted)" }}>{t("rarity.kicker")}</div>
               <div className="grid gap-2">
                 {[
-                  { label: lang === "ru" ? "Малое • L1" : "Small • L1", color: "var(--rarity-common)", cls: "border-zinc-500/30 bg-zinc-800/30 text-zinc-300" },
-                  { label: lang === "ru" ? "Тяжелое яйцо • L2" : "Heavy Egg • L2", color: "var(--rarity-rare)", cls: "border-blue-500/30 bg-blue-900/20 text-blue-300" },
-                  { label: lang === "ru" ? "Тяжелое • L3" : "Big • L3", color: "var(--rarity-epic)", cls: "border-purple-500/30 bg-purple-900/20 text-purple-300" },
-                  { label: lang === "ru" ? "Супер тяжелое • L4" : "Super Heavy • L4", color: "var(--rarity-legendary)", cls: "border-amber-500/30 bg-amber-900/20 text-amber-300" },
+                  { label: lang === "ru" ? "Малое • L1" : "Small • L1",           color: "var(--rarity-common)",    cls: "border-[#D9D3C2]/60 bg-[#D9D3C2]/20 text-[var(--ink-2)]" },
+                  { label: lang === "ru" ? "Тяжелое яйцо • L2" : "Heavy Egg • L2", color: "var(--rarity-rare)",      cls: "border-[#7AC7E8]/60 bg-[#7AC7E8]/15 text-[var(--ink-2)]" },
+                  { label: lang === "ru" ? "Тяжелое • L3" : "Big • L3",             color: "var(--rarity-epic)",      cls: "border-[#26C6A8]/60 bg-[#26C6A8]/15 text-[var(--ink-2)]" },
+                  { label: lang === "ru" ? "Супер тяжелое • L4" : "Super Heavy • L4", color: "var(--rarity-legendary)", cls: "border-[#88FC00]/60 bg-[#88FC00]/15 text-[var(--ink-2)]" },
                 ].map(({ label, color, cls }) => (
                   <div key={label} className={`flex items-center justify-between rounded-xl border px-4 py-2.5 ${cls}`}>
                     <div className="text-sm font-semibold">{label}</div>

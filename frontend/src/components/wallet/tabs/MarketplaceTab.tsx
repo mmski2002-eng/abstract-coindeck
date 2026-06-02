@@ -256,8 +256,8 @@ export function MarketplaceTab({
 
                     {/* price */}
                     <div style={{ fontFamily: 'ui-monospace,"JetBrains Mono",monospace', fontWeight: 600, fontSize: 12, color: "var(--ink-3)" }}>
-                      <span style={{ fontSize: 16, fontWeight: 800, color: "var(--ink-2)", fontFamily: "inherit" }}>{(Number(l.price) / 1e18).toFixed(4)}</span>
-                      <span style={{ color: "var(--ink-2)", fontWeight: 800 }}>{" ETH"}</span>
+                      <span style={{ fontSize: 18, fontWeight: 800, color: "var(--ink-2)", fontFamily: "inherit" }}>{(Number(l.price) / 1e18).toFixed(4)}</span>
+                      <span style={{ color: "var(--ink-2)", fontWeight: 700, fontSize: 11 }}>{" ETH"}</span>
                     </div>
 
                     {/* action */}

@@ -1243,10 +1243,10 @@ export function AdminTab({
               <div className="space-y-3">
                 <div className="text-xs font-semibold text-violet-300/80">{lang === "ru" ? "Множители тиров (×0.01)" : "Tier multipliers (×0.01)"}</div>
                 {([
-                  { label: "Маленькое",  color: "text-zinc-300",   idx: 0 },
-                  { label: "Среднее",    color: "text-blue-300",   idx: 1 },
-                  { label: "Тяжелое",    color: "text-purple-300", idx: 2 },
-                  { label: "Супер Тяжелое", color: "text-amber-300",  idx: 3 },
+                  { label: "Маленькое",     color: "text-[#D9D3C2]", idx: 0 },
+                  { label: "Среднее",       color: "text-[#7AC7E8]", idx: 1 },
+                  { label: "Тяжелое",       color: "text-[#26C6A8]", idx: 2 },
+                  { label: "Супер Тяжелое", color: "text-[#88FC00]", idx: 3 },
                 ] as const).map(({ label, color, idx }) => (
                   <div key={label} className="flex gap-2 items-center">
                     <label className={`text-xs font-semibold w-24 shrink-0 ${color}`}>{label}</label>

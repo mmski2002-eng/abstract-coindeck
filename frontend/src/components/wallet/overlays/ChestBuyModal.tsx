@@ -50,7 +50,7 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
         className="relative w-full max-w-sm rounded-2xl overflow-hidden"
         style={{
           background: "var(--modal-bg)",
-          border: "1.5px solid #000",
+          border: "2.5px solid var(--ink)",
           boxShadow: "var(--shadow-sticker)",
         }}
         onClick={(e) => e.stopPropagation()}
@@ -113,13 +113,13 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
               <button
                 onClick={() => handleQtyChange(-1)}
                 className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90"
-                style={{ background: t.accent, border: "1.5px solid var(--ink)", color: "#111" }}
+                style={{ background: t.accent, border: "2px solid var(--ink)", color: "var(--ink)" }}
               >−</button>
               <span className="w-10 text-center font-bold text-base tabular-nums" style={{ color: "var(--panel-text)" }}>{chestBuyQty}</span>
               <button
                 onClick={() => handleQtyChange(1)}
                 className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90"
-                style={{ background: t.accent, border: "1.5px solid var(--ink)", color: "#111" }}
+                style={{ background: t.accent, border: "2px solid var(--ink)", color: "var(--ink)" }}
               >+</button>
             </div>
           </div>

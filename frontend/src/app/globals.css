@@ -48,6 +48,7 @@
   --shadow-sticker-legend: 4px 4px 0 var(--shadow-sticker-color), 8px 8px 0 #88FC00;
   --radius-sm: 10px;
   --radius-md: 18px;
+  --radius-lg: 24px;
 
   --background: #f4f5f7;
   --foreground: #16181d;
@@ -62,8 +63,8 @@
   --surface-2: rgba(244,245,247,0.96);
   --border:    rgba(22,24,29,0.12);
 
-  --brand:     #00c2d7;
-  --brand-2:   #7de3f2;
+  --brand:     #26C6A8;
+  --brand-2:   #BFEDE2;
 
   --page-background:
     linear-gradient(180deg, #fafbfc 0%, #f4f5f7 52%, #eceff3 100%);
@@ -174,10 +175,15 @@
   --filter-chip-active-border: rgba(22,24,29,0.32);
   --filter-chip-active-text: #16181d;
 
-  --rarity-common:    #9CA3AF;
-  --rarity-rare:      #60A5FA;
-  --rarity-epic:      #C084FC;
-  --rarity-legendary: #FBBF24;
+  --rarity-common:    #D9D3C2;
+  --rarity-rare:      #7AC7E8;
+  --rarity-epic:      #26C6A8;
+  --rarity-legendary: #88FC00;
+
+  --up:   #23A86A;
+  --down: #E25C5C;
+  --warn: #F2B73A;
+  --info: #4DAFD5;
 }
 
 html[data-theme="dark"] {
@@ -197,7 +203,7 @@ html[data-theme="dark"] {
   --paper-3: #1B232C;
   --sunken:  #0A0F14;
   --ink-2:   #E8EEF5;
-  --ink-3:   #1B232C;
+  --ink-3:   #9AA3AE;
 
   --background: #171718;
   --foreground: #ffffff;
@@ -237,8 +243,8 @@ html[data-theme="dark"] {
   --modal-bg: #3A4049;
   --modal-header-bg: #1f1f1f;
   --modal-shadow: 0 34px 90px rgba(0,0,0,0.42);
-  --button-primary-bg: #00FF66;
-  --button-primary-hover: #33ff85;
+  --button-primary-bg: #26C6A8;
+  --button-primary-hover: #1DA88E;
   --button-primary-text: #181818;
   --button-secondary-bg: #1f1f1f;
   --button-secondary-hover: #2a2a2a;
@@ -725,6 +731,10 @@ html[data-theme="light"] .text-white\/70 { color: rgba(22,24,29,0.70) !important
   transform: translate(4px, 4px);
   box-shadow: none;
 }
+.btn-sticker-primary:focus-visible {
+  outline: 3px solid var(--mint);
+  outline-offset: 2px;
+}
 .btn-sticker-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .btn-sticker-outline {
@@ -749,6 +759,10 @@ html[data-theme="light"] .text-white\/70 { color: rgba(22,24,29,0.70) !important
 .btn-sticker-outline:active:not(:disabled) {
   transform: translate(4px, 4px);
   box-shadow: none;
+}
+.btn-sticker-outline:focus-visible {
+  outline: 3px solid var(--mint);
+  outline-offset: 2px;
 }
 .btn-sticker-outline:disabled { opacity: 0.4; cursor: not-allowed; }
 

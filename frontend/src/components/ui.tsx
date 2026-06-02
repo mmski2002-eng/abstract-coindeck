@@ -41,7 +41,7 @@ export function Button({
       "bg-[var(--button-secondary-bg)] text-[var(--button-secondary-text)] hover:bg-[var(--button-secondary-hover)] ring-1 ring-black/10 backdrop-blur",
     ghost: "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover)] ring-1 ring-black/10",
     brand:
-      "bg-[#00c2d7] text-[#07131a] shadow-sm ring-1 ring-black/5 hover:brightness-105 active:brightness-95",
+      "bg-[var(--mint)] text-[var(--ink)] shadow-sm ring-1 ring-black/5 hover:brightness-105 active:brightness-95",
   };
   return (
     <button className={cn(base, variants[variant], className)} {...props}>

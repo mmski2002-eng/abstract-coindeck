@@ -146,7 +146,7 @@ export function ChestOpenModal({ lang, modal, onClose, chestOpenQty, setChestOpe
         className="relative w-full max-w-sm rounded-2xl overflow-hidden"
         style={{
           background: "var(--modal-bg)",
-          border: "1.5px solid #000",
+          border: "2.5px solid var(--ink)",
           boxShadow: "var(--shadow-sticker)",
           minHeight: showAnim ? 400 : undefined,
           transition: "min-height 0.3s",
@@ -183,11 +183,11 @@ export function ChestOpenModal({ lang, modal, onClose, chestOpenQty, setChestOpe
               <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--nft-muted)" }}>{ru ? "Выбери количество" : "Select amount"}</span>
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1">
-                  <button onClick={() => setChestOpenQty((q) => Math.max(1, q - 1))} className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90" style={{ background: t.accent, border: "1.5px solid var(--ink)", color: "#111" }}>−</button>
+                  <button onClick={() => setChestOpenQty((q) => Math.max(1, q - 1))} className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90" style={{ background: t.accent, border: "2px solid var(--ink)", color: "var(--ink)" }}>−</button>
                   <span className="w-10 text-center font-bold text-base tabular-nums" style={{ color: "var(--panel-text)" }}>{chestOpenQty}</span>
-                  <button onClick={() => setChestOpenQty((q) => Math.min(modal.available, q + 1))} className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90" style={{ background: t.accent, border: "1.5px solid var(--ink)", color: "#111" }}>+</button>
+                  <button onClick={() => setChestOpenQty((q) => Math.min(modal.available, q + 1))} className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90" style={{ background: t.accent, border: "2px solid var(--ink)", color: "var(--ink)" }}>+</button>
                 </div>
-                <button onClick={() => setChestOpenQty(modal.available)} className="rounded-lg px-3 h-8 text-xs font-bold transition active:scale-90" style={{ background: t.accent, border: "1.5px solid var(--ink)", color: "#111" }}>MAX</button>
+                <button onClick={() => setChestOpenQty(modal.available)} className="rounded-lg px-3 h-8 text-xs font-bold transition active:scale-90" style={{ background: t.accent, border: "2px solid var(--ink)", color: "var(--ink)" }}>MAX</button>
               </div>
             </div>
 

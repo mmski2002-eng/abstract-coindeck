@@ -3,9 +3,17 @@ import { checkSecretAuth } from "../../admin/auth";
 import { botWalletStatus, readConfig, readState, recoverStaleRun, runOnce } from "../runner";
 import { runOracleSync } from "../../oracle-history/lib";
 
+function checkCronOrAdminAuth(req: NextRequest) {
+  const cronSecret = process.env.CRON_SECRET ?? "";
+  const provided = req.headers.get("authorization") ?? "";
+  if (cronSecret && provided === `Bearer ${cronSecret}`) {
+    return { ok: true as const };
+  }
+  return checkSecretAuth(req);
+}
 
 export async function GET(req: NextRequest) {
-  const auth = checkSecretAuth(req);
+  const auth = checkCronOrAdminAuth(req);
   if (!auth.ok) {
     return NextResponse.json({ error: "Unauthorized", reason: auth.error }, { status: 401 });
   }

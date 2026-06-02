@@ -57,7 +57,7 @@ export function ChestOpeningOverlay({
           className="absolute top-5 right-5 w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
           style={{
             background: "var(--modal-bg)",
-            border: "1px solid #000",
+            border: "2px solid var(--ink)",
           }}
           aria-label={lang === "ru" ? "Пропустить" : "Skip"}
         >

@@ -87,7 +87,7 @@ export function MarketplaceTab({
               {myListings.slice(myListingsPage * MY_LISTINGS_PAGE_SIZE, (myListingsPage + 1) * MY_LISTINGS_PAGE_SIZE).map((l) => {
                 const primerFill = (["var(--rarity-common)","var(--rarity-rare)","var(--rarity-epic)","var(--rarity-legendary)"] as const)[l.tier] ?? "var(--rarity-common)";
                 return (
-                  <div key={l.id} className="flex flex-col gap-2 rounded-xl p-2.5" style={{ border: "2px solid var(--outline)", background: "var(--paper-3)", boxShadow: "2px 2px 0 var(--outline)" }}>
+                  <div key={l.id} className="flex flex-col gap-2 rounded-xl p-2.5" style={{ border: "2px solid var(--outline)", background: "var(--paper-3)", boxShadow: "2px 2px 0 var(--shadow-sticker-color-strong)" }}>
                     <div className="flex items-center gap-2 min-w-0">
                       <img src={COIN_ICONS[l.playerId]} alt={HEROES[l.playerId]}
                         className="h-8 w-8 shrink-0 rounded-lg object-cover opacity-80" style={{ border: "2px solid var(--outline)", background: primerFill }} referrerPolicy="no-referrer" />

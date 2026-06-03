@@ -7,6 +7,7 @@ import { useConnect, useDisconnect, useAccount, useChainId, useSwitchChain, useB
 import { abstractTestnet } from "viem/chains";
 import { Sun, Moon } from "lucide-react";
 import { useI18n } from "@/components/LanguageProvider";
+import { readEvmMintedNftCount } from "@/lib/evmContracts";
 
 function _hadPreviousWalletConnection(): boolean {
   if (typeof window === "undefined") return false;
@@ -418,6 +419,55 @@ export type ConnectModalProps = {
   onEnterApp?: () => void;
 };
 
+function AnimatedMintedNumber({ value, lang }: { value: number | null; lang: string }) {
+  const [displayValue, setDisplayValue] = useState(0);
+  const displayRef = useRef(0);
+
+  function setDisplay(next: number) {
+    displayRef.current = next;
+    setDisplayValue(next);
+  }
+
+  useEffect(() => {
+    let frame = 0;
+
+    if (value === null) {
+      const startedAt = Date.now();
+      const timer = setInterval(() => {
+        const tick = Math.floor((Date.now() - startedAt) / 90);
+        const wave = Math.round(Math.sin(tick / 2) * 9);
+        setDisplay(180 + ((tick * 17 + wave) % 720));
+      }, 90);
+
+      return () => clearInterval(timer);
+    }
+
+    const from = displayRef.current;
+    const diff = value - from;
+    const duration = 650;
+    const startedAt = performance.now();
+
+    const animate = (now: number) => {
+      const progress = Math.min(1, (now - startedAt) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(from + diff * eased));
+
+      if (progress < 1) {
+        frame = requestAnimationFrame(animate);
+      }
+    };
+
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, [value]);
+
+  return (
+    <span style={{ minWidth: 28, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
+      {displayValue.toLocaleString(lang === "ru" ? "ru-RU" : "en-US")}
+    </span>
+  );
+}
+
 export function ConnectModal({ lang, open, onClose, onEnterApp }: ConnectModalProps) {
   const { connect, connectors } = useConnect();
   const { isConnected, address } = useAccount();
@@ -431,6 +481,7 @@ export function ConnectModal({ lang, open, onClose, onEnterApp }: ConnectModalPr
   const [selConnector, setSelConnector] = useState<Connector | null>(null);
   const [error, setError] = useState("");
   const [countdown, setCountdown] = useState(60);
+  const [mintedNftCount, setMintedNftCount] = useState<number | null>(null);
   const [isDark, setIsDark] = useState(() =>
     typeof document !== "undefined" && document.documentElement.dataset.theme === "dark"
   );
@@ -441,6 +492,26 @@ export function ConnectModal({ lang, open, onClose, onEnterApp }: ConnectModalPr
     obs.observe(document.documentElement, { attributeFilter: ["data-theme"] });
     return () => obs.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+
+    let active = true;
+    setMintedNftCount(null);
+
+    readEvmMintedNftCount()
+      .then((count) => {
+        if (active) setMintedNftCount(count);
+      })
+      .catch((e) => {
+        console.warn("Не удалось прочитать количество заминченных NFT из блокчейна", e);
+        if (active) setMintedNftCount(null);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (isConnected && open && modalState !== "success" && modalState !== "error") setModalState("success");
@@ -479,6 +550,9 @@ export function ConnectModal({ lang, open, onClose, onEnterApp }: ConnectModalPr
   const balanceStr = balanceData
     ? `${parseFloat(balanceData.formatted).toFixed(4)} ${balanceData.symbol}`
     : "—";
+  const mintedNftLabel = mintedNftCount === null
+    ? (lang === "ru" ? "НФТ пересчитывается" : "NFTs recalculating")
+    : (lang === "ru" ? "НФТ заминчено" : "NFTs minted");
 
   function handleConnect(connector: Connector) {
     setSelConnector(connector);
@@ -504,7 +578,7 @@ export function ConnectModal({ lang, open, onClose, onEnterApp }: ConnectModalPr
   const ctaContent = (
     <div className="px-6 pt-5 pb-6">
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-        <div style={{ width: 48, height: 48, borderRadius: 14, background: "var(--lime-pop)", border: "2.5px solid var(--outline)", boxShadow: "3px 3px 0 var(--outline)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <div style={{ width: 48, height: 48, borderRadius: 14, background: "var(--lime-pop)", border: "2.5px solid var(--outline)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <img src="/logo.webp" style={{ width: 36, height: 36, objectFit: "cover", borderRadius: 8 }} alt="" />
         </div>
         <img src="/brand/name.png" style={{ height: 32, width: "auto", objectFit: "contain" }} alt="HeavyEggs" />
@@ -525,7 +599,8 @@ export function ConnectModal({ lang, open, onClose, onEnterApp }: ConnectModalPr
       <div style={{ display: "flex", justifyContent: "center" }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "6px 14px", background: "var(--beach-live-bg)", border: "1.5px solid var(--beach-live-border)", borderRadius: 999, fontSize: 12, fontWeight: 700, color: "var(--ink-2)" }}>
           <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--mint)", flexShrink: 0, display: "inline-block", animation: "dotPulse 1.8s ease-in-out infinite" }} />
-          {lang === "ru" ? "342 НФТ заминчено" : "342 NFTs minted"}
+          <AnimatedMintedNumber value={mintedNftCount} lang={lang} />
+          {mintedNftLabel}
         </div>
       </div>
     </div>
@@ -565,7 +640,7 @@ export function ConnectModal({ lang, open, onClose, onEnterApp }: ConnectModalPr
               <div style={{
                 width: 56, height: 56, borderRadius: 16, overflow: "hidden",
                 border: isAGW ? "2.5px solid var(--mint)" : "2px solid var(--outline)",
-                boxShadow: isAGW ? "3px 3px 0 var(--mint)" : "2px 2px 0 var(--outline)",
+                boxShadow: isAGW ? "3px 3px 0 var(--mint)" : "2px 2px 0 var(--shadow-sticker-color-strong)",
                 flexShrink: 0,
               }}>
                 {connector.icon

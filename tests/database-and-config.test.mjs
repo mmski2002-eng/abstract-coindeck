@@ -65,3 +65,17 @@ test("project-addresses.json содержит активную сеть и ва�
     }
   }
 });
+
+test("frontend CSP разрешает Abstract fonts и MetaMask SDK endpoints", () => {
+  const config = read("frontend/next.config.ts");
+
+  for (const token of [
+    "https://abstract-assets.abs.xyz",
+    "https://metamask-sdk.api.cx.metamask.io",
+    "https://mm-sdk-analytics.api.cx.metamask.io",
+    "https://*.api.cx.metamask.io",
+    "wss://*.api.cx.metamask.io",
+  ]) {
+    assert.equal(config.includes(token), true, `В CSP отсутствует ${token}`);
+  }
+});

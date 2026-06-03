@@ -20,6 +20,90 @@ function wc(config: Config, params: Omit<WriteContractParameters, "chain">) {
   return writeContract(config, { chain: abstractTestnet, ...params } as WriteContractParameters);
 }
 
+type JsonRpcResponse<T> = {
+  result?: T;
+  error?: {
+    code?: number;
+    message?: string;
+  };
+};
+
+const EVM_ADDRESS_RE = /^0x[a-fA-F0-9]{40}$/;
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+const LOG_CHUNK_SIZE = 2_000_000n;
+
+const NFT_MINT_EVENT_TOPICS = [
+  keccak256(new TextEncoder().encode("EggMonetMinted(address,uint256,uint8,uint8)")),
+  keccak256(new TextEncoder().encode("EggMinted(address,uint256,uint8)")),
+] as const;
+
+function toBlockHex(block: bigint) {
+  return `0x${block.toString(16)}`;
+}
+
+async function rpc<T>(rpcUrl: string, method: string, params: unknown[]): Promise<T> {
+  const response = await fetch(rpcUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: Date.now(), method, params }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`RPC ${method} вернул HTTP ${response.status}`);
+  }
+
+  const payload = await response.json() as JsonRpcResponse<T>;
+  if (payload.error) {
+    throw new Error(payload.error.message ?? `RPC ${method} error ${payload.error.code ?? ""}`.trim());
+  }
+  if (payload.result === undefined) {
+    throw new Error(`RPC ${method} не вернул result`);
+  }
+
+  return payload.result;
+}
+
+async function readLogCount(rpcUrl: string, address: string, topic: string, fromBlock: string, toBlock: string) {
+  const logs = await rpc<unknown[]>(rpcUrl, "eth_getLogs", [{
+    address,
+    fromBlock,
+    toBlock,
+    topics: [topic],
+  }]);
+
+  return Array.isArray(logs) ? logs.length : 0;
+}
+
+async function readLogCountWithFallback(rpcUrl: string, address: string, topic: string) {
+  try {
+    return await readLogCount(rpcUrl, address, topic, "0x0", "latest");
+  } catch {
+    const latestHex = await rpc<string>(rpcUrl, "eth_blockNumber", []);
+    const latest = BigInt(latestHex);
+    let total = 0;
+
+    for (let from = 0n; from <= latest; from += LOG_CHUNK_SIZE + 1n) {
+      const to = from + LOG_CHUNK_SIZE > latest ? latest : from + LOG_CHUNK_SIZE;
+      total += await readLogCount(rpcUrl, address, topic, toBlockHex(from), toBlockHex(to));
+    }
+
+    return total;
+  }
+}
+
+export async function readEvmMintedNftCount(): Promise<number> {
+  const addrs = getRuntimeProjectAddresses();
+  if (!EVM_ADDRESS_RE.test(addrs.coinDeckNFT) || addrs.coinDeckNFT === ZERO_ADDRESS) {
+    throw new Error("Адрес CoinDeckNFT не настроен");
+  }
+
+  const counts = await Promise.all(
+    NFT_MINT_EVENT_TOPICS.map((topic) => readLogCountWithFallback(addrs.restUrl, addrs.coinDeckNFT, topic)),
+  );
+
+  return counts.reduce((sum, count) => sum + count, 0);
+}
+
 // ── Minimal write-only ABIs ────────────────────────────────────────────────
 
 export const TOURNAMENT_ABI = [

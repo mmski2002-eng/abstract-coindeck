@@ -354,7 +354,7 @@ export function RosterTab({
 
         {/* Claim banner */}
         {claimState?.active && userClaimable > 0 && (
-          <div className="flex items-center justify-between gap-4 rounded-xl px-4 py-3" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--outline)" }}>
+          <div className="flex items-center justify-between gap-4 rounded-xl px-4 py-3" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
             <div>
               <div className="text-sm font-bold">🎉 {lang === "ru" ? "Доступен приз!" : "Prize available!"}</div>
               <div className="mt-0.5 text-xs font-semibold" style={{ color: "var(--ink-2)" }}>

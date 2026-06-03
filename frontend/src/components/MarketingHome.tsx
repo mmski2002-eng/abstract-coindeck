@@ -44,7 +44,7 @@ function MergeRow({
   to: { label: string; color: string; count: number };
 }) {
   return (
-    <div className="grid items-center gap-3 rounded-xl p-4 md:grid-cols-[1fr_auto_1fr]" style={{ border: "2px solid var(--outline)", background: "var(--paper-2)", boxShadow: "2px 2px 0 var(--outline)" }}>
+    <div className="grid items-center gap-3 rounded-xl p-4 md:grid-cols-[1fr_auto_1fr]" style={{ border: "2px solid var(--outline)", background: "var(--paper-2)", boxShadow: "2px 2px 0 var(--shadow-sticker-color-strong)" }}>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: from.color }} />
@@ -69,7 +69,7 @@ function MergeRow({
 
 function StepCard({ num, icon, title, desc }: { num: number; icon: string; title: string; desc: string }) {
   return (
-    <div className="relative rounded-xl p-5" style={{ border: "2px solid var(--outline)", background: "var(--paper-2)", boxShadow: "3px 3px 0 var(--outline)" }}>
+    <div className="relative rounded-xl p-5" style={{ border: "2px solid var(--outline)", background: "var(--paper-2)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
       <div className="absolute -top-3 -left-3 flex h-7 w-7 items-center justify-center rounded-full text-xs font-black" style={{ border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--ink)" }}>
         {num}
       </div>
@@ -347,7 +347,7 @@ export function MarketingHome() {
                 border: "2.5px solid var(--outline)",
                 borderRadius: 12,
                 background: "var(--lime-pop)",
-                boxShadow: "3px 3px 0 var(--outline)",
+                boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)",
               }}
             >
               <img src="/logo.webp" alt="logo" style={{ width: 32, height: 32, objectFit: "cover", borderRadius: 8 }} />
@@ -364,7 +364,7 @@ export function MarketingHome() {
                 border: "2.5px solid var(--outline)",
                 borderRadius: 12,
                 background: "var(--lime-pop)",
-                boxShadow: "3px 3px 0 var(--outline)",
+                boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)",
               }}
             >
               <img src="/logo.webp" alt="logo" style={{ width: 32, height: 32, objectFit: "cover", borderRadius: 8 }} />
@@ -372,7 +372,8 @@ export function MarketingHome() {
             <img src="/brand/name.png" alt="HeavyEggs" style={{ height: 36, width: "auto", objectFit: "contain" }} />
           </div>}
 
-          {contentReady && <nav className="mx-auto hidden min-w-0 flex-shrink items-center gap-1.5 overflow-x-auto scrollbar-hide lg:flex" style={{ paddingBottom: 6, marginBottom: -6 }}>
+          {contentReady && <div className="mx-auto hidden min-w-0 flex-1 justify-center lg:flex">
+            <nav className="flex max-w-full items-center gap-1.5 overflow-x-auto scrollbar-hide" style={{ padding: "2px 8px 8px 2px", marginBottom: -8 }}>
             {tabs.filter(({ adminOnly }) => !adminOnly || isAdmin).map(({ id, ru, en, icon: Icon }) => {
               const active = activeTab === id;
               return (
@@ -381,7 +382,7 @@ export function MarketingHome() {
                   id={`tour-tab-${id}`}
                   type="button"
                   onClick={() => { setActiveTab(id); try { localStorage.setItem("active_tab", id); } catch {} }}
-                  className="flex items-center gap-1.5 transition-all"
+                  className="flex shrink-0 items-center gap-1.5 transition-all"
                   style={{
                     padding: "6px 14px", whiteSpace: "nowrap",
                     background: active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)",
@@ -395,9 +396,11 @@ export function MarketingHome() {
                 </button>
               );
             })}
-          </nav>}
+            </nav>
+          </div>}
 
-          {contentReady && <nav className="mx-auto flex gap-1.5 overflow-x-auto scrollbar-hide lg:hidden" style={{ paddingBottom: 6, marginBottom: -6 }}>
+          {contentReady && <div className="mx-auto flex min-w-0 flex-1 justify-center lg:hidden">
+            <nav className="flex max-w-full gap-1.5 overflow-x-auto scrollbar-hide" style={{ padding: "2px 8px 8px 2px", marginBottom: -8 }}>
             {tabs.filter(({ adminOnly }) => !adminOnly || isAdmin).map(({ id, icon: Icon }) => {
               const active = activeTab === id;
               return (
@@ -405,7 +408,7 @@ export function MarketingHome() {
                   key={id}
                   type="button"
                   onClick={() => { setActiveTab(id); try { localStorage.setItem("active_tab", id); } catch {} }}
-                  className="flex items-center justify-center transition-all"
+                  className="flex shrink-0 items-center justify-center transition-all"
                   style={{
                     width: 36, height: 36,
                     background: active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)",
@@ -418,10 +421,10 @@ export function MarketingHome() {
                 </button>
               );
             })}
-          </nav>}
+            </nav>
+          </div>}
 
           <div className="ml-auto flex shrink-0 items-center gap-3 lg:ml-0" style={{ display: contentReady ? undefined : "none" }}>
-            <div id="network-badge" />
             <div id="wallet-cta" className="flex items-center" />
           </div>
         </div>

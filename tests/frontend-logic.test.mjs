@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { read } from "./helpers.mjs";
 import { importTs } from "./ts-loader.mjs";
 
 test("oracleScoring считает очки, пороги и clamp без регрессий", async () => {
@@ -98,4 +99,19 @@ test("adminAuth стабилизирует домен, payload и сообщен
     "nonce:nonce-1",
     "payloadHash:0xabc",
   ].join("\n"));
+});
+
+test("connect modal берет счетчик minted NFT из блокчейна и не показывает статичное число", () => {
+  const modal = read("frontend/src/components/wallet/overlays/ConnectPortals.tsx");
+  const evm = read("frontend/src/lib/evmContracts.ts");
+
+  assert.equal(modal.includes("342 НФТ заминчено"), false, "CTA не должен показывать старое статичное число NFT.");
+  assert.equal(modal.includes("342 NFTs minted"), false, "CTA не должен показывать старое статичное число NFT.");
+  assert.match(modal, /readEvmMintedNftCount/, "Connect modal должен читать счетчик из EVM helper.");
+  assert.match(modal, /AnimatedMintedNumber/, "Пока данные грузятся, должен работать анимированный пересчет цифр.");
+  assert.match(modal, /НФТ пересчитывается/, "Для отсутствующих данных нужен loading-текст пересчета.");
+
+  assert.match(evm, /EggMonetMinted\(address,uint256,uint8,uint8\)/, "Нужно считать mint card события.");
+  assert.match(evm, /EggMinted\(address,uint256,uint8\)/, "Нужно считать mint egg события.");
+  assert.match(evm, /eth_getLogs/, "Счетчик minted NFT должен читать события из RPC.");
 });

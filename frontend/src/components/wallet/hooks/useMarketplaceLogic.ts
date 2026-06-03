@@ -128,10 +128,13 @@ export function useMarketplaceLogic({
     setMpError("");
     try {
       await ensureInitialized();
+      const listing = mpListings.find((l) => l.id === listingId);
+      if (!listing) throw new Error("Listing not found");
       await submitTx({
         function: `${moduleAddress}::marketplace::buy_card`,
         typeArguments: [],
         functionArguments: [listingId],
+        value: BigInt(listing.price),
       });
       setTimeout(() => {
         refreshInventory();
@@ -148,10 +151,17 @@ export function useMarketplaceLogic({
     try {
       await ensureInitialized();
       const previousCount = flCards.length;
+      const selectedListings = listingIds.map((id) => {
+        const listing = mpListings.find((l) => l.id === id);
+        if (!listing) throw new Error(`Listing ${id} not found`);
+        return listing;
+      });
+      const totalPrice = selectedListings.reduce((sum, listing) => sum + BigInt(listing.price), 0n);
       await submitTx({
         function: `${moduleAddress}::marketplace::buy_cards_batch`,
         typeArguments: [],
         functionArguments: [listingIds],
+        value: totalPrice,
       });
       await waitForInventoryIncrease(previousCount, listingIds.length);
       await refreshListings();

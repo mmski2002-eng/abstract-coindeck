@@ -46,12 +46,48 @@ test("BeachScene использует централизованные beach CSS
     "--beach-sea-start",
     "--beach-sand-start",
     "--beach-wave-front",
-    "--beach-card-bg",
-    "--beach-cta-bg",
+    "--beach-ghost-bg",
+    "--beach-ghost-border",
+    "--beach-ghost-inner-bg",
+    "--beach-ghost-line-strong",
+    "--beach-ghost-line-soft",
   ]) {
     assert.equal(css.includes(token), true, `В globals.css нет ${token}`);
     assert.equal(scene.includes(`var(${token})`), true, `BeachScene не использует ${token}`);
   }
 
   assert.equal(/const\s+sky1|const\s+sea1|const\s+sand1/.test(scene), false, "BeachScene снова содержит локальные цвета фона.");
+});
+
+test("dark theme использует единый серый shadow token вместо белых теней", () => {
+  const css = read("frontend/src/app/globals.css");
+  const darkBlock = css.match(/html\[data-theme="dark"\]\s*\{[\s\S]*?\n\}/)?.[0] ?? "";
+
+  assert.match(darkBlock, /--shadow-sticker-color-strong:\s*#4A5563;/);
+  for (const token of [
+    "--shadow-sticker",
+    "--shadow-sticker-sm",
+    "--shadow-sticker-legend",
+    "--card-shadow",
+    "--info-shell-shadow",
+    "--filter-btn-shadow",
+    "--filter-btn-shadow-active",
+  ]) {
+    assert.match(
+      darkBlock,
+      new RegExp(`${token}:\\s*[^;]*var\\(--shadow-sticker-color-strong\\)`),
+      `${token} в dark theme должен ссылаться на общий серый shadow token.`,
+    );
+  }
+});
+
+test("sticker shadows не используют outline: в dark theme outline остается рамкой, а не тенью", () => {
+  const files = listFiles("frontend/src", [".css", ".ts", ".tsx"]);
+
+  assertNoMatches(
+    assert,
+    files,
+    /(?:boxShadow|box-shadow)[^;\n}]*var\(--outline\)/,
+    "Найдена тень, привязанная к --outline. Для тени используйте --shadow-sticker-color-strong / --card-shadow.",
+  );
 });

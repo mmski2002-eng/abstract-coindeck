@@ -137,7 +137,7 @@ export function TournamentTab({
       {tnError && <div className="rounded-xl p-3 text-sm font-semibold" style={{ border: "2px solid var(--down)", background: "var(--paper-2)", color: "var(--down)", boxShadow: "2px 2px 0 var(--down)" }}>{tnError}</div>}
 
       {!tnState && !tnRefreshing && (
-        <div className="rounded-xl p-4 text-center text-sm font-semibold" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--outline)" }}>
+        <div className="rounded-xl p-4 text-center text-sm font-semibold" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
           {lang === "ru" ? "Инвестирование ещё не запущено администратором" : "Investing not started yet"}
         </div>
       )}
@@ -182,7 +182,7 @@ export function TournamentTab({
                 </div>
               </div>
               {tnLineups.length > 0 && (
-                <div className="flex shrink-0 items-center self-stretch rounded-xl px-3" style={{ border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--outline)" }}>
+                <div className="flex shrink-0 items-center self-stretch rounded-xl px-3" style={{ border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
                   <div className="text-sm font-bold">
                     TOTAL {weeklyTotal} pts
                   </div>
@@ -196,18 +196,18 @@ export function TournamentTab({
       {/* Lineup builder */}
       <style>{`
         @keyframes eligiblePulse {
-          0%, 100% { box-shadow: 2px 2px 0 var(--outline), inset 0 0 0 0 var(--warn); }
-          50% { box-shadow: 2px 2px 0 var(--outline), inset 0 0 0 4px var(--warn); }
+          0%, 100% { box-shadow: 2px 2px 0 var(--shadow-sticker-color-strong), inset 0 0 0 0 var(--warn); }
+          50% { box-shadow: 2px 2px 0 var(--shadow-sticker-color-strong), inset 0 0 0 4px var(--warn); }
         }
         .eligible-glow { animation: eligiblePulse 1.8s ease-in-out infinite; }
       `}</style>
       {tnState?.active && tnState.startTimestamp * 1000 > nowMs && hasWalletAccount && (
-        <div className="rounded-xl p-4 text-center text-sm font-semibold" style={{ border: "2px solid var(--outline)", background: "var(--sky-soft)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--outline)" }}>
+        <div className="rounded-xl p-4 text-center text-sm font-semibold" style={{ border: "2px solid var(--outline)", background: "var(--sky-soft)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
           {lang === "ru" ? "Турнир стартует завтра — выставить портфель можно будет после старта" : "Tournament starts tomorrow — you can submit your portfolio once it begins"}
         </div>
       )}
       {tnState?.active && tnState.currentDay === 0 && !tnRefreshing && (viewEpoch === null || viewEpoch === tnState.epoch) && (
-        <div className="flex items-start gap-3 rounded-xl p-4" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--outline)" }}>
+        <div className="flex items-start gap-3 rounded-xl p-4" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
           <div className="text-xl mt-0.5">⏳</div>
           <div>
             <div className="text-sm font-semibold">
@@ -362,9 +362,9 @@ export function TournamentTab({
                     onClick={() => { setLineupPickerSlot(isOpen ? null : slotIdx); setLineupPickerSearch(""); }}
                     className={`relative flex flex-col items-center gap-1 rounded-xl p-2 text-center transition${slotIdx === firstEmptySlot && !card && lineupPickerSlot === null ? " slot-invite" : ""}`}
                     style={isOpen
-                      ? { border: "2.5px solid var(--outline)", background: "var(--sky-soft)", boxShadow: "2px 2px 0 var(--outline)" }
+                      ? { border: "2.5px solid var(--outline)", background: "var(--sky-soft)", boxShadow: "2px 2px 0 var(--shadow-sticker-color-strong)" }
                       : card
-                        ? { border: "2.5px solid var(--outline)", background: "var(--paper-2)", boxShadow: "2px 2px 0 var(--outline)" }
+                        ? { border: "2.5px solid var(--outline)", background: "var(--paper-2)", boxShadow: "2px 2px 0 var(--shadow-sticker-color-strong)" }
                         : { border: "2.5px dashed var(--ink)", background: "var(--paper-2)" }
                     }
                   >
@@ -442,7 +442,7 @@ export function TournamentTab({
                         {([null, 0, 1, 2, 3] as (number | null)[]).map((t) => (
                           <button key={t ?? "all"} onClick={() => setLineupPickerTier(t)}
                             className="whitespace-nowrap rounded-full px-3 py-1.5 font-display text-[10px] font-bold uppercase tracking-widest transition-all"
-                            style={{ border: "2px solid var(--outline)", background: lineupPickerTier === t ? "var(--mint)" : "var(--paper-2)", color: lineupPickerTier === t ? "var(--ink)" : "var(--ink-2)", boxShadow: lineupPickerTier === t ? "2px 2px 0 var(--outline)" : "none" }}>
+                            style={{ border: "2px solid var(--outline)", background: lineupPickerTier === t ? "var(--mint)" : "var(--paper-2)", color: lineupPickerTier === t ? "var(--ink)" : "var(--ink-2)", boxShadow: lineupPickerTier === t ? "2px 2px 0 var(--shadow-sticker-color-strong)" : "none" }}>
                             {t === null ? (lang === "ru" ? "Все" : "All") : TIER_NAMES[t]}
                           </button>
                         ))}
@@ -465,7 +465,7 @@ export function TournamentTab({
                                   setLineupPickerSlot(null); setLineupPickerSearch("");
                                 }}
                                 className={`flex flex-col items-center gap-1 rounded-xl p-1.5 text-center transition hover:scale-105 active:scale-95${isRoleMatch ? " eligible-glow" : ""}`}
-                                style={{ border: "2px solid var(--outline)", background: "var(--paper-2)", boxShadow: "2px 2px 0 var(--outline)" }}>
+                                style={{ border: "2px solid var(--outline)", background: "var(--paper-2)", boxShadow: "2px 2px 0 var(--shadow-sticker-color-strong)" }}>
                                 <div className="relative w-full aspect-square overflow-hidden rounded-lg" style={{ border: "1.5px solid var(--outline)", background: tierStyle.color }}>
                                   <img src={COIN_ICONS[c.playerId]} alt="" className="w-full h-full object-contain p-1 opacity-90" />
                                   {isRoleMatch && <div className="absolute top-0.5 right-0.5 text-[9px] leading-none">⚡</div>}
@@ -667,7 +667,7 @@ export function TournamentTab({
             </details>
 
             {claimState?.active && userClaimable > 0 && (
-              <div className="space-y-3 rounded-xl p-4" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--outline)" }}>
+              <div className="space-y-3 rounded-xl p-4" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-sm font-bold">🎉 {lang === "ru" ? "Ваш приз готов к получению" : "Your prize is ready to claim"}</div>
@@ -703,9 +703,9 @@ export function TournamentTab({
                         disabled={!past && !isToday}
                         className={`w-12 h-12 rounded-lg text-xs font-bold transition relative flex flex-col items-center justify-center leading-none ${btnClass}`}
                         style={isToday
-                          ? { border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--ink)", boxShadow: "2px 2px 0 var(--outline)" }
+                          ? { border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--ink)", boxShadow: "2px 2px 0 var(--shadow-sticker-color-strong)" }
                           : resultsDay === d
-                            ? { border: "2px solid var(--outline)", background: "var(--mint)", color: "var(--ink)", boxShadow: "2px 2px 0 var(--outline)" }
+                            ? { border: "2px solid var(--outline)", background: "var(--mint)", color: "var(--ink)", boxShadow: "2px 2px 0 var(--shadow-sticker-color-strong)" }
                             : !past
                               ? { background: "var(--paper-2)", color: "var(--ink-3)", border: "2px dashed var(--ink)" }
                               : { background: "var(--paper-2)", color: "var(--ink-2)", border: "2px solid var(--outline)" }}>

@@ -28,8 +28,8 @@ const KEYFRAMES = `
     50% { transform: translateY(-12px); }
   }
   @keyframes connectPulse {
-    0%,100% { box-shadow: 4px 4px 0 var(--outline), 0 0 0 0 var(--beach-connect-pulse); }
-    55% { box-shadow: 4px 4px 0 var(--outline), 0 0 0 14px var(--beach-connect-pulse-off); }
+    0%,100% { box-shadow: 4px 4px 0 var(--shadow-sticker-color-strong), 0 0 0 0 var(--beach-connect-pulse); }
+    55% { box-shadow: 4px 4px 0 var(--shadow-sticker-color-strong), 0 0 0 14px var(--beach-connect-pulse-off); }
   }
   @keyframes fadeInCard {
     from { opacity: 0; transform: translateY(22px); }

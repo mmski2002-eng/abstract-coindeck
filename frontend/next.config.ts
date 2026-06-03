@@ -18,13 +18,13 @@ function buildContentSecurityPolicy() {
     "object-src 'none'",
     `script-src ${scriptSrc.join(" ")}`,
     `style-src ${styleSrc.join(" ")}`,
-    "font-src 'self' https://fonts.gstatic.com data:",
+    "font-src 'self' https://fonts.gstatic.com https://abstract-assets.abs.xyz data:",
     "img-src 'self' data: blob: https://assets.coingecko.com",
     "media-src 'self' blob:",
     "manifest-src 'self'",
     "frame-src 'self' https://auth.privy.io https://*.privy.io",
     "worker-src 'self' blob:",
-    "connect-src 'self' https://api.testnet.abs.xyz https://api.mainnet.abs.xyz wss://api.testnet.abs.xyz wss://api.mainnet.abs.xyz https://api.coingecko.com https://assets.coingecko.com https://auth.privy.io https://*.privy.io wss://auth.privy.io",
+    "connect-src 'self' https://api.testnet.abs.xyz https://api.mainnet.abs.xyz wss://api.testnet.abs.xyz wss://api.mainnet.abs.xyz https://api.coingecko.com https://assets.coingecko.com https://auth.privy.io https://*.privy.io wss://auth.privy.io https://metamask-sdk.api.cx.metamask.io https://mm-sdk-analytics.api.cx.metamask.io https://*.api.cx.metamask.io wss://*.api.cx.metamask.io",
   ].join("; ");
 }
 

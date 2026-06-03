@@ -253,10 +253,18 @@ html[data-theme="dark"] {
   --paper-3: #1B232C;
   --sunken:  #0A0F14;
   --outline: #9AA3AE;
-  --shadow-sticker-color: rgba(154,163,174,0.18);
-  --shadow-sticker: 4px 4px 0 #9AA3AE;
-  --shadow-sticker-sm: 2px 2px 0 #9AA3AE;
-  --shadow-sticker-legend: 4px 4px 0 #9AA3AE, 8px 8px 0 var(--lime-pop);
+  --shadow-sticker-color: rgba(74,85,99,0.92);
+  --shadow-sticker-color-strong: #4A5563;
+  --shadow-sticker: 4px 4px 0 var(--shadow-sticker-color-strong);
+  --shadow-sticker-sm: 2px 2px 0 var(--shadow-sticker-color-strong);
+  --shadow-sticker-legend: 4px 4px 0 var(--shadow-sticker-color-strong), 8px 8px 0 var(--lime-pop);
+  --shadow-card: var(--shadow-sticker);
+  --shadow-card-sm: var(--shadow-sticker-sm);
+  --shadow-legend: var(--shadow-sticker-legend);
+  --info-shell-shadow: var(--shadow-sticker-color-strong);
+  --card-shadow: var(--shadow-sticker-color-strong);
+  --filter-btn-shadow: var(--filter-btn-shadow-size) var(--filter-btn-shadow-size) 0 var(--shadow-sticker-color-strong);
+  --filter-btn-shadow-active: var(--filter-btn-shadow-size-active) var(--filter-btn-shadow-size-active) 0 var(--shadow-sticker-color-strong);
 
   --text-primary: var(--ink-2);
   --text-secondary: #C8D0DA;
@@ -778,7 +786,7 @@ html[data-theme="dark"] .sky-night { display: block; }
 
 @keyframes btn-glow-pulse {
   0%, 100% { transform: translate(0, 0); box-shadow: var(--shadow-sticker); }
-  50%      { transform: translate(1px, 1px); box-shadow: 3px 3px 0 var(--ink); }
+  50%      { transform: translate(1px, 1px); box-shadow: 3px 3px 0 var(--shadow-sticker-color-strong); }
 }
 .btn-glow {
   animation: btn-glow-pulse 1.6s var(--ease-out) infinite;

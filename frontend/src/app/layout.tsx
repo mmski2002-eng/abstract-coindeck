@@ -1,33 +1,15 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { Inter, Lora, Titan_One } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { SuppressExtensionErrors } from "@/components/SuppressExtensionErrors";
-
-const titanOne = Titan_One({
-  variable: "--font-titan-one",
-  subsets: ["latin"],
-  weight: ["400"],
-});
-
-const lora = Lora({
-  variable: "--font-display",
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const inter = Inter({
-  variable: "--font-body",
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700", "800"],
-});
+import { sanitizePaletteData } from "@/lib/palette";
 
 export const metadata: Metadata = {
-  title: "CoinDeck",
-  description: "CoinDeck dApp on Movement with wallet connect",
+  title: "HeavyEggs",
+  description: "HeavyEggs dApp on Abstract with wallet connect",
   twitter: {
     site: "@MrHeavyEggs",
     creator: "@MrHeavyEggs",
@@ -75,9 +57,7 @@ const initThemeScript = `
 (function () {
   try {
     var stored = localStorage.getItem("cd_theme");
-    var theme = stored === "dark" || stored === "light"
-      ? stored
-      : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    var theme = stored === "dark" || stored === "light" ? stored : "dark";
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
     document.cookie = "cd_theme=" + theme + "; path=/; max-age=31536000; samesite=lax";
@@ -90,7 +70,7 @@ async function loadPaletteCSS(): Promise<string> {
     const { readFile } = await import("fs/promises");
     const { join } = await import("path");
     const raw = await readFile(join(process.cwd(), "data", "palette.json"), "utf-8");
-    const pal = JSON.parse(raw) as { light?: Record<string, string>; dark?: Record<string, string> };
+    const pal = sanitizePaletteData(JSON.parse(raw));
     const lv = Object.entries(pal.light ?? {}).filter(([, v]) => v).map(([k, v]) => `${k}:${v}`).join(";");
     const dv = Object.entries(pal.dark ?? {}).filter(([, v]) => v).map(([k, v]) => `${k}:${v}`).join(";");
     return (lv ? `:root{${lv}}` : "") + (dv ? `html[data-theme="dark"]{${dv}}` : "");
@@ -106,13 +86,13 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies();
   const storedTheme = cookieStore.get("cd_theme")?.value;
-  const initialTheme = storedTheme === "dark" || storedTheme === "light" ? storedTheme : "light";
+  const initialTheme = storedTheme === "dark" || storedTheme === "light" ? storedTheme : "dark";
   const paletteCSS = await loadPaletteCSS();
 
   return (
     <html
       lang="en"
-      className={`${lora.variable} ${inter.variable} ${titanOne.variable} h-full antialiased`}
+      className="h-full antialiased"
       data-theme={initialTheme}
       style={{ colorScheme: initialTheme }}
       suppressHydrationWarning

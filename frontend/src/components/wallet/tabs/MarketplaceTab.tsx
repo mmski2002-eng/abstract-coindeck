@@ -2,7 +2,7 @@
 
 import {
   HEROES, COIN_TICKERS, COIN_ICONS,
-  CARD_TIER_STYLES, TIER_COLORS, TIER_NAMES, ALL_TEAMS,
+  CARD_TIER_STYLES, TIER_NAMES, ALL_TEAMS,
 } from "../constants";
 import type { Listing } from "../types";
 
@@ -58,10 +58,10 @@ export function MarketplaceTab({
   onCancelListing,
   isDark = false,
 }: Props) {
-  const accentBg = isDark ? "#141B23" : "#F4EFE2";
+  const accentBg = isDark ? "var(--paper-2)" : "var(--paper)";
   return (
     <div className="mt-2 space-y-4">
-      {mpError && <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-200">{mpError}</div>}
+      {mpError && <div className="rounded-xl p-3 text-sm font-semibold" style={{ border: "2px solid var(--down)", background: "var(--paper-2)", color: "var(--down)", boxShadow: "2px 2px 0 var(--down)" }}>{mpError}</div>}
 
       {/* My active listings */}
       {(() => {
@@ -70,31 +70,30 @@ export function MarketplaceTab({
           .sort((a, b) => Number(a.price) - Number(b.price) || a.id - b.id);
         if (myListings.length === 0) return null;
         return (
-          <div className="rounded-2xl p-4" style={{ border: "2.5px solid var(--ink)", boxShadow: "4px 4px 0 var(--card-shadow)", background: accentBg }}>
+          <div className="rounded-2xl p-4" style={{ border: "2.5px solid var(--outline)", boxShadow: "4px 4px 0 var(--card-shadow)", background: accentBg }}>
             <div className="flex items-center justify-between mb-3">
-              <div className="font-display font-bold uppercase tracking-widest text-xs text-white/70">{lang === "ru" ? "Мои лоты" : "My lots"} <span className="text-zinc-600 normal-case tracking-normal font-normal">({myListings.length})</span></div>
+              <div className="font-display text-xs font-bold uppercase tracking-widest" style={{ color: "var(--ink-2)" }}>{lang === "ru" ? "Мои лоты" : "My lots"} <span className="normal-case tracking-normal font-normal" style={{ color: "var(--ink-3)" }}>({myListings.length})</span></div>
               {myListings.length > MY_LISTINGS_PAGE_SIZE && (
                 <div className="flex items-center gap-1">
                   <button onClick={() => setMyListingsPage(p => Math.max(0, p - 1))} disabled={myListingsPage === 0}
-                    className="h-6 w-6 rounded flex items-center justify-center text-zinc-400 hover:text-white disabled:opacity-30 bg-white/5 transition text-xs">‹</button>
-                  <span className="text-[10px] text-zinc-500 px-1">{myListingsPage + 1}/{Math.ceil(myListings.length / MY_LISTINGS_PAGE_SIZE)}</span>
+                    className="btn-sticker-ghost h-6 w-6 p-0 text-xs">‹</button>
+                  <span className="px-1 text-[10px]" style={{ color: "var(--ink-3)" }}>{myListingsPage + 1}/{Math.ceil(myListings.length / MY_LISTINGS_PAGE_SIZE)}</span>
                   <button onClick={() => setMyListingsPage(p => Math.min(Math.ceil(myListings.length / MY_LISTINGS_PAGE_SIZE) - 1, p + 1))} disabled={myListingsPage >= Math.ceil(myListings.length / MY_LISTINGS_PAGE_SIZE) - 1}
-                    className="h-6 w-6 rounded flex items-center justify-center text-zinc-400 hover:text-white disabled:opacity-30 bg-white/5 transition text-xs">›</button>
+                    className="btn-sticker-ghost h-6 w-6 p-0 text-xs">›</button>
                 </div>
               )}
             </div>
             <div className="grid gap-2 grid-cols-2 sm:grid-cols-4">
               {myListings.slice(myListingsPage * MY_LISTINGS_PAGE_SIZE, (myListingsPage + 1) * MY_LISTINGS_PAGE_SIZE).map((l) => {
-                const tc = TIER_COLORS[l.tier];
-                const primerFill = (["#D9D3C2","#7AC7E8","#26C6A8","#88FC00"] as const)[l.tier] ?? "#D9D3C2";
+                const primerFill = (["var(--rarity-common)","var(--rarity-rare)","var(--rarity-epic)","var(--rarity-legendary)"] as const)[l.tier] ?? "var(--rarity-common)";
                 return (
-                  <div key={l.id} className={`flex flex-col gap-2 rounded-xl border p-2.5 ${tc.border}`} style={{ background: isDark ? "#1B232C" : "var(--card)" }}>
+                  <div key={l.id} className="flex flex-col gap-2 rounded-xl p-2.5" style={{ border: "2px solid var(--outline)", background: "var(--paper-3)", boxShadow: "2px 2px 0 var(--outline)" }}>
                     <div className="flex items-center gap-2 min-w-0">
                       <img src={COIN_ICONS[l.playerId]} alt={HEROES[l.playerId]}
-                        className="h-8 w-8 rounded-lg object-cover opacity-80 shrink-0" referrerPolicy="no-referrer" />
+                        className="h-8 w-8 shrink-0 rounded-lg object-cover opacity-80" style={{ border: "2px solid var(--outline)", background: primerFill }} referrerPolicy="no-referrer" />
                       <div className="min-w-0">
                         <div className="text-xs font-semibold truncate">{HEROES[l.playerId]}</div>
-                        <div className="text-[10px] text-zinc-500 truncate">{TIER_NAMES[l.tier]} · {(Number(l.price) / 1e18).toFixed(4)} ETH</div>
+                        <div className="truncate text-[10px]" style={{ color: "var(--ink-3)" }}>{TIER_NAMES[l.tier]} · {(Number(l.price) / 1e18).toFixed(4)} ETH</div>
                       </div>
                     </div>
                     <button onClick={() => onCancelListing(l.id)} disabled={busy !== null}
@@ -115,7 +114,7 @@ export function MarketplaceTab({
         {/* Ticker search */}
         <div className="relative">
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-500">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--ink-3)" }}>
               <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
             </svg>
           </div>
@@ -124,8 +123,7 @@ export function MarketplaceTab({
             placeholder={lang === "ru" ? "Поиск по тикеру или монете…" : "Search ticker or coin…"}
             value={mpSearchTicker}
             onChange={(e) => setMpSearchTicker(e.target.value)}
-            className="w-full rounded-xl pl-8 pr-8 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-cyan-500/40 font-mono tracking-wide"
-            style={{ border: "2.5px solid var(--ink)", color: "var(--panel-text)", boxShadow: "4px 4px 0 var(--card-shadow)", background: accentBg }}
+            className="input-sticker w-full py-2 pl-8 pr-8 font-mono text-xs tracking-wide"
           />
           {mpSearchTicker && (
             <button
@@ -147,7 +145,7 @@ export function MarketplaceTab({
                 style={{
                   padding: "8px 14px", whiteSpace: "nowrap",
                   background: active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)",
-                  color: "var(--header-btn-color)", border: "2.5px solid var(--ink)", borderRadius: 999,
+                  color: active ? "var(--ink)" : "var(--ink-2)", border: "2.5px solid var(--outline)", borderRadius: 999,
                   fontSize: 11, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
                   boxShadow: active ? "var(--filter-btn-shadow-active)" : "var(--filter-btn-shadow)",
                   transition: "background .12s",
@@ -167,7 +165,7 @@ export function MarketplaceTab({
                 style={{
                   padding: "8px 14px", whiteSpace: "nowrap",
                   background: active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)",
-                  color: "var(--header-btn-color)", border: "2.5px solid var(--ink)", borderRadius: 999,
+                  color: active ? "var(--ink)" : "var(--ink-2)", border: "2.5px solid var(--outline)", borderRadius: 999,
                   fontSize: 11, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
                   boxShadow: active ? "var(--filter-btn-shadow-active)" : "var(--filter-btn-shadow)",
                   transition: "background .12s",
@@ -183,7 +181,7 @@ export function MarketplaceTab({
 
       {/* All listings grid */}
       {mpFiltered.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-10 text-center text-sm text-zinc-500" data-tour="market-cards">
+        <div className="card-sticker p-10 text-center text-sm" style={{ color: "var(--ink-3)" }} data-tour="market-cards">
           {mpRefreshing ? (lang === "ru" ? "Загрузка…" : "Loading…") : (lang === "ru" ? "Нет активных лотов" : "No active listings")}
         </div>
       ) : (
@@ -196,13 +194,13 @@ export function MarketplaceTab({
               const isOwn = accountAddress && l.seller.toLowerCase() === accountAddress.toLowerCase();
               const buyKey = `mp_buy_${l.id}`;
               const isLegendary = l.tier === 3;
-              const primerFill = (["#D9D3C2","#7AC7E8","#26C6A8","#88FC00"] as const)[l.tier] ?? "#D9D3C2";
+              const primerFill = (["var(--rarity-common)","var(--rarity-rare)","var(--rarity-epic)","var(--rarity-legendary)"] as const)[l.tier] ?? "var(--rarity-common)";
               const eggW = ([72, 88, 108, 120] as const)[l.tier] ?? 88;
               return (
                 <article key={l.id} className="anim-card-entry" style={{ animationDelay: `${cardIdx * 30}ms`, height: "100%", display: "flex", flexDirection: "column" }}>
                   <div style={{
-                    background: "var(--paper-2)", border: "2.5px solid var(--ink)", borderRadius: 18,
-                    boxShadow: isLegendary ? "4px 4px 0 var(--card-shadow), 8px 8px 0 #88FC00" : "4px 4px 0 var(--card-shadow)",
+                    background: "var(--paper-2)", border: "2.5px solid var(--outline)", borderRadius: 18,
+                    boxShadow: isLegendary ? "4px 4px 0 var(--card-shadow), 8px 8px 0 var(--rarity-legendary)" : "4px 4px 0 var(--card-shadow)",
                     padding: 16, display: "flex", flexDirection: "column", gap: 12, position: "relative", height: "100%", justifyContent: "flex-start",
                   }}>
                     {/* rarity chip + mine badge */}
@@ -210,7 +208,7 @@ export function MarketplaceTab({
                       <div style={{
                         display: "inline-flex", alignItems: "center", gap: 5,
                         background: primerFill, color: "var(--ink)",
-                        border: "2.5px solid var(--ink)", borderRadius: 999,
+                        border: "2.5px solid var(--outline)", borderRadius: 999,
                         padding: "3px 9px", fontSize: 9, letterSpacing: 1.6, fontWeight: 800,
                         boxShadow: "2px 2px 0 var(--card-shadow)",
                       }}>
@@ -220,7 +218,7 @@ export function MarketplaceTab({
                         <div style={{
                           fontSize: 9, letterSpacing: 1.5, fontWeight: 800, padding: "3px 8px",
                           borderRadius: 999, background: primerFill, color: "var(--ink)",
-                          border: "2.5px solid var(--ink)", boxShadow: "2px 2px 0 var(--card-shadow)",
+                          border: "2.5px solid var(--outline)", boxShadow: "2px 2px 0 var(--card-shadow)",
                         }}>{lang === "ru" ? "МОЙ" : "MINE"}</div>
                       )}
                     </div>
@@ -228,13 +226,12 @@ export function MarketplaceTab({
                     {/* image plate */}
                     <div style={{
                       height: 140, borderRadius: 14, background: primerFill,
-                      border: "2.5px solid var(--ink)", display: "grid", placeItems: "center",
+                      border: "2.5px solid var(--outline)", display: "grid", placeItems: "center",
                       position: "relative", overflow: "hidden",
                     }}>
                       <div aria-hidden style={{
                         position: "absolute", inset: 0,
-                        backgroundImage: "radial-gradient(var(--ink) 1.2px, transparent 1.4px)",
-                        backgroundSize: "14px 14px", opacity: 0.12,
+                        background: "transparent", opacity: 0.12,
                       }} />
                       <div className="anim-float" style={{ position: "relative", width: eggW, height: eggW, animationDelay: `${(cardIdx % 3) * -2}s` }}>
                         <img src="/egg.webp" alt="" aria-hidden style={{ width: "100%", height: "100%", objectFit: "contain" }} />
@@ -255,7 +252,7 @@ export function MarketplaceTab({
                     </div>
 
                     {/* price */}
-                    <div style={{ fontFamily: 'ui-monospace,"JetBrains Mono",monospace', fontWeight: 600, fontSize: 12, color: "var(--ink-3)" }}>
+                    <div style={{ fontFamily: "Roobert, system-ui, sans-serif", fontWeight: 600, fontSize: 12, color: "var(--ink-3)" }}>
                       <span style={{ fontSize: 18, fontWeight: 800, color: "var(--ink-2)", fontFamily: "inherit" }}>{(Number(l.price) / 1e18).toFixed(4)}</span>
                       <span style={{ color: "var(--ink-2)", fontWeight: 700, fontSize: 11 }}>{" ETH"}</span>
                     </div>
@@ -286,16 +283,16 @@ export function MarketplaceTab({
               <button
                 onClick={() => setMpPage((p) => Math.max(0, p - 1))}
                 disabled={mpPage === 0}
-                className="rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-white/10 disabled:opacity-30 transition">
+                className="btn-sticker-outline px-3 py-1.5 text-xs">
                 ←
               </button>
-              <span className="text-xs text-zinc-400">
+              <span className="text-xs font-semibold" style={{ color: "var(--ink-3)" }}>
                 {mpPage + 1} / {Math.ceil(mpFiltered.length / MP_PAGE_SIZE)}
               </span>
               <button
                 onClick={() => setMpPage((p) => Math.min(Math.ceil(mpFiltered.length / MP_PAGE_SIZE) - 1, p + 1))}
                 disabled={mpPage >= Math.ceil(mpFiltered.length / MP_PAGE_SIZE) - 1}
-                className="rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-white/10 disabled:opacity-30 transition">
+                className="btn-sticker-outline px-3 py-1.5 text-xs">
                 →
               </button>
             </div>

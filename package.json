@@ -1,0 +1,10 @@
+{
+  "name": "abstract-coindeck",
+  "private": true,
+  "scripts": {
+    "test": "npm run test:repo && npm run test:contracts && npm run test:frontend:build",
+    "test:repo": "node --test tests/*.test.mjs",
+    "test:frontend:build": "npm --prefix frontend run build",
+    "test:contracts": "npm --prefix contracts test"
+  }
+}

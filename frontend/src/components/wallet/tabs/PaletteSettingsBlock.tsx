@@ -6,6 +6,12 @@ import { PALETTE_ACTION } from "@/lib/adminAuth";
 type VarDef = { name: string; label: string; hex: boolean };
 type Group = { label: string; vars: VarDef[] };
 
+const PALETTE_PANEL = "card-sticker rounded-2xl p-4";
+const PALETTE_INPUT = "input-sticker min-w-0 px-1.5 py-0.5 font-mono";
+const PALETTE_BUTTON_PRIMARY = "btn-sticker-primary px-4 py-2 text-xs";
+const PALETTE_BUTTON_SECONDARY = "btn-sticker-secondary px-4 py-2 text-xs";
+const PALETTE_BUTTON_DANGER = "btn-sticker-destructive px-4 py-2 text-xs";
+
 const GROUPS: Group[] = [
   { label: "Шапка", vars: [
     { name: "--header-bg",        label: "Фон шапки",                hex: false },
@@ -18,7 +24,6 @@ const GROUPS: Group[] = [
     { name: "--header-btn-bg",        label: "Фон кнопок (неактивные)",   hex: true  },
     { name: "--header-btn-active-bg", label: "Фон активной кнопки",       hex: true  },
     { name: "--header-btn-color",     label: "Цвет иконок / текста кнопок", hex: true },
-    { name: "--ink",                  label: "Рамка кнопок и тени (глобальный цвет чернил)", hex: true },
   ]},
   { label: "Кнопки фильтров (Roster, Marketplace, шапка)", vars: [
     { name: "--header-btn-bg",              label: "Фон неактивной кнопки",                 hex: true  },
@@ -27,10 +32,6 @@ const GROUPS: Group[] = [
     { name: "--filter-btn-hover-bg",        label: "Фон при наведении",                     hex: false },
     { name: "--filter-btn-shadow-size",     label: "Размер тени неактивной (напр. 2px)",    hex: false },
     { name: "--filter-btn-shadow-size-active", label: "Размер тени активной (напр. 4px)",   hex: false },
-  ]},
-  { label: "Фон страницы", vars: [
-    { name: "--background", label: "Основной фон",   hex: true },
-    { name: "--foreground", label: "Основной текст", hex: true },
   ]},
   { label: "Кнопки действий (только <Button> из ui.tsx)", vars: [
     { name: "--button-primary-bg",     label: "Primary — фон (редко используется)",      hex: true  },
@@ -53,18 +54,6 @@ const GROUPS: Group[] = [
     { name: "--surface",          label: "Полупрозрачная поверхность",              hex: false },
     { name: "--surface-2",        label: "Поверхность (вариант 2)",                 hex: false },
   ]},
-  { label: "Акцентные цвета", vars: [
-    { name: "--brand",     label: "Бирюза — ссылки, иконки, подсветки", hex: true },
-    { name: "--brand-2",   label: "Светлая бирюза",                     hex: true },
-    { name: "--mint",      label: "Зелёный — фон кнопок-«наклеек»",     hex: true },
-    { name: "--mint-deep", label: "Тёмный зелёный — hover наклеек",     hex: true },
-    { name: "--lime-pop",  label: "Неон-зелёный — акцент тёмной темы",  hex: true },
-  ]},
-  { label: "Тени", vars: [
-    { name: "--shadow-sticker-color", label: "Цвет тени sticker-кнопок",  hex: true  },
-    { name: "--shadow-sticker",       label: "Полная тень (смещение + цвет, расширенно)", hex: false },
-    { name: "--shadow-sticker-sm",    label: "Полная тень маленькая (расширенно)",         hex: false },
-  ]},
   { label: "Рамки и поля ввода", vars: [
     { name: "--border",       label: "Основная рамка блоков",     hex: false },
     { name: "--soft-border",  label: "Тонкая / мягкая рамка",     hex: false },
@@ -77,14 +66,6 @@ const GROUPS: Group[] = [
     { name: "--overlay-backdrop", label: "Затемнение под модалкой",      hex: false },
     { name: "--floating-bg",      label: "Плавающий элемент — фон",      hex: false },
     { name: "--floating-text",    label: "Плавающий элемент — текст",    hex: true  },
-  ]},
-  { label: "Чернила и бумага (базовые)", vars: [
-    { name: "--ink",     label: "Чернила — тени кнопок, обводки, тёмный текст", hex: true },
-    { name: "--ink-2",   label: "Чернила-2 — вторичный тёмный текст",           hex: true },
-    { name: "--ink-3",   label: "Чернила-3 — очень приглушённый цвет",          hex: true },
-    { name: "--paper",   label: "Бумага — бежевый фон (карточки light-темы)",   hex: true },
-    { name: "--paper-3", label: "Бумага-3 — белый / почти белый фон",           hex: true },
-    { name: "--sunken",  label: "Углублённый — фон неактивных зон",             hex: true },
   ]},
 ];
 
@@ -118,7 +99,8 @@ function Swatch({ display, hex, onChange }: { display: string; hex: boolean; onC
       <div
         style={{
           width: 20, height: 20, borderRadius: 4,
-          border: "1px solid rgba(255,255,255,0.15)",
+          border: "2px solid var(--panel-border)",
+          boxShadow: "var(--shadow-sticker-sm)",
           background: display || "transparent",
         }}
       />
@@ -152,13 +134,14 @@ function VarCell({
         onChange={e => onChange(e.target.value)}
         onFocus={() => { if (!override && defaultVal) onChange(defaultVal); }}
         placeholder={defaultVal || v.name}
-        className="w-36 min-w-0 rounded border border-white/10 bg-black/20 px-1.5 py-0.5 font-mono focus:outline-none focus:ring-1 focus:ring-pink-500/40"
+        className={`w-36 ${PALETTE_INPUT}`}
         style={{ fontSize: "9px", color: isCustom ? "var(--panel-text)" : "var(--panel-text-muted)" }}
       />
       {isCustom && (
         <button
           onClick={onClear}
-          className="shrink-0 text-[10px] text-zinc-600 hover:text-red-400 transition leading-none"
+          className="shrink-0 text-[10px] transition leading-none"
+          style={{ color: "var(--down)" }}
           title="Сбросить"
         >
           ✕
@@ -291,15 +274,15 @@ export function PaletteSettingsBlock({ lang, buildAdminAuth, setAdminError, setA
 
   if (!loaded) {
     return (
-      <div className="rounded-2xl border border-pink-500/20 p-4" style={{ background: "var(--card)" }}>
+      <div className={PALETTE_PANEL} style={{ background: "var(--card)" }}>
         <div className="text-xs" style={{ color: "var(--panel-text-muted)" }}>…</div>
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-pink-500/20 p-4 space-y-4" style={{ background: "var(--card)" }}>
-      <div className="text-xs font-semibold text-pink-300/90">
+    <div className={`${PALETTE_PANEL} space-y-4`} style={{ background: "var(--card)" }}>
+      <div className="text-xs font-semibold" style={{ color: "var(--panel-text)" }}>
         🎨 {lang === "ru" ? "Настройки палитры" : "Palette settings"}
       </div>
 
@@ -309,28 +292,28 @@ export function PaletteSettingsBlock({ lang, buildAdminAuth, setAdminError, setA
           const customCount =
             g.vars.filter(v => palette.light[v.name] || palette.dark[v.name]).length;
           return (
-            <div key={g.label} className="rounded-xl border border-white/5 overflow-hidden">
+            <div key={g.label} className="rounded-xl overflow-hidden" style={{ border: "2px solid var(--panel-border)", background: "var(--sunken)" }}>
               <button
                 onClick={() => toggleGroup(g.label)}
-                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold hover:bg-white/[0.03] transition text-left"
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold transition text-left"
                 style={{ color: "var(--panel-text)" }}
               >
                 <span>
                   {g.label}
                   {customCount > 0 && (
-                    <span className="ml-2 text-[9px] font-bold text-pink-400">{customCount} custom</span>
+                    <span className="ml-2 text-[9px] font-bold" style={{ color: "var(--mint)" }}>{customCount} custom</span>
                   )}
                 </span>
-                <span className="text-[10px] text-zinc-600">{isOpen ? "▲" : "▼"}</span>
+                <span className="text-[10px]" style={{ color: "var(--panel-text-muted)" }}>{isOpen ? "▲" : "▼"}</span>
               </button>
 
               {isOpen && (
-                <div className="border-t border-white/5 px-3 py-2 space-y-1.5">
+                <div className="px-3 py-2 space-y-1.5" style={{ borderTop: "1px solid var(--divider)" }}>
                   {/* Column headers */}
                   <div className="grid items-center gap-2" style={{ gridTemplateColumns: "minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr)" }}>
                     <span />
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-600">☀️ Light</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-600">🌙 Dark</span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: "var(--panel-text-muted)" }}>☀️ Light</span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: "var(--panel-text-muted)" }}>🌙 Dark</span>
                   </div>
 
                   {g.vars.map(v => (
@@ -375,20 +358,20 @@ export function PaletteSettingsBlock({ lang, buildAdminAuth, setAdminError, setA
         <button
           onClick={save}
           disabled={saving}
-          className="rounded-xl bg-pink-700/80 px-4 py-2 text-xs font-bold text-white hover:bg-pink-700 disabled:opacity-40 transition"
+          className={PALETTE_BUTTON_PRIMARY}
         >
           {saving ? "…" : (lang === "ru" ? "💾 Сохранить" : "💾 Save")}
         </button>
         <button
           onClick={exportCSS}
-          className="rounded-xl bg-white/5 px-4 py-2 text-xs font-bold text-zinc-300 hover:bg-white/10 transition"
+          className={PALETTE_BUTTON_SECONDARY}
         >
           {lang === "ru" ? "📋 Экспорт CSS" : "📋 Export CSS"}
         </button>
         <button
           onClick={reset}
           disabled={saving}
-          className="rounded-xl bg-red-900/40 px-4 py-2 text-xs font-bold text-red-300 hover:bg-red-900/60 disabled:opacity-40 transition"
+          className={PALETTE_BUTTON_DANGER}
         >
           {saving ? "…" : (lang === "ru" ? "↺ Сбросить" : "↺ Reset")}
         </button>

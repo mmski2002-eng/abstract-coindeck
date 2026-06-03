@@ -19,8 +19,7 @@ export function SellModal({ lang, modal, onClose, sellPrice, setSellPrice, busy,
     <Modal open onClose={onClose} title={lang === "ru" ? "Выставить на продажу" : "List for sale"}>
       <div className="space-y-5">
         <div
-          className="flex items-center gap-4 rounded-2xl p-4"
-          style={{ border: "1px solid var(--panel-border)", background: "var(--panel-bg)" }}
+          className="card-sticker flex items-center gap-4 p-4"
         >
           <img src={COIN_ICONS[modal.playerId]} alt={HEROES[modal.playerId]}
             className="h-16 w-16 rounded-xl object-cover" referrerPolicy="no-referrer" />
@@ -39,12 +38,7 @@ export function SellModal({ lang, modal, onClose, sellPrice, setSellPrice, busy,
           <input
             type="number" min="0.01" step="0.01" value={sellPrice}
             onChange={(e) => setSellPrice(e.target.value)}
-            className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2"
-            style={{
-              border: "1px solid var(--panel-border)",
-              background: "var(--panel-bg)",
-              color: "var(--panel-text)",
-            }}
+            className="input-sticker w-full px-4 py-2.5 text-sm"
           />
           <div className="mt-1 text-xs" style={{ color: "var(--nft-muted)" }}>
             ≈ {(parseFloat(sellPrice || "0") * 1e18).toLocaleString(undefined, { maximumFractionDigits: 0 })} wei
@@ -57,14 +51,13 @@ export function SellModal({ lang, modal, onClose, sellPrice, setSellPrice, busy,
         </div>
         <div className="flex gap-2">
           <button onClick={onClose}
-            className="flex-1 rounded-xl py-2.5 text-sm font-medium transition"
-            style={{ border: "1px solid var(--panel-border)", background: "var(--button-secondary-bg)", color: "var(--button-secondary-text)" }}>
+            className="btn-sticker-outline flex-1 py-2.5">
             {lang === "ru" ? "Отмена" : "Cancel"}
           </button>
           <button
             onClick={() => onListCard(modal.playerId, modal.tier, parseFloat(sellPrice || "0"))}
             disabled={busy !== null || parseFloat(sellPrice || "0") <= 0}
-            className="flex-1 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 py-2.5 text-sm font-bold text-white shadow hover:opacity-90 disabled:opacity-50">
+            className="btn-sticker-primary flex-1 py-2.5">
             {busy === "mp_list" ? (lang === "ru" ? "Выставление…" : "Listing…") : (lang === "ru" ? "Выставить" : "List")}
           </button>
         </div>

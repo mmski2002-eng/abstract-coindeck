@@ -50,7 +50,7 @@ export function QuickBuyMergeModal({
   const canBuy = selectedQty > 0 && busy === null;
 
   const statCell = (label: string, value: React.ReactNode) => (
-    <div className="rounded-xl px-2.5 py-2" style={{ border: "1px solid var(--panel-border)", background: "var(--card)" }}>
+    <div className="card-sticker rounded-xl px-2.5 py-2" style={{ boxShadow: "var(--shadow-sticker-sm)" }}>
       <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: "var(--nft-muted)" }}>{label}</div>
       <div className="mt-0.5 text-base font-black" style={{ color: "var(--panel-text)" }}>{value}</div>
     </div>
@@ -66,8 +66,7 @@ export function QuickBuyMergeModal({
       <div className="space-y-3">
         {/* Card preview */}
         <div
-          className="flex items-center gap-3 rounded-2xl p-2.5"
-          style={{ border: "1px solid var(--panel-border)", background: "var(--panel-bg)" }}
+          className="card-sticker flex items-center gap-3 p-2.5"
         >
           <img
             src={COIN_ICONS[modal.playerId]}
@@ -85,12 +84,12 @@ export function QuickBuyMergeModal({
         </div>
 
         {/* Stats grid */}
-        <div className="rounded-2xl p-2.5" style={{ border: "1px solid var(--panel-border)", background: "var(--panel-bg)" }}>
+        <div className="card-sticker p-2.5">
           <div className="grid grid-cols-4 gap-2">
             {statCell(lang === "ru" ? "Есть" : "Owned", modal.ownedCount)}
-            {statCell(lang === "ru" ? "Нужно" : "Need", <span className="text-cyan-400">{modal.neededCount}</span>)}
+            {statCell(lang === "ru" ? "Нужно" : "Need", <span style={{ color: "var(--info)" }}>{modal.neededCount}</span>)}
             {statCell(lang === "ru" ? "Доступно" : "Available", matchingListings.length)}
-            <div className="rounded-xl px-2.5 py-2" style={{ border: "1px solid var(--panel-border)", background: "var(--card)" }}>
+            <div className="card-sticker rounded-xl px-2.5 py-2" style={{ boxShadow: "var(--shadow-sticker-sm)" }}>
               <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: "var(--nft-muted)" }}>
                 {lang === "ru" ? "Купить" : "Buy"}
               </div>
@@ -98,15 +97,13 @@ export function QuickBuyMergeModal({
                 <button
                   onClick={() => setManualQty(Math.max(1, selectedQty - 1))}
                   disabled={selectedQty <= 1 || maxSelectable === 0}
-                  className="grid h-7 w-7 place-items-center rounded-lg text-sm transition disabled:opacity-30"
-                  style={{ border: "1px solid var(--panel-border)", background: "var(--button-secondary-bg)", color: "var(--button-secondary-text)" }}
+                  className="btn-sticker-outline grid h-7 w-7 place-items-center p-0 text-sm disabled:opacity-30"
                 >−</button>
                 <span className="min-w-[1.5rem] text-center text-base font-black tabular-nums" style={{ color: "var(--panel-text)" }}>{selectedQty}</span>
                 <button
                   onClick={() => setManualQty(Math.min(maxSelectable, selectedQty + 1))}
                   disabled={selectedQty >= maxSelectable}
-                  className="grid h-7 w-7 place-items-center rounded-lg text-sm transition disabled:opacity-30"
-                  style={{ border: "1px solid var(--panel-border)", background: "var(--button-secondary-bg)", color: "var(--button-secondary-text)" }}
+                  className="btn-sticker-outline grid h-7 w-7 place-items-center p-0 text-sm disabled:opacity-30"
                 >+</button>
               </div>
             </div>
@@ -125,7 +122,7 @@ export function QuickBuyMergeModal({
               {lang === "ru" ? "Лоты для покупки" : "Lots to buy"}
             </div>
             {!enoughForMerge && (
-              <div className="text-[11px] text-amber-400">
+              <div className="text-[11px]" style={{ color: "var(--warn)" }}>
                 {lang === "ru"
                   ? `Не хватает ${modal.neededCount - matchingListings.length} лотов`
                   : `${modal.neededCount - matchingListings.length} more lots needed`}
@@ -134,15 +131,15 @@ export function QuickBuyMergeModal({
           </div>
 
           {mpRefreshing ? (
-            <div className="rounded-2xl px-4 py-4 text-sm" style={{ border: "1px solid var(--panel-border)", background: "var(--panel-bg)", color: "var(--nft-muted)" }}>
+            <div className="card-sticker px-4 py-4 text-sm" style={{ color: "var(--nft-muted)" }}>
               {lang === "ru" ? "Обновляем лоты маркетплейса…" : "Refreshing marketplace lots…"}
             </div>
           ) : matchingListings.length === 0 ? (
-            <div className="rounded-2xl px-4 py-4 text-sm" style={{ border: "1px solid var(--panel-border)", background: "var(--panel-bg)", color: "var(--nft-muted)" }}>
+            <div className="card-sticker px-4 py-4 text-sm" style={{ color: "var(--nft-muted)" }}>
               {lang === "ru" ? "Подходящих лотов сейчас нет." : "No matching lots are available right now."}
             </div>
           ) : (
-            <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--panel-border)" }}>
+            <div className="card-sticker overflow-hidden">
               {matchingListings.map((listing, index) => {
                 const active = index < selectedQty;
                 return (
@@ -150,8 +147,8 @@ export function QuickBuyMergeModal({
                     key={listing.id}
                     className="flex items-center justify-between gap-3 px-4 py-2.5 transition"
                     style={{
-                      borderBottom: "1px solid var(--panel-border)",
-                      background: active ? "rgba(0,240,255,0.05)" : "var(--panel-bg)",
+                      borderBottom: "2px solid var(--outline)",
+                      background: active ? "var(--sky-soft)" : "var(--panel-bg)",
                       opacity: active ? 1 : 0.55,
                     }}
                   >
@@ -164,7 +161,7 @@ export function QuickBuyMergeModal({
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <div className="text-sm font-black" style={{ color: active ? "#22d3ee" : "var(--nft-muted)" }}>
+                      <div className="text-sm font-black" style={{ color: active ? "var(--ink)" : "var(--nft-muted)" }}>
                         {(Number(listing.price) / 1e18).toFixed(4)} ETH
                       </div>
                     </div>
@@ -177,18 +174,17 @@ export function QuickBuyMergeModal({
 
         {/* Footer */}
         <div className="flex items-center gap-2">
-          <div className="min-w-0 flex-1 rounded-xl px-3 py-2.5" style={{ border: "1px solid var(--panel-border)", background: "var(--panel-bg)" }}>
+          <div className="card-sticker min-w-0 flex-1 rounded-xl px-3 py-2.5" style={{ boxShadow: "var(--shadow-sticker-sm)" }}>
             <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--nft-muted)" }}>
               {lang === "ru" ? "Итого" : "Total"}
             </div>
             <div className="mt-0.5 text-base font-black" style={{ color: "var(--panel-text)" }}>
-              {(totalPrice / 1e18).toFixed(4)} <span className="text-cyan-400">ETH</span>
+              {(totalPrice / 1e18).toFixed(4)} <span style={{ color: "var(--info)" }}>ETH</span>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-xl px-4 py-2.5 text-sm font-medium transition"
-            style={{ border: "1px solid var(--panel-border)", background: "var(--button-secondary-bg)", color: "var(--button-secondary-text)" }}
+            className="btn-sticker-outline px-4 py-2.5"
           >
             {lang === "ru" ? "Отмена" : "Cancel"}
           </button>
@@ -198,7 +194,7 @@ export function QuickBuyMergeModal({
               if (ok) onClose();
             }}
             disabled={!canBuy}
-            className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-sm font-bold text-white shadow hover:opacity-90 disabled:opacity-50"
+            className="btn-sticker-primary px-4 py-2.5"
           >
             {busy === "mp_buy_batch"
               ? (lang === "ru" ? "Покупка…" : "Buying…")

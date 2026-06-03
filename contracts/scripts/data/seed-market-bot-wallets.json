@@ -1,0 +1,726 @@
+{
+  "network": "abstractTestnet",
+  "createdAt": "2026-06-02T11:03:23.485Z",
+  "wallets": [
+    {
+      "index": 1,
+      "address": "0x3336dDc997504Ed4500140Ed0acf0d0Ce0E88821",
+      "privateKey": "0x39fdff125c9eb185e80c4ecc2b993caeb38833ea4b524464c377c605470e8015",
+      "nickname": "Nova",
+      "playerId": 21,
+      "tier": 0
+    },
+    {
+      "index": 2,
+      "address": "0x203062FF4c7f415B0dd5C3814E9B4d40a47698E9",
+      "privateKey": "0xad9e9f3e72821879f6c505a27e67e4037e00f170c15edadbce151b342121b8ba",
+      "nickname": "Marina",
+      "playerId": 25,
+      "tier": 0
+    },
+    {
+      "index": 3,
+      "address": "0x0Fd9D5D1046912097502071ea06e118768ba97AD",
+      "privateKey": "0xe2396d59fbf8a48779210aa399488c64eb1af1be7d2b0dcda341a4cbdf2901ee",
+      "nickname": "Copper",
+      "playerId": 49,
+      "tier": 0
+    },
+    {
+      "index": 4,
+      "address": "0x0FFf8D2650540327dF7bA94C9d06a55F3d321FA0",
+      "privateKey": "0x2cdd08a4a02d3aac4ae16ddae3c75d5978e033dde10d9aa50b44471678aadc6e",
+      "nickname": "Pearl",
+      "playerId": 39,
+      "tier": 0
+    },
+    {
+      "index": 5,
+      "address": "0x39632bfBff651B2372f82dc71BEA8eedb3a16cC8",
+      "privateKey": "0x36734e91cc391ce6e6c84027f87f544434847057c37c19efebe263878410683a",
+      "nickname": "Laurel",
+      "playerId": 33,
+      "tier": 0
+    },
+    {
+      "index": 6,
+      "address": "0x9E7212E1bCEE6faf844092D3BBAA62a1BdBD429f",
+      "privateKey": "0x35915108bf8bd2b2bd9fdf7f8e43ed29b3cb50c5d59db7d2cfd04dc9b21645cd",
+      "nickname": "Lake",
+      "playerId": 38,
+      "tier": 0
+    },
+    {
+      "index": 7,
+      "address": "0xA78B65773D97dF42dFe23966b9e9bD1b10982144",
+      "privateKey": "0x47330e2a64466c786a85204f07072866546fdff761451484c089f77bc6916fd8",
+      "nickname": "Sky",
+      "playerId": 5,
+      "tier": 0
+    },
+    {
+      "index": 8,
+      "address": "0x85b6887b2D93d0190DA5A1456Ef3a032A6fC50B0",
+      "privateKey": "0x7f8f79e2898b93fe2b9e835ed88f41be427f7e87b5a29d47514ed7a907e8bf61",
+      "nickname": "Sunset",
+      "playerId": 6,
+      "tier": 0
+    },
+    {
+      "index": 9,
+      "address": "0xa4Fa547017d5dA86f85c86926F123aDFE3EEEc5c",
+      "privateKey": "0xa9bb6858b39565a97336654493b7a1cb27cdb82de27f64389e09a2580b93de94",
+      "nickname": "Lemon",
+      "playerId": 25,
+      "tier": 0
+    },
+    {
+      "index": 10,
+      "address": "0x152461E42896bfeC2788f86aCFc589aF45D9f5fd",
+      "privateKey": "0x41bfd09c842ec93d5149c19edc6ce99a499f3911645c27d14b67e05148000c76",
+      "nickname": "Mint",
+      "playerId": 37,
+      "tier": 0
+    },
+    {
+      "index": 11,
+      "address": "0x8F3403B26eA707B801A73343C09ce41BFEDF4DC7",
+      "privateKey": "0x05dcbe6c5e10e37bf9fbc3598da9741d82f438328cccd0f6c2752a12f77bfd1b",
+      "nickname": "Jet",
+      "playerId": 29,
+      "tier": 0
+    },
+    {
+      "index": 12,
+      "address": "0xA61ec469988A1D9F3314329EEE527e6524633CBc",
+      "privateKey": "0xa4cd641d5e7475a2e87d1fd3504032aaf5d6b01644f5fce4d20871c3f946a015",
+      "nickname": "Glade",
+      "playerId": 34,
+      "tier": 0
+    },
+    {
+      "index": 13,
+      "address": "0x20E97AfF29205C9Fc6ac6eFE36012426D3e4D787",
+      "privateKey": "0xe65847774339d8c8cbc07b23773f1ed53467f989d3f00f099b335f749bc26a39",
+      "nickname": "Prairie",
+      "playerId": 49,
+      "tier": 0
+    },
+    {
+      "index": 14,
+      "address": "0x5CBf1a499B5D83cB442DB381dFcE7584E5Bb081D",
+      "privateKey": "0x743906e62c9aa3351da84bc983d0838c6a1b60b666fb29d5c6363c830ff65193",
+      "nickname": "Chalk",
+      "playerId": 39,
+      "tier": 0
+    },
+    {
+      "index": 15,
+      "address": "0xf0d81f551b03EE892fEE02B4Be0FdF9cE34229d9",
+      "privateKey": "0x98d2be1c3a7c6a12333dc006c2a789ad3426bbff9576ed03503b846be4a02aa7",
+      "nickname": "Pebble",
+      "playerId": 5,
+      "tier": 0
+    },
+    {
+      "index": 16,
+      "address": "0xac29Fb4705de3EdDDe4197353950CA0F721FEA92",
+      "privateKey": "0x15ffec69da28aa69992c9985f78336e8cdda3154a604c4f26739cdbc822e9d19",
+      "nickname": "Bloom",
+      "playerId": 34,
+      "tier": 0
+    },
+    {
+      "index": 17,
+      "address": "0xB886F35572da5DaccE1436755154f19885270D3D",
+      "privateKey": "0x49a903214226629ad7dd4284e9b224e0f844f09c854c5c1f671e874598261ee8",
+      "nickname": "Linden",
+      "playerId": 30,
+      "tier": 0
+    },
+    {
+      "index": 18,
+      "address": "0xdad6D5d0B5919aFeCD44105A10964038ab74C7F4",
+      "privateKey": "0x7cef5d7fbc88cf5914461c59aabbf182c55c4c7793e1e5af150b5b4c3df1fddc",
+      "nickname": "Silver",
+      "playerId": 41,
+      "tier": 0
+    },
+    {
+      "index": 19,
+      "address": "0xfFe248c8363953b3fE15e06e65328412f15896d6",
+      "privateKey": "0x67bcfec5813093e2c8b1ebf5a249fea0e46796432f592c3fdddbea090ea11ef4",
+      "nickname": "Summit",
+      "playerId": 4,
+      "tier": 0
+    },
+    {
+      "index": 20,
+      "address": "0xE13e69BB3a9Df67B832445e8491bdA593fEA19A3",
+      "privateKey": "0x1499fbfdf0182b9e245e6c898efd7c859dec539cdeef8c3345cd51205972c609",
+      "nickname": "Dawn",
+      "playerId": 15,
+      "tier": 0
+    },
+    {
+      "index": 21,
+      "address": "0x4df39e278c27fd7E8a3cDaf4314a4c00a8BbE1fD",
+      "privateKey": "0x33b8a540e4161f8216c5611be280fadfe36e2af2c88cb587c4b316693892441c",
+      "nickname": "Apple",
+      "playerId": 2,
+      "tier": 0
+    },
+    {
+      "index": 22,
+      "address": "0xB1D2a857BF8e0C1D6163fe513E01842e809e52D0",
+      "privateKey": "0x2f223101c5406bd3474924bd60c8b130075a5c3cb59b58d7f73e9c6081bf5cc9",
+      "nickname": "Ivory",
+      "playerId": 49,
+      "tier": 0
+    },
+    {
+      "index": 23,
+      "address": "0x6A4eC17C580Ba211bd32c6F47C282716F1a2994C",
+      "privateKey": "0x8d7afe0e6e4b8ca475c5efb6c4cfafdc76661e93cc4d3c194ca0ab62dd609c11",
+      "nickname": "Lily",
+      "playerId": 45,
+      "tier": 0
+    },
+    {
+      "index": 24,
+      "address": "0x99da750E23b375b3968C566b230a11A052d3f9f6",
+      "privateKey": "0xe359cde26d12f9bb285cee8494dbbbab2ecc33efa06cf1105d28103738679030",
+      "nickname": "Ruby",
+      "playerId": 32,
+      "tier": 0
+    },
+    {
+      "index": 25,
+      "address": "0x82908E5644E3aa0C87F9DCd41ed0943886Ff93fa",
+      "privateKey": "0xd9bd23685089e480e43141bfc48fe08bfb406ebcc0d9f8cf240c6ad3b744aea7",
+      "nickname": "Iris",
+      "playerId": 0,
+      "tier": 0
+    },
+    {
+      "index": 26,
+      "address": "0xb6510f3765799FE5Fd1CAEd2a663Badded829Bc7",
+      "privateKey": "0xa1a96c044042b75b5c7bc3c5f607a04e3298400783facea8ba1021f08d8856bb",
+      "nickname": "Slate",
+      "playerId": 6,
+      "tier": 0
+    },
+    {
+      "index": 27,
+      "address": "0x98664d27E53b25B741D0054DE486C05E78e56B4f",
+      "privateKey": "0xdfb821c419ead6e9ba85d78c37efa51eb827260b234b69289f3aeb012fa20b62",
+      "nickname": "Drift",
+      "playerId": 44,
+      "tier": 0
+    },
+    {
+      "index": 28,
+      "address": "0x34Af678629337786413952b1e815b1F0A5b712E0",
+      "privateKey": "0x4792d540622a6e109468bbad1654fcbb573029123a5e8d401814248dc3c31919",
+      "nickname": "Canyon",
+      "playerId": 21,
+      "tier": 0
+    },
+    {
+      "index": 29,
+      "address": "0xceDEfeCCA348ea6d1F7F48fb7dD6dD35F614e012",
+      "privateKey": "0x6f17ca3775643a5082675b1273ae6e0b8871b6c83fa8bbec9a144d5a6e0d2fc9",
+      "nickname": "Aurora",
+      "playerId": 43,
+      "tier": 0
+    },
+    {
+      "index": 30,
+      "address": "0x7962FBA0b0FbE7152b52a27159e3A4b657EDD254",
+      "privateKey": "0x97a8efde390a998857c254443226aeb652ad1554114cda2f4b67d39457de19f2",
+      "nickname": "Delta",
+      "playerId": 24,
+      "tier": 0
+    },
+    {
+      "index": 31,
+      "address": "0x77Bf5052B7c1faB233E67Cd01a5beCC77BFeeEc0",
+      "privateKey": "0x6359f05bbfc3576ba67e27cc71cf300188be4627866e7bd6aedeca016f68e9ad",
+      "nickname": "Coral",
+      "playerId": 5,
+      "tier": 1
+    },
+    {
+      "index": 32,
+      "address": "0xc2d854c3b4A1c36e96a3d271C5208Fe016ef6095",
+      "privateKey": "0xf357de16950d21f01fecae27897b28d6627417d3d7877cd0009c59c615f72aab",
+      "nickname": "Scarlet",
+      "playerId": 49,
+      "tier": 1
+    },
+    {
+      "index": 33,
+      "address": "0x1fB923Cf9d109a337E3Be3555E2181E7E0385657",
+      "privateKey": "0xfd496f901847cb7a5209890dccd790d39d43a5ca051e6594f946db21e8e84a5e",
+      "nickname": "Keystone",
+      "playerId": 19,
+      "tier": 1
+    },
+    {
+      "index": 34,
+      "address": "0x6031d6667052896292b065995bB5aE8CAe27A08e",
+      "privateKey": "0x7912b75dacccd24b16039988cac57980f106e05a6dc5e12f6a2882f839767bff",
+      "nickname": "Cinder",
+      "playerId": 18,
+      "tier": 1
+    },
+    {
+      "index": 35,
+      "address": "0x780F1054DA7056bAfC93A254E87fA717B949D5A3",
+      "privateKey": "0xb15d5d3edb370793c4105ccdd3db5eb9e305c9ea5d77ec4b8b23747552422b15",
+      "nickname": "Summer",
+      "playerId": 36,
+      "tier": 1
+    },
+    {
+      "index": 36,
+      "address": "0xC27050f531b80fF2bbf3Fe77CDD40685343A6a98",
+      "privateKey": "0x372f03363bfb2624553b18b82bdb9adc5b4654839efaa72a5edc2571d997a518",
+      "nickname": "Shell",
+      "playerId": 35,
+      "tier": 1
+    },
+    {
+      "index": 37,
+      "address": "0x562D1e85567a15E9a25C04757f88f0eaDC9bE609",
+      "privateKey": "0x04292d80cf585ed606e2153ec202ab5b5fc701b673201a3b56b4a3af35d82ef7",
+      "nickname": "Bay",
+      "playerId": 43,
+      "tier": 1
+    },
+    {
+      "index": 38,
+      "address": "0x915236fB0801016e1617eaed8BF0e06857e612E8",
+      "privateKey": "0x8189ce7b02677ed29a640eb66f1119598cdccb7722b39961daf714be21259508",
+      "nickname": "Olive",
+      "playerId": 27,
+      "tier": 1
+    },
+    {
+      "index": 39,
+      "address": "0x92f76CfE8550489d041D7489179D32F6478CB177",
+      "privateKey": "0x5369077d351e709b63532ab403a7443d3f350eab6bdf12a0dd3068a0d7c6044f",
+      "nickname": "Brook",
+      "playerId": 29,
+      "tier": 1
+    },
+    {
+      "index": 40,
+      "address": "0xe1A9403Dec2522EBa1e80090fF5Fc01C59A64499",
+      "privateKey": "0xd93d3edd6f269e62350d3a058e12ac2f2028c99bcb526c573f4e424be9332064",
+      "nickname": "Vale",
+      "playerId": 23,
+      "tier": 1
+    },
+    {
+      "index": 41,
+      "address": "0xF5849c19d0bb732c26db5a3bD9e5df9D0839e56e",
+      "privateKey": "0xcd337edec2ea4ecdd31643dc1736dd14c3aeb501d739ac638c1865ee2043b251",
+      "nickname": "Baker",
+      "playerId": 36,
+      "tier": 1
+    },
+    {
+      "index": 42,
+      "address": "0x461B2b72A8E64aAB9A9fF9Ccd3B05f125761288D",
+      "privateKey": "0x9763b6dd17580fafba1952eb9fe17abcb78df8101d23080625a26579d13fb447",
+      "nickname": "Horizon",
+      "playerId": 32,
+      "tier": 1
+    },
+    {
+      "index": 43,
+      "address": "0xf649c9Ed8A11801f201700618Ee69252B138Ef3d",
+      "privateKey": "0xba10b7d6b67b6ba55e8a9ab4ecefeb81aa559881c1a938baba4eb0151caf6d9e",
+      "nickname": "Timber",
+      "playerId": 39,
+      "tier": 1
+    },
+    {
+      "index": 44,
+      "address": "0x2CaAB9659d719A20b5EdCe367F16dAEbB302148f",
+      "privateKey": "0xbeeb265f033408cc3d55999499bacc99a35a9e21e7714767499430204006008d",
+      "nickname": "Crane",
+      "playerId": 45,
+      "tier": 1
+    },
+    {
+      "index": 45,
+      "address": "0x3FAc94A3a316c7F9F1788d7bD79754fe6A533421",
+      "privateKey": "0xa9033ea6523f8ca2dcc8080ef14ec8eb9810f24eb5198bc196f16a44a30460f2",
+      "nickname": "Snow",
+      "playerId": 1,
+      "tier": 1
+    },
+    {
+      "index": 46,
+      "address": "0xD025E395D147b6f3032Cbd285fF99af7ff0cC907",
+      "privateKey": "0x4062adff05377874f4edb204257a87ba6623fc31b81fb1b4703385b508279d7d",
+      "nickname": "Granite",
+      "playerId": 30,
+      "tier": 1
+    },
+    {
+      "index": 47,
+      "address": "0xD6ea17B8CeF5e80F9189883BB97a196e975fb3ab",
+      "privateKey": "0x1b37d57a3646b40f03ec17760ba412de3e4f1dcdc8e62db8a9f3f11a16580351",
+      "nickname": "Harbor",
+      "playerId": 44,
+      "tier": 1
+    },
+    {
+      "index": 48,
+      "address": "0x811de0461AC8Ac897793970CB0C78079dE6F741a",
+      "privateKey": "0x87048a28a58ce8a3a9300298e0bcfb0c659013be3f58854ec7d77e9611e70bc2",
+      "nickname": "Rose",
+      "playerId": 2,
+      "tier": 1
+    },
+    {
+      "index": 49,
+      "address": "0x8B544a2b21403b98244210598b0A7db0708A13Ff",
+      "privateKey": "0xafa8a7d6fbe4d367a5d4871f5c68f865ee9b4b6789d4bd23380ced38187e5a67",
+      "nickname": "Jade",
+      "playerId": 12,
+      "tier": 1
+    },
+    {
+      "index": 50,
+      "address": "0xc929e6bb5eFD6dD909aD9DFd8a03D03013606f68",
+      "privateKey": "0x1e77fa166b6f4978420d3b8cd235467e4295aa94be648b798894e2304e82ca8d",
+      "nickname": "Velvet",
+      "playerId": 41,
+      "tier": 1
+    },
+    {
+      "index": 51,
+      "address": "0x5441156d0049E9bDC8e9FdDfcAaf2a55Eb311c27",
+      "privateKey": "0x76db6712219c530e6f321c79ff7ebe76f4c24ef0453676c0acb420cab284d2f1",
+      "nickname": "Sage",
+      "playerId": 41,
+      "tier": 1
+    },
+    {
+      "index": 52,
+      "address": "0x884506Fb37bE117c7fC646c7b8b1bD6b766C3a86",
+      "privateKey": "0x7ebce57bf4788d802211bbed75911198d1952720d08337aea96a4c28b8f148ae",
+      "nickname": "Cedar",
+      "playerId": 48,
+      "tier": 1
+    },
+    {
+      "index": 53,
+      "address": "0xb0ffe0CD4a5294a0f6f460693924F8aE9253a67c",
+      "privateKey": "0x78e4878249de0d0dccd96b9c3c5ca0a0a9cf72ec4f1fb167493776388cb108df",
+      "nickname": "Wren",
+      "playerId": 11,
+      "tier": 1
+    },
+    {
+      "index": 54,
+      "address": "0x4D5d2A70A27A173491bC9DCd5efC75c0C98f7032",
+      "privateKey": "0x30cbd16884440be8040c69fb4926d8ff5afc9fe519f0947176c91c51a139d2c3",
+      "nickname": "Oak",
+      "playerId": 30,
+      "tier": 1
+    },
+    {
+      "index": 55,
+      "address": "0x392230806879E3A113042F4e1CaC0A482cdBDA48",
+      "privateKey": "0xa1ccf7c44b50ee4d659618a07a1330377d1539029bf5f3bca53cfe3cc356304c",
+      "nickname": "Ash",
+      "playerId": 6,
+      "tier": 1
+    },
+    {
+      "index": 56,
+      "address": "0x0e8EaCE90e9535E236f3Ee53C8951a8125E383bC",
+      "privateKey": "0xadf8e56e648682962bad393d1aaa9ac20fbecaeb9779ff889ac0837eae8ad886",
+      "nickname": "Garden",
+      "playerId": 24,
+      "tier": 1
+    },
+    {
+      "index": 57,
+      "address": "0x6a510c27Da86dfC2E7F511d7bC9a7d779181542f",
+      "privateKey": "0xdd5ce5d8475a87c62fbed86773bf46d7679b7528c7761354c21c1bfc1ea465be",
+      "nickname": "Cobalt",
+      "playerId": 45,
+      "tier": 1
+    },
+    {
+      "index": 58,
+      "address": "0x35666F0c216c707409f11c8F174F437eA272D86F",
+      "privateKey": "0x6429d3784be1509cd5cff585f42db0f65f46ba2c82331c643a981b6f5d0810f6",
+      "nickname": "Onyx",
+      "playerId": 1,
+      "tier": 1
+    },
+    {
+      "index": 59,
+      "address": "0x54eA3D160478D6207B7b4760B9f6107f98706eda",
+      "privateKey": "0xad24c178246985e9084d518893cd2ad510b563bd8687016832dfeb557552e05e",
+      "nickname": "Frost",
+      "playerId": 13,
+      "tier": 1
+    },
+    {
+      "index": 60,
+      "address": "0x3E35eC9d0De0278fC4221dBa0C52f7ad7f63FFB4",
+      "privateKey": "0xa6b303f6dfe5342bd58d63d1acb68d07465e67cde9510ad4eeca07f89938bde4",
+      "nickname": "Reef",
+      "playerId": 49,
+      "tier": 1
+    },
+    {
+      "index": 61,
+      "address": "0xDfB8CC6D7eE4F71970256F2258eB227D6db36A82",
+      "privateKey": "0x780055894fe2d73390aba5dad83048d9718ae04f1314867330847f7b26dba2a7",
+      "nickname": "Harvest",
+      "playerId": 6,
+      "tier": 2
+    },
+    {
+      "index": 62,
+      "address": "0x8bFb3B33Bc276070f5a64404D65848d32dC1FD86",
+      "privateKey": "0x888b88a3ff75599db4c6528c945902fa577bd42bdb99ba39cc903dabac952882",
+      "nickname": "Spruce",
+      "playerId": 24,
+      "tier": 2
+    },
+    {
+      "index": 63,
+      "address": "0x858B9bC18b274E0C5cbC94D93fc161B4CC98A74B",
+      "privateKey": "0xa50196e4f8bae5efd5440aa5fcd6f57cf400c368481ddc2e6a5d46a8df62d959",
+      "nickname": "Citrus",
+      "playerId": 16,
+      "tier": 2
+    },
+    {
+      "index": 64,
+      "address": "0x912e5Ac83f5157B5A862CeF5Bd33a180B3847244",
+      "privateKey": "0x5104dd9f95c4fdd0c347920468e1ba60076ad3ba70806a2f7540fd22b067680a",
+      "nickname": "Comet",
+      "playerId": 30,
+      "tier": 2
+    },
+    {
+      "index": 65,
+      "address": "0x6f9eFffDD4584c20f316Ad3ae9216FEF474f49b4",
+      "privateKey": "0x2f46577db7320c8e3b72ce29de1906c1d56e68d352344daa319565ea31566f12",
+      "nickname": "Blaze",
+      "playerId": 41,
+      "tier": 2
+    },
+    {
+      "index": 66,
+      "address": "0x132ac7DF1bEB5EF1b4acBa8e57B49DE316977230",
+      "privateKey": "0xa1eb60ec120d0243f6ef79836ca79f96f91c684c23a0b8caf6898f4c339d039d",
+      "nickname": "Raven",
+      "playerId": 35,
+      "tier": 2
+    },
+    {
+      "index": 67,
+      "address": "0xA23c615F1287458A220bf86057c24b837E5d6b8D",
+      "privateKey": "0xd5073ef5ec0f61554d2f56a2c0c9b0f2ddcb8d695b5d5e79ad8ad4592680a828",
+      "nickname": "Orbit",
+      "playerId": 15,
+      "tier": 2
+    },
+    {
+      "index": 68,
+      "address": "0xb60c6a88aeBcD48Cd9C467Fe6E59a0dF073e9318",
+      "privateKey": "0xf2438764a4a33fb04be155549706978935fdb1cdaef3092a9bc9f712479f3093",
+      "nickname": "Hill",
+      "playerId": 34,
+      "tier": 2
+    },
+    {
+      "index": 69,
+      "address": "0x8c0169b281B46eC42068745f736F2644Da3d64A0",
+      "privateKey": "0x96db83a6b819cf1b5c6e1a90e52069d89841db589a1e459edaf890070c21bc33",
+      "nickname": "Leaf",
+      "playerId": 13,
+      "tier": 2
+    },
+    {
+      "index": 70,
+      "address": "0x80992Bef3878FC83a601Ef0F22FAC7226A8d19EE",
+      "privateKey": "0xddbed563b82b099bb133f0ac6899c28b89fee4bda024b6b59ba8fdcddcc9a979",
+      "nickname": "Atlas",
+      "playerId": 41,
+      "tier": 2
+    },
+    {
+      "index": 71,
+      "address": "0xEFD73a6B5bF29EC45C37a7b81d926Df80C480bF4",
+      "privateKey": "0xac2389f704fb4064701c901633075649b647b7e213db2c2d7cc01ba0847f59d3",
+      "nickname": "Indigo",
+      "playerId": 33,
+      "tier": 2
+    },
+    {
+      "index": 72,
+      "address": "0x521e9b4E90a45A08975eE91d45B87ba8145a0b3A",
+      "privateKey": "0x113fc5708f162d0e5f99bb517b14831ca94b91fa4445d3ce1213975ffdb5fe74",
+      "nickname": "Kingfisher",
+      "playerId": 6,
+      "tier": 2
+    },
+    {
+      "index": 73,
+      "address": "0x7C4630D25D01CE63367031C4643d60Bbfb18121f",
+      "privateKey": "0x80dc767e966567cce23b55d11a4251d67576603106f0c28fdac51213ba099976",
+      "nickname": "Breeze",
+      "playerId": 48,
+      "tier": 2
+    },
+    {
+      "index": 74,
+      "address": "0x71C0128Fb5Bbc426EFF031B6dAdaBC3734baE7F4",
+      "privateKey": "0x6eddedbe71c60fc79c2696a03b91daa4a0fcdd0218c1e039229460c9df1c0df5",
+      "nickname": "Mistral",
+      "playerId": 36,
+      "tier": 2
+    },
+    {
+      "index": 75,
+      "address": "0x905dcdFbB446fD45A5F9f64823B8c49b6dc996E5",
+      "privateKey": "0xea2fe8cfe4cf79d1345a2e11ca3838962c689ba882839591b5a1e510996d2d76",
+      "nickname": "Juniper",
+      "playerId": 10,
+      "tier": 2
+    },
+    {
+      "index": 76,
+      "address": "0x504ab2c5Afb3dD6976c934646E7CB32aCD912002",
+      "privateKey": "0x5f6b38c21e2e57e5d6f5e1ce9047a00614ec76e54126eb46423d6bd00ed85979",
+      "nickname": "Ember",
+      "playerId": 37,
+      "tier": 2
+    },
+    {
+      "index": 77,
+      "address": "0x17e80b4b08dD6E2dEcB15BAaEc7a7b4229c8AF82",
+      "privateKey": "0x01c587dfc5f4bda0805c6fb5b805884dfa0c5dec49136a63f180511cd5f91257",
+      "nickname": "Thistle",
+      "playerId": 6,
+      "tier": 2
+    },
+    {
+      "index": 78,
+      "address": "0x383D6e36647eE37e9784FC71BC8F4f2118A7eA0c",
+      "privateKey": "0x3405abfd80653da50c57b963d5ada0c2317554e252d5f46dd11a38d9b77c4500",
+      "nickname": "Topaz",
+      "playerId": 38,
+      "tier": 2
+    },
+    {
+      "index": 79,
+      "address": "0xf84C5b322a817d514b181eD7F4dbeC26E849ebfa",
+      "privateKey": "0xfc7b7a4aa9935ba2c50ddd320a5bc67f827ec1994d8a32b31cab99de2a6b1e5b",
+      "nickname": "Cloud",
+      "playerId": 36,
+      "tier": 2
+    },
+    {
+      "index": 80,
+      "address": "0x03e93181fFf55C5B89c41D523e2330c2e5dEEcD3",
+      "privateKey": "0xc4c88a00e370c92749939a146e13bd4d0efeefca2116ddac27f613a6fb14884e",
+      "nickname": "Wind",
+      "playerId": 44,
+      "tier": 2
+    },
+    {
+      "index": 81,
+      "address": "0x40496E66c279B7D34AFc05856Ad17e2be0b3a94D",
+      "privateKey": "0xa2e503b37b4f582de37fa580be7882ade41ffe54a2f632c8b32c01b7348ac870",
+      "nickname": "Star",
+      "playerId": 46,
+      "tier": 2
+    },
+    {
+      "index": 82,
+      "address": "0xd82341c0571688cc4c2aeB7F6f3953a30ADf6Bd5",
+      "privateKey": "0xcbcc7793c0002ee1d84a65c65f108b7fa6f0c4f628bbf1cf07504e874a91d30c",
+      "nickname": "Opal",
+      "playerId": 18,
+      "tier": 2
+    },
+    {
+      "index": 83,
+      "address": "0xE7511d34855E142ac30F69D5f6BEACf5C68EE6ED",
+      "privateKey": "0x76be4ba2d4f045da97717ed298a19b1690a2ded927a0b4affa0fd6b96493f85a",
+      "nickname": "Field",
+      "playerId": 28,
+      "tier": 2
+    },
+    {
+      "index": 84,
+      "address": "0xf82c4870C05803c541Aa01aAA0B02E596434C13d",
+      "privateKey": "0x6d790954110a41b3d96b7fa2f8b1ebf7c4f8dd664624e4347c9738b820d77f0b",
+      "nickname": "Ocean",
+      "playerId": 3,
+      "tier": 2
+    },
+    {
+      "index": 85,
+      "address": "0x31Fb4Ba67444A13a6138206C74905B5f7b3D3b39",
+      "privateKey": "0xca56288cde4cd4029f051179425c1c3ce958f871fcb1b451019d0b0ddac6c648",
+      "nickname": "Robin",
+      "playerId": 41,
+      "tier": 2
+    },
+    {
+      "index": 86,
+      "address": "0xe213ca5a8174aEA5eD7dfFDA7Af31130863fce54",
+      "privateKey": "0xe5215d7eab496b6b7fada77219055906448c4cd930a9ab2f070af6ad98f12077",
+      "nickname": "Winter",
+      "playerId": 13,
+      "tier": 2
+    },
+    {
+      "index": 87,
+      "address": "0x33a3C8AFcF1534Acddc2315b8558cfaBc10dEbA7",
+      "privateKey": "0xbe1747ac8a4cb827d242cc66258c66c2913800f8168e73f19933cf5abcb24354",
+      "nickname": "Arbor",
+      "playerId": 49,
+      "tier": 2
+    },
+    {
+      "index": 88,
+      "address": "0xEf65B1593ccE6Da58Ca92672EBa16D561122A59c",
+      "privateKey": "0x9cb2786c276ac9f6219505ff274e8b2d509ab3b0838bd3da8f84a613ec036fda",
+      "nickname": "Dew",
+      "playerId": 23,
+      "tier": 2
+    },
+    {
+      "index": 89,
+      "address": "0x7D88EDD05f496465e46bBA30408797d6D4fFCeCD",
+      "privateKey": "0x6d6aa9b6f1fbada75a466fdb7e145191950e5537b8a05065664cce34121371d8",
+      "nickname": "Shadow",
+      "playerId": 38,
+      "tier": 2
+    },
+    {
+      "index": 90,
+      "address": "0x1FD270b931c79Bfd45dBF212f113d9b6A037086D",
+      "privateKey": "0x2da287fcf456cab33f166f4d118cdb1415a74534b65df9b01279fb585251fd1c",
+      "nickname": "Bamboo",
+      "playerId": 37,
+      "tier": 2
+    }
+  ]
+}

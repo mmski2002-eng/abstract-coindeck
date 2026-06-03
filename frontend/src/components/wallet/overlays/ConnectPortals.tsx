@@ -5,10 +5,24 @@ import { useRef, useState, useEffect } from "react";
 import type { Connector } from "wagmi";
 import { useConnect, useDisconnect, useAccount, useChainId, useSwitchChain, useBalance } from "wagmi";
 import { abstractTestnet } from "viem/chains";
+import { Sun, Moon } from "lucide-react";
+import { useI18n } from "@/components/LanguageProvider";
+
+function _hadPreviousWalletConnection(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const raw = localStorage.getItem("wagmi.store");
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    return data?.state?.status === "connected" || Boolean(data?.state?.current);
+  } catch { return false; }
+}
 
 function nicknameStorageKey(addr: string) {
   return `player_nickname:${addr.toLowerCase()}`;
 }
+
+const DROPDOWN_DIVIDER = "1.5px solid var(--divider)";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sticker penguin mascot
@@ -93,7 +107,7 @@ function ConnectorIcon({ id, name }: { id: string; name: string }) {
   const lower = (id + name).toLowerCase();
 
   if (lower.includes("abstract")) return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#26C6A8", border: "2px solid var(--ink)" }}>
+    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#26C6A8", border: "2px solid var(--outline)" }}>
       <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
         <path d="M5 19L12 5L19 19" stroke="var(--ink)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M7.5 14.5H16.5" stroke="var(--ink)" strokeWidth="2" strokeLinecap="round"/>
@@ -102,7 +116,7 @@ function ConnectorIcon({ id, name }: { id: string; name: string }) {
   );
 
   if (lower.includes("metamask")) return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#F6851B", border: "2px solid var(--ink)" }}>
+    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#F6851B", border: "2px solid var(--outline)" }}>
       <svg viewBox="0 0 32 32" fill="none" className="h-6 w-6">
         <path d="M28 4L17.6 11.6L19.5 7L28 4Z" fill="white" opacity="0.9"/>
         <path d="M4 4L14.3 11.7L12.5 7L4 4Z" fill="white" opacity="0.9"/>
@@ -115,7 +129,7 @@ function ConnectorIcon({ id, name }: { id: string; name: string }) {
   );
 
   if (lower.includes("coinbase")) return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#0052FF", border: "2px solid var(--ink)" }}>
+    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#0052FF", border: "2px solid var(--outline)" }}>
       <svg viewBox="0 0 32 32" fill="none" className="h-6 w-6">
         <circle cx="16" cy="16" r="11" fill="white"/>
         <rect x="11.5" y="13.5" width="9" height="5" rx="2.5" fill="#0052FF"/>
@@ -124,7 +138,7 @@ function ConnectorIcon({ id, name }: { id: string; name: string }) {
   );
 
   if (lower.includes("walletconnect") || lower.includes("wallet connect")) return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#3B99FC", border: "2px solid var(--ink)" }}>
+    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#3B99FC", border: "2px solid var(--outline)" }}>
       <svg viewBox="0 0 32 32" fill="none" className="h-6 w-6">
         <path d="M9.5 12.5C13 9 19 9 22.5 12.5L23 13C23.5 13.5 23.5 14.5 23 15L21.5 16.5C21.25 16.75 20.75 16.75 20.5 16.5L19.5 15.5C17.5 13.5 14.5 13.5 12.5 15.5L11.3 16.7C11.05 16.95 10.55 16.95 10.3 16.7L8.8 15.2C8.3 14.7 8.3 13.7 8.8 13.2L9.5 12.5Z" fill="white"/>
         <path d="M13.5 17.5L15 19C15.5 19.5 16.5 19.5 17 19L18.5 17.5C18.75 17.25 19.25 17.25 19.5 17.5L21 19C21.5 19.5 21.5 20.5 21 21L17.5 24.5C17 25 16 25 15.5 24.5L12 21C11.5 20.5 11.5 19.5 12 19L13.5 17.5C13.75 17.25 13.25 17.25 13.5 17.5Z" fill="white"/>
@@ -132,14 +146,33 @@ function ConnectorIcon({ id, name }: { id: string; name: string }) {
     </div>
   );
 
+  if (lower.includes("okx")) return (
+    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#000000", border: "2px solid var(--outline)" }}>
+      <svg viewBox="0 0 32 32" fill="none" className="h-6 w-6">
+        <rect x="4" y="13" width="7" height="7" rx="1" fill="white"/>
+        <rect x="13" y="4" width="7" height="7" rx="1" fill="white"/>
+        <rect x="13" y="22" width="7" height="7" rx="1" fill="white"/>
+        <rect x="22" y="13" width="7" height="7" rx="1" fill="white"/>
+        <rect x="13" y="13" width="7" height="7" rx="1" fill="white"/>
+      </svg>
+    </div>
+  );
+
   if (lower.includes("rabby")) return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0 text-xl" style={{ background: "#8697FF", border: "2px solid var(--ink)" }}>
-      🐰
+    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#8697FF", border: "2px solid var(--outline)" }}>
+      <svg viewBox="0 0 32 32" fill="none" className="h-6 w-6">
+        <ellipse cx="16" cy="17" rx="10" ry="8" fill="white" opacity="0.95"/>
+        <ellipse cx="11" cy="10" rx="4" ry="6" fill="white" opacity="0.9" transform="rotate(-20 11 10)"/>
+        <ellipse cx="21" cy="10" rx="4" ry="6" fill="white" opacity="0.9" transform="rotate(20 21 10)"/>
+        <circle cx="13" cy="17" r="1.8" fill="#8697FF"/>
+        <circle cx="19" cy="17" r="1.8" fill="#8697FF"/>
+        <path d="M13 21.5 Q16 24 19 21.5" stroke="#8697FF" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
     </div>
   );
 
   if (lower.includes("phantom")) return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#AB9FF2", border: "2px solid var(--ink)" }}>
+    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#AB9FF2", border: "2px solid var(--outline)" }}>
       <svg viewBox="0 0 32 32" fill="none" className="h-6 w-6">
         <ellipse cx="16" cy="15" rx="9" ry="11" fill="white" opacity="0.9"/>
         <circle cx="13" cy="14" r="2" fill="#AB9FF2"/>
@@ -150,7 +183,7 @@ function ConnectorIcon({ id, name }: { id: string; name: string }) {
   );
 
   return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0 text-xs font-black" style={{ background: "var(--sunken)", border: "2px solid var(--ink)", color: "var(--ink-2)" }}>
+    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0 text-xs font-black" style={{ background: "var(--sunken)", border: "2px solid var(--outline)", color: "var(--ink-2)" }}>
       {name.slice(0, 2).toUpperCase()}
     </div>
   );
@@ -161,7 +194,7 @@ function ConnectorIcon({ id, name }: { id: string; name: string }) {
 // ─────────────────────────────────────────────────────────────────────────────
 function AbstractPill() {
   return (
-    <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1" style={{ background: "var(--paper-3)", border: "2px solid var(--ink)", fontSize: 10, fontWeight: 800, letterSpacing: "0.09em", color: "var(--ink-2)", textTransform: "uppercase" }}>
+    <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1" style={{ background: "var(--paper-3)", border: "2px solid var(--outline)", fontSize: 10, fontWeight: 800, letterSpacing: "0.09em", color: "var(--ink-2)", textTransform: "uppercase" }}>
       <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: "#22C55E" }}/>
       Abstract
     </div>
@@ -185,8 +218,8 @@ function SBtn({
   disabled?: boolean;
 }) {
   const base = variant === "primary"
-    ? { background: "var(--mint)", color: "var(--ink)", border: "2.5px solid var(--ink)", boxShadow: "4px 4px 0 var(--shadow-sticker-color)" }
-    : { background: "var(--paper-3)", color: "var(--ink-2)", border: "2px solid var(--ink)", boxShadow: "2px 2px 0 var(--shadow-sticker-color)" };
+    ? { background: "var(--mint)", color: "var(--ink)", border: "2.5px solid var(--outline)", boxShadow: "4px 4px 0 var(--shadow-sticker-color)" }
+    : { background: "var(--paper-3)", color: "var(--ink-2)", border: "2px solid var(--outline)", boxShadow: "2px 2px 0 var(--shadow-sticker-color)" };
   const hoverShadow = variant === "primary" ? "2px 2px 0 var(--shadow-sticker-color)" : "1px 1px 0 var(--shadow-sticker-color)";
 
   return (
@@ -214,7 +247,12 @@ const ICON_WALLET = (
   </svg>
 );
 
-function WalletButton({ lang }: { lang: string }) {
+function WalletButton({ theme, setTheme, themeReady }: {
+  theme: "light" | "dark";
+  setTheme: (t: "light" | "dark") => void;
+  themeReady: boolean;
+}) {
+  const { lang, setLang } = useI18n();
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const chainId = useChainId();
@@ -271,8 +309,43 @@ function WalletButton({ lang }: { lang: string }) {
       </button>
 
       {menuOpen && (
-        <div className="absolute top-full right-0 mt-3 w-56 z-[60]" style={{ background: "var(--paper-2)", border: "2.5px solid var(--ink)", borderRadius: 14, boxShadow: "4px 4px 0 var(--shadow-sticker-color)" }}>
-          <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1.5px solid rgba(15,17,21,0.12)" }}>
+        <div className="absolute top-full right-0 mt-3 w-56 z-[60]" style={{ background: "var(--paper-2)", border: "2.5px solid var(--outline)", borderRadius: 14, boxShadow: "4px 4px 0 var(--shadow-sticker-color)" }}>
+          {/* Settings row — theme + lang */}
+          <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: DROPDOWN_DIVIDER }}>
+            <div className="flex items-center gap-0.5 rounded-full p-0.5" style={{ background: "var(--sunken)", border: theme === "dark" ? "1.5px solid rgba(232,238,245,0.7)" : "1.5px solid var(--outline)" }}>
+              <button
+                onClick={() => setTheme("light")}
+                className="flex items-center justify-center rounded-full transition-all"
+                style={{ width: 28, height: 28, background: themeReady && theme === "light" ? "var(--paper)" : "transparent", boxShadow: themeReady && theme === "light" ? "1px 1px 0 var(--shadow-sticker-color)" : "none" }}
+              >
+                <Sun size={12} />
+              </button>
+              <button
+                onClick={() => setTheme("dark")}
+                className="flex items-center justify-center rounded-full transition-all"
+                style={{ width: 28, height: 28, background: themeReady && theme === "dark" ? "var(--paper)" : "transparent", boxShadow: themeReady && theme === "dark" ? "1px 1px 0 var(--shadow-sticker-color)" : "none" }}
+              >
+                <Moon size={12} />
+              </button>
+            </div>
+            <div className="flex items-center gap-0.5 rounded-full p-0.5" style={{ background: "var(--sunken)", border: theme === "dark" ? "1.5px solid rgba(232,238,245,0.7)" : "1.5px solid var(--outline)" }}>
+              <button
+                onClick={() => setLang("ru")}
+                className="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest transition-all"
+                style={{ background: lang === "ru" ? "var(--paper)" : "transparent", boxShadow: lang === "ru" ? "1px 1px 0 var(--shadow-sticker-color)" : "none", color: "var(--ink)" }}
+              >
+                RU
+              </button>
+              <button
+                onClick={() => setLang("en")}
+                className="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest transition-all"
+                style={{ background: lang === "en" ? "var(--paper)" : "transparent", boxShadow: lang === "en" ? "1px 1px 0 var(--shadow-sticker-color)" : "none", color: "var(--ink)" }}
+              >
+                EN
+              </button>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: DROPDOWN_DIVIDER }}>
             {wrongNetwork ? (
               <>
                 <span className="h-2 w-2 rounded-full shrink-0" style={{ background: "var(--down)" }}/>
@@ -282,7 +355,7 @@ function WalletButton({ lang }: { lang: string }) {
                 <button
                   onClick={() => { switchChain({ chainId: abstractTestnet.id }); setMenuOpen(false); }}
                   className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md"
-                  style={{ background: "var(--down)", color: "#0F1115", border: "1.5px solid var(--ink)" }}
+                  style={{ background: "var(--down)", color: "var(--ink)", border: "1.5px solid var(--outline)" }}
                 >
                   {lang === "ru" ? "Сменить" : "Switch"}
                 </button>
@@ -295,14 +368,14 @@ function WalletButton({ lang }: { lang: string }) {
             )}
           </div>
 
-          <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1.5px solid rgba(15,17,21,0.12)" }}>
+          <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: DROPDOWN_DIVIDER }}>
             <svg className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--ink-3)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
             </svg>
             <span className="text-xs font-semibold truncate flex-1" style={{ color: "var(--ink-2)" }}>{nickname || shortAddr}</span>
           </div>
 
-          <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1.5px solid rgba(15,17,21,0.12)" }}>
+          <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: DROPDOWN_DIVIDER }}>
             <svg className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--ink-3)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
@@ -319,7 +392,7 @@ function WalletButton({ lang }: { lang: string }) {
             onClick={() => { disconnect(); setMenuOpen(false); }}
             className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold transition-colors rounded-b-[11px]"
             style={{ color: "var(--down)", background: "transparent" }}
-            onMouseEnter={e => (e.currentTarget.style.background = "rgba(226,92,92,0.08)")}
+            onMouseEnter={e => (e.currentTarget.style.background = "var(--down-soft)")}
             onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
           >
             <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -334,34 +407,62 @@ function WalletButton({ lang }: { lang: string }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Connect modal — 4 states: select / connecting / success / error
+// Connect modal — 5 states: cta / select / connecting / success / error
 // ─────────────────────────────────────────────────────────────────────────────
-type ModalState = "select" | "connecting" | "success" | "error";
+type ModalState = "cta" | "select" | "connecting" | "success" | "error";
 
 export type ConnectModalProps = {
   lang: string;
   open: boolean;
   onClose: () => void;
+  onEnterApp?: () => void;
 };
 
-function ConnectModal({ lang, open, onClose }: ConnectModalProps) {
+export function ConnectModal({ lang, open, onClose, onEnterApp }: ConnectModalProps) {
   const { connect, connectors } = useConnect();
   const { isConnected, address } = useAccount();
   const { disconnect } = useDisconnect();
   const { data: balanceData } = useBalance({ address });
 
-  const [modalState, setModalState] = useState<ModalState>("select");
+  const [modalState, setModalState] = useState<ModalState>("cta");
+  const [displayState, setDisplayState] = useState<ModalState>("cta");
+  const [contentOpacity, setContentOpacity] = useState(1);
+  const [isClosing, setIsClosing] = useState(false);
   const [selConnector, setSelConnector] = useState<Connector | null>(null);
   const [error, setError] = useState("");
   const [countdown, setCountdown] = useState(60);
+  const [isDark, setIsDark] = useState(() =>
+    typeof document !== "undefined" && document.documentElement.dataset.theme === "dark"
+  );
+  useEffect(() => {
+    const obs = new MutationObserver(() =>
+      setIsDark(document.documentElement.dataset.theme === "dark")
+    );
+    obs.observe(document.documentElement, { attributeFilter: ["data-theme"] });
+    return () => obs.disconnect();
+  }, []);
 
   useEffect(() => {
-    if (isConnected && open && modalState === "connecting") setModalState("success");
+    if (isConnected && open && modalState !== "success" && modalState !== "error") setModalState("success");
   }, [isConnected, open, modalState]);
 
   useEffect(() => {
+    if (modalState === displayState) return;
+    setContentOpacity(0);
+    const t = setTimeout(() => { setDisplayState(modalState); setContentOpacity(1); }, 320);
+    return () => clearTimeout(t);
+  }, [modalState, displayState]);
+
+  useEffect(() => {
+    if (modalState === "success") {
+      const t = setTimeout(() => { onEnterApp?.(); onClose(); }, 4000);
+      return () => clearTimeout(t);
+    }
+  }, [modalState, onClose, onEnterApp]);
+
+  useEffect(() => {
     if (!open) {
-      const t = setTimeout(() => { setModalState("select"); setError(""); setCountdown(60); }, 300);
+      const t = setTimeout(() => { setModalState("cta"); setDisplayState("cta"); setError(""); setCountdown(60); }, 300);
       return () => clearTimeout(t);
     }
   }, [open]);
@@ -384,6 +485,7 @@ function ConnectModal({ lang, open, onClose }: ConnectModalProps) {
     setModalState("connecting");
     setError("");
     connect({ connector }, {
+      onSuccess: () => setModalState("success"),
       onError: (e) => { setError(e.message); setModalState("error"); },
     });
   }
@@ -393,9 +495,41 @@ function ConnectModal({ lang, open, onClose }: ConnectModalProps) {
     setModalState("connecting");
     setError("");
     connect({ connector: selConnector }, {
+      onSuccess: () => setModalState("success"),
       onError: (e) => { setError(e.message); setModalState("error"); },
     });
   }
+
+  // ── CTA ────────────────────────────────────────────────────────────────────
+  const ctaContent = (
+    <div className="px-6 pt-5 pb-6">
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+        <div style={{ width: 48, height: 48, borderRadius: 14, background: "var(--lime-pop)", border: "2.5px solid var(--outline)", boxShadow: "3px 3px 0 var(--outline)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <img src="/logo.webp" style={{ width: 36, height: 36, objectFit: "cover", borderRadius: 8 }} alt="" />
+        </div>
+        <img src="/brand/name.png" style={{ height: 32, width: "auto", objectFit: "contain" }} alt="HeavyEggs" />
+      </div>
+      <p style={{ color: "var(--ink-3)", fontSize: 13, lineHeight: 1.55, marginBottom: 18 }}>
+        {lang === "ru" ? "Подключи кошелёк — начни собирать яйца" : "Connect your wallet to start collecting eggs"}
+      </p>
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
+        <img src={isDark ? "/wc/dark_mood_1.webp" : "/wc/light_mood_1.webp"} alt="" style={{ width: 140, height: 140, objectFit: "contain" }} />
+      </div>
+      <button
+        onClick={() => setModalState("select")}
+        style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--mint)", color: "var(--ink)", border: "2.5px solid var(--outline)", borderRadius: 14, padding: "13px 20px", fontSize: 14, fontWeight: 800, letterSpacing: 0.6, cursor: "pointer", marginBottom: 16, outline: "none" }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>
+        {lang === "ru" ? "Подключить кошелёк" : "Connect Wallet"}
+      </button>
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "6px 14px", background: "var(--beach-live-bg)", border: "1.5px solid var(--beach-live-border)", borderRadius: 999, fontSize: 12, fontWeight: 700, color: "var(--ink-2)" }}>
+          <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--mint)", flexShrink: 0, display: "inline-block", animation: "dotPulse 1.8s ease-in-out infinite" }} />
+          {lang === "ru" ? "342 НФТ заминчено" : "342 NFTs minted"}
+        </div>
+      </div>
+    </div>
+  );
 
   // ── Select ─────────────────────────────────────────────────────────────────
   const selectContent = (
@@ -411,30 +545,45 @@ function ConnectModal({ lang, open, onClose }: ConnectModalProps) {
         </p>
       </div>
 
-      <div className="px-4 py-3 space-y-2">
+      <div className="px-5 py-4" style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
         {connectors.map((connector) => {
           const isAGW = (connector.id + connector.name).toLowerCase().includes("abstract");
           return (
             <button
               key={connector.id}
               onClick={() => handleConnect(connector)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all"
               style={{
-                background: isAGW ? "#E8F9F3" : "var(--paper-3)",
-                border: isAGW ? "2.5px solid #5BD3B6" : "2px solid var(--ink)",
-                boxShadow: isAGW ? "3px 3px 0 #3BB89A" : "2px 2px 0 var(--shadow-sticker-color)",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 7,
+                width: 72, background: "transparent", border: "none", cursor: "pointer",
+                padding: "4px 2px", borderRadius: 14,
+                transition: "transform 0.15s",
+                position: "relative",
               }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translate(1px,1px)"; e.currentTarget.style.boxShadow = isAGW ? "1px 1px 0 var(--mint-deep)" : "1px 1px 0 var(--shadow-sticker-color)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = isAGW ? "3px 3px 0 var(--mint-deep)" : "2px 2px 0 var(--shadow-sticker-color)"; }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = ""; }}
             >
-              <ConnectorIcon id={connector.id} name={connector.name}/>
-              <span className="flex-1 text-left text-sm font-bold" style={{ color: "var(--ink-2)" }}>
+              <div style={{
+                width: 56, height: 56, borderRadius: 16, overflow: "hidden",
+                border: isAGW ? "2.5px solid var(--mint)" : "2px solid var(--outline)",
+                boxShadow: isAGW ? "3px 3px 0 var(--mint)" : "2px 2px 0 var(--outline)",
+                flexShrink: 0,
+              }}>
+                {connector.icon
+                  ? <img src={connector.icon} alt={connector.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}><ConnectorIcon id={connector.id} name={connector.name} /></div>
+                }
+              </div>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "var(--ink-2)", textAlign: "center", lineHeight: 1.2, letterSpacing: 0.2 }}>
                 {connector.name}
               </span>
               {isAGW && (
-                <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shrink-0" style={{ background: "var(--mint)", color: "var(--ink)", border: "1.5px solid var(--ink)" }}>
-                  {lang === "ru" ? "Рекомендуем" : "Recommended"}
-                </span>
+                <span style={{
+                  position: "absolute", top: -4, right: -4,
+                  width: 16, height: 16, borderRadius: "50%",
+                  background: "var(--mint)", border: "1.5px solid var(--outline)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 9, lineHeight: 1,
+                }}>★</span>
               )}
             </button>
           );
@@ -469,35 +618,20 @@ function ConnectModal({ lang, open, onClose }: ConnectModalProps) {
           {lang === "ru" ? "Подтверди в кошельке" : "Confirm in Wallet"}
         </h2>
 
-        {/* Countdown timer */}
-        <div className="flex justify-end px-2 mb-1">
-          <span className="text-xs font-mono font-bold tabular-nums" style={{ color: countdown <= 10 ? "#FF7A6A" : "var(--ink-3)" }}>
-            0:{countdown.toString().padStart(2, "0")}
-          </span>
-        </div>
 
-        {/* Egg with animated dashed ring */}
-        <div className="relative flex items-center justify-center my-5" style={{ height: 150 }}>
-          <svg className="absolute" width="150" height="150" viewBox="0 0 150 150" fill="none">
-            <circle cx="75" cy="75" r="64" stroke="var(--mint)" strokeWidth="3" strokeDasharray="12 8" strokeLinecap="round">
-              <animateTransform attributeName="transform" type="rotate" from="0 75 75" to="360 75 75" dur="4s" repeatCount="indefinite"/>
-            </circle>
-          </svg>
-          <div className="absolute rounded-full" style={{ width: 120, height: 120, background: "radial-gradient(circle, rgba(38,198,168,0.18) 0%, transparent 70%)" }}/>
-          <div className="egg-shake relative z-10">
-            <svg width="80" height="96" viewBox="0 0 80 96" fill="none">
-              <ellipse cx="40" cy="90" rx="20" ry="4" fill="var(--ink)" opacity="0.1"/>
-              <path d="M40 4 C18 4 8 28 8 50 C8 72 22 88 40 88 C58 88 72 72 72 50 C72 28 62 4 40 4Z" fill="#D9D3C2" stroke="var(--ink)" strokeWidth="2.5"/>
-              <ellipse cx="28" cy="26" rx="5" ry="8" fill="white" opacity="0.22" transform="rotate(-20 28 26)"/>
-              <path className="crack-line" d="M40 12 L45 28 L37 36 L43 54" stroke="#1A1A1A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-            </svg>
+        {/* Egg with ripple waves */}
+        <div className="relative my-5" style={{ height: 105, overflow: "visible" }}>
+          <div className="absolute inset-0 flex items-center justify-center" style={{ overflow: "visible" }}>
+<div className="connect-egg-shake relative z-10">
+              <img src="/wc/eggwalletopen.webp" alt="" style={{ width: 168, height: "auto", objectFit: "contain" }}/>
+            </div>
           </div>
         </div>
 
         <p className="text-sm leading-relaxed mb-4 whitespace-pre-line" style={{ color: "var(--ink-3)" }}>
           {lang === "ru"
-            ? "Открой кошелёк и подтверди подключение.\nЯйцо вот-вот треснет…"
-            : "Open your wallet and confirm.\nThe egg is about to crack…"}
+            ? "Открой кошелёк и подтверди подключение."
+            : "Open your wallet and confirm."}
         </p>
 
         <div className="flex items-center justify-center gap-2 mb-5">
@@ -509,9 +643,6 @@ function ConnectModal({ lang, open, onClose }: ConnectModalProps) {
           </svg>
         </div>
 
-        <SBtn variant="outline" onClick={() => setModalState("select")}>
-          {lang === "ru" ? "Отменить" : "Cancel"}
-        </SBtn>
       </div>
     </>
   );
@@ -529,7 +660,7 @@ function ConnectModal({ lang, open, onClose }: ConnectModalProps) {
       </div>
 
       <div className="px-4 py-3">
-        <div className="rounded-2xl p-4 mb-3" style={{ background: "var(--mint-soft)", border: "2px solid var(--ink)", boxShadow: "2px 2px 0 var(--shadow-sticker-color)" }}>
+        <div className="rounded-2xl p-4 mb-3" style={{ background: "var(--paper-2)", border: "2px solid var(--outline)", boxShadow: "2px 2px 0 var(--shadow-sticker-color)" }}>
           <div className="flex items-center gap-3 mb-4">
             {selConnector && <ConnectorIcon id={selConnector.id} name={selConnector.name}/>}
             <div>
@@ -547,13 +678,13 @@ function ConnectModal({ lang, open, onClose }: ConnectModalProps) {
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-xl p-3" style={{ background: "var(--paper-3)", border: "1.5px solid var(--ink)" }}>
+            <div className="rounded-xl p-3" style={{ background: "var(--paper-3)", border: "1.5px solid var(--outline)" }}>
               <div className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: "var(--ink-3)" }}>
                 {lang === "ru" ? "Баланс" : "Balance"}
               </div>
               <div className="text-sm font-black" style={{ color: "var(--ink)" }}>{balanceStr}</div>
             </div>
-            <div className="rounded-xl p-3" style={{ background: "var(--paper-3)", border: "1.5px solid var(--ink)" }}>
+            <div className="rounded-xl p-3" style={{ background: "var(--paper-3)", border: "1.5px solid var(--outline)" }}>
               <div className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: "var(--ink-3)" }}>
                 {lang === "ru" ? "Сеть" : "Network"}
               </div>
@@ -566,8 +697,8 @@ function ConnectModal({ lang, open, onClose }: ConnectModalProps) {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <SBtn variant="primary" onClick={() => { onClose(); setTimeout(() => document.getElementById("app")?.scrollIntoView({ behavior: "smooth" }), 120); }}>
-            {lang === "ru" ? "Купить яйцо 🥚" : "Buy an Egg 🥚"}
+          <SBtn variant="primary" onClick={() => { setIsClosing(true); setTimeout(() => { onEnterApp?.(); onClose(); setIsClosing(false); }, 500); }}>
+            {lang === "ru" ? "Вперёд!" : "Let's go!"}
           </SBtn>
           <SBtn variant="outline" onClick={() => { disconnect(); onClose(); }}>
             {lang === "ru" ? "Отключить" : "Disconnect"}
@@ -593,20 +724,17 @@ function ConnectModal({ lang, open, onClose }: ConnectModalProps) {
 
       <div className="px-4 py-3">
         {error && (
-          <div className="rounded-2xl p-4 mb-4" style={{ background: "#FFE6E1", border: "2px solid #FF7A6A", boxShadow: "2px 2px 0 #FF7A6A" }}>
+          <div className="rounded-2xl p-4 mb-4" style={{ background: "var(--down-soft)", border: "2px solid var(--down)", boxShadow: "2px 2px 0 var(--down)" }}>
             <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl shrink-0" style={{ background: "#FF7A6A", border: "1.5px solid var(--ink)" }}>
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl shrink-0" style={{ background: "var(--down)", border: "1.5px solid var(--outline)" }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
                   <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
                   <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
                 </svg>
               </div>
               <div>
-                <div className="text-sm font-bold mb-0.5" style={{ color: "var(--ink)" }}>
+                <div className="text-sm font-bold" style={{ color: "var(--ink)" }}>
                   {lang === "ru" ? "Ошибка подключения" : "Connection error"}
-                </div>
-                <div className="text-xs font-mono leading-relaxed" style={{ color: "var(--ink-3)" }}>
-                  {error.slice(0, 100)}{error.length > 100 ? "…" : ""}
                 </div>
               </div>
             </div>
@@ -623,28 +751,35 @@ function ConnectModal({ lang, open, onClose }: ConnectModalProps) {
     </>
   );
 
-  const moodMap: Record<ModalState, "happy" | "waiting" | "celebrating" | "sad"> = {
-    select: "happy",
-    connecting: "waiting",
-    success: "celebrating",
-    error: "sad",
-  };
+  const penguinImg = isDark
+    ? { select: "/wc/dark_mood_1.webp", connecting: "/wc/dark_mood_2.webp", success: "/wc/dark_mood_3.webp", error: "/wc/dark_mood_4.webp" }
+    : { select: "/wc/light_mood_1.webp", connecting: "/wc/light_mood_2.webp", success: "/wc/light_mood_3.webp", error: "/wc/light_mood_4.webp" };
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-[9990] flex items-center justify-center"
-      style={{ background: "rgba(20,30,50,0.55)", backdropFilter: "blur(8px)" }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
+      <div
+        className="fixed inset-0 z-[9990] flex items-center justify-center"
+        onClick={(e) => { if (e.target === e.currentTarget && displayState !== "cta") onClose(); }}
+      >
+        <div style={{ position: "absolute", inset: 0, background: "var(--overlay-backdrop)", backdropFilter: "blur(6px)", opacity: (displayState === "cta" || displayState === "success") ? 0 : 1, transition: "opacity 800ms ease", pointerEvents: "none" }} />
       <style>{`
         @keyframes modalIn { from { opacity:0; transform:scale(0.92) } to { opacity:1; transform:scale(1) } }
         @keyframes crackDraw { from { stroke-dashoffset:70 } to { stroke-dashoffset:0 } }
         .crack-line { stroke-dasharray:70; animation:crackDraw 1.2s ease-in-out 0.4s forwards; }
+        @keyframes connectRipple { 0% { transform:scale(1); opacity:0.7; } 100% { transform:scale(3.8); opacity:0; } }
+        @keyframes connectShake { 0%,78%,100% { transform:translateX(0) rotate(0deg); } 80% { transform:translateX(-6px) rotate(-5deg); } 82% { transform:translateX(6px) rotate(5deg); } 84% { transform:translateX(-5px) rotate(-3deg); } 86% { transform:translateX(4px) rotate(2deg); } 88% { transform:translateX(-2px) rotate(-1deg); } 90% { transform:translateX(1px) rotate(0deg); } }
+        .connect-egg-shake { animation:connectShake 3.5s ease-in-out infinite; }
+        .connect-ripple { animation:connectRipple 2s ease-out infinite; }
+        @keyframes modalContentIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        .modal-content-transition { animation:modalContentIn 220ms ease-out both; }
+        @keyframes backdropIn { from { opacity:0; } to { opacity:1; } }
+        @keyframes modalOverlayOut { from { opacity:1; transform:scale(1); } to { opacity:0; transform:scale(0.96); } }
       `}</style>
-      <div className="relative w-full max-w-[460px] mx-4">
-        {/* Penguin mascot — peeks above modal */}
-        <div className="absolute left-1/2 -translate-x-1/2 z-10 pointer-events-none" style={{ top: -76 }}>
-          <PenguinMascot mood={moodMap[modalState]} size={120}/>
+      <div className="relative w-full max-w-[480px] mx-4" style={{ animation: isClosing ? "modalOverlayOut 500ms ease-in forwards" : "modalIn 240ms ease-out both" }}>
+        {/* Penguin mascot — peeks above modal, hidden for cta */}
+        <div className="absolute left-1/2 -translate-x-1/2 z-10 pointer-events-none" style={{ top: -76, width: 120, height: 120, opacity: displayState === "cta" ? 0 : 1, transition: "opacity 800ms ease" }}>
+          {(Object.entries(penguinImg) as [ModalState, string][]).map(([state, src]) => (
+            <img key={state} src={src} alt="" style={{ position: "absolute", width: 120, height: 120, objectFit: "contain", opacity: displayState === state ? 1 : 0, transition: "opacity 600ms ease" }} />
+          ))}
         </div>
 
         {/* Modal card */}
@@ -652,32 +787,26 @@ function ConnectModal({ lang, open, onClose }: ConnectModalProps) {
           className="overflow-hidden rounded-[24px]"
           style={{
             background: "var(--paper)",
-            border: "3px solid #1A1A1A",
-            boxShadow: "6px 8px 0 #1A1A1A",
+            border: "3px solid var(--outline)",
+            boxShadow: "var(--shadow-sticker)",
             paddingTop: 14,
-            animation: "modalIn 240ms ease-out both",
+            minHeight: 420,
           }}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 py-2.5" style={{ borderBottom: "1.5px solid rgba(15,17,21,0.10)" }}>
-            <AbstractPill/>
-            <button
-              onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-full transition-colors"
-              style={{ color: "var(--ink-2)" }}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(15,17,21,0.08)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <path d="M18 6L6 18M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
+          {/* Header — only AbstractPill, no close button, hidden for cta */}
+          {displayState !== "cta" && (
+            <div className="flex items-center px-5 py-2.5" style={{ borderBottom: "1.5px solid var(--divider)" }}>
+              <AbstractPill/>
+            </div>
+          )}
 
-          {modalState === "select"     && selectContent}
-          {modalState === "connecting" && connectingContent}
-          {modalState === "success"    && successContent}
-          {modalState === "error"      && errorContent}
+          <div style={{ opacity: contentOpacity, transition: "opacity 320ms ease", minHeight: 340 }}>
+            {displayState === "cta"        && ctaContent}
+            {displayState === "select"     && selectContent}
+            {displayState === "connecting" && connectingContent}
+            {displayState === "success"    && successContent}
+            {displayState === "error"      && errorContent}
+          </div>
         </div>
       </div>
     </div>,
@@ -702,20 +831,34 @@ function ConnectButton({ lang, onOpenConnect }: { lang: string; onOpenConnect: (
 // ─────────────────────────────────────────────────────────────────────────────
 // Exports
 // ─────────────────────────────────────────────────────────────────────────────
-type Props = { lang: string; ctaHost: HTMLElement | null };
+type Props = {
+  lang: string;
+  ctaHost: HTMLElement | null;
+  theme: "light" | "dark";
+  setTheme: (t: "light" | "dark") => void;
+  themeReady: boolean;
+  onEnterApp?: () => void;
+};
 
-export function ConnectPortals({ lang, ctaHost }: Props) {
-  const { isConnected } = useAccount();
+export function ConnectPortals({ lang, ctaHost, theme, setTheme, themeReady, onEnterApp }: Props) {
+  const { isConnected, status } = useAccount();
   const [connectOpen, setConnectOpen] = useState(false);
+  const wasReconnectingRef = useRef(_hadPreviousWalletConnection());
+  useEffect(() => {
+    if (status === "reconnecting") { wasReconnectingRef.current = true; return; }
+    if (status === "disconnected") { wasReconnectingRef.current = false; setConnectOpen(true); }
+    if (status === "connected" && !wasReconnectingRef.current) setConnectOpen(true);
+    if (status === "connected") wasReconnectingRef.current = false;
+  }, [status]);
 
   const button = isConnected
-    ? <WalletButton lang={lang}/>
+    ? <WalletButton theme={theme} setTheme={setTheme} themeReady={themeReady}/>
     : <ConnectButton lang={lang} onOpenConnect={() => setConnectOpen(true)}/>;
 
   return (
     <>
       {ctaHost ? createPortal(button, ctaHost) : null}
-      <ConnectModal lang={lang} open={connectOpen} onClose={() => setConnectOpen(false)}/>
+      <ConnectModal lang={lang} open={connectOpen} onClose={() => setConnectOpen(false)} onEnterApp={onEnterApp}/>
     </>
   );
 }
@@ -728,14 +871,14 @@ export function WrongNetworkBlocker({ lang }: { lang: string }) {
   if (!isConnected || chainId === abstractTestnet.id) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.70)", backdropFilter: "blur(3px)" }}>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ background: "var(--overlay-backdrop)" }}>
       <div className="mx-4 w-full max-w-sm">
         {/* Sad penguin above */}
         <div className="flex justify-center mb-[-14px] relative z-10">
           <PenguinMascot mood="sad" size={64}/>
         </div>
-        <div className="rounded-3xl overflow-hidden" style={{ background: "var(--paper)", border: "2.5px solid var(--ink)", boxShadow: "6px 6px 0 var(--shadow-sticker-color)" }}>
-          <div className="flex items-center justify-between px-5 py-2.5" style={{ borderBottom: "1.5px solid rgba(15,17,21,0.10)" }}>
+        <div className="rounded-3xl overflow-hidden" style={{ background: "var(--paper)", border: "2.5px solid var(--outline)", boxShadow: "6px 6px 0 var(--shadow-sticker-color)" }}>
+          <div className="flex items-center justify-between px-5 py-2.5" style={{ borderBottom: "1.5px solid var(--divider)" }}>
             <AbstractPill/>
           </div>
           <div className="px-6 py-5 text-center">

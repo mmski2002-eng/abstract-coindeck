@@ -14,9 +14,9 @@ const EGG_STARS: { top?: string; left?: string; right?: string; bottom?: string;
 export type ChestBuyData = { type: number; label: string; emoji: string; rarity: string; desc: string; price: number; buyBg: string };
 
 const THEME = [
-  { accent: "#D9D3C2", glow: "rgba(217,211,194,0.22)", b1: "rgba(217,211,194,0.45)", b2: "rgba(200,195,180,0.45)", bg: "rgba(217,211,194,0.08)" },
-  { accent: "#7AC7E8", glow: "rgba(122,199,232,0.22)", b1: "rgba(122,199,232,0.45)", b2: "rgba(80,160,210,0.45)",  bg: "rgba(122,199,232,0.08)" },
-  { accent: "#26C6A8", glow: "rgba(38,198,168,0.22)",  b1: "rgba(38,198,168,0.45)",  b2: "rgba(20,160,130,0.45)", bg: "rgba(38,198,168,0.08)"  },
+  { accent: "var(--rarity-common)", panel: "var(--paper-2)" },
+  { accent: "var(--rarity-rare)", panel: "var(--sky-soft)" },
+  { accent: "var(--rarity-epic)", panel: "var(--mint-soft)" },
 ];
 
 type Props = {
@@ -42,7 +42,7 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[150] flex items-center justify-center backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[150] flex items-center justify-center p-4"
       style={{ background: "var(--overlay-backdrop)" }}
       onClick={onClose}
     >
@@ -50,7 +50,7 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
         className="relative w-full max-w-sm rounded-2xl overflow-hidden"
         style={{
           background: "var(--modal-bg)",
-          border: "2.5px solid var(--ink)",
+          border: "2.5px solid var(--outline)",
           boxShadow: "var(--shadow-sticker)",
         }}
         onClick={(e) => e.stopPropagation()}
@@ -63,7 +63,7 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
         <div className="relative flex flex-col items-center pt-8 pb-6 px-6 overflow-hidden">
           <div
             className="absolute inset-0 pointer-events-none"
-            style={{ background: `radial-gradient(ellipse at 50% 0%, ${t.bg} 0%, transparent 65%)` }}
+            style={{ background: t.panel, opacity: 0.45 }}
           />
           <div className="relative mb-4" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
             <div className="egg-ripple"   style={{ color: t.accent, animationDelay: `${([0, -4, -8] as const)[modal.type]}s` }} />
@@ -88,7 +88,7 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
             <div style={{
               marginTop: 8, display: "inline-flex", alignItems: "center",
               background: t.accent, color: "var(--ink)",
-              border: "2.5px solid var(--ink)", borderRadius: 999,
+              border: "2.5px solid var(--outline)", borderRadius: 999,
               padding: "4px 10px", fontSize: 10, letterSpacing: 1.6,
               fontWeight: 800, boxShadow: "2px 2px 0 var(--card-shadow)",
             }}>
@@ -98,7 +98,7 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
         </div>
 
         {/* ── Divider ── */}
-        <div className="mx-6 h-px" style={{ background: `linear-gradient(to right, transparent, ${t.accent}35, transparent)` }} />
+        <div className="mx-6 h-px" style={{ background: "var(--ink)", opacity: 0.14 }} />
 
         {/* ── Body ── */}
         <div className="p-6 space-y-4">
@@ -113,13 +113,13 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
               <button
                 onClick={() => handleQtyChange(-1)}
                 className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90"
-                style={{ background: t.accent, border: "2px solid var(--ink)", color: "var(--ink)" }}
+                style={{ background: t.accent, border: "2px solid var(--outline)", color: "var(--ink)" }}
               >−</button>
               <span className="w-10 text-center font-bold text-base tabular-nums" style={{ color: "var(--panel-text)" }}>{chestBuyQty}</span>
               <button
                 onClick={() => handleQtyChange(1)}
                 className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90"
-                style={{ background: t.accent, border: "2px solid var(--ink)", color: "var(--ink)" }}
+                style={{ background: t.accent, border: "2px solid var(--outline)", color: "var(--ink)" }}
               >+</button>
             </div>
           </div>
@@ -127,7 +127,7 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
           {/* Total row */}
           <div
             className="flex items-center justify-between rounded-xl px-4 py-3"
-            style={{ background: t.accent + "0a", border: `1px solid ${t.accent}22` }}
+            style={{ background: "var(--sunken)", border: "1px solid var(--panel-border)" }}
           >
             <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--nft-muted)" }}>
               {lang === "ru" ? "Итого" : "Total"}

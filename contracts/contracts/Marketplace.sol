@@ -28,6 +28,15 @@ contract Marketplace is ReentrancyGuard {
         uint256 vecIdx; // position in listingIds for O(1) swap-remove
     }
 
+    struct ListingPageBuffers {
+        uint256[] ids;
+        address[] sellers;
+        uint256[] eggMonetIds;
+        uint8[] playerIds;
+        uint8[] tiers;
+        uint256[] prices;
+    }
+
     mapping(uint256 => Listing) public listings;         // listingId → Listing
     mapping(uint256 => uint256) public byEggMonet;       // eggMonetId → listingId
     uint256[] public listingIds;
@@ -260,24 +269,32 @@ contract Marketplace is ReentrancyGuard {
         uint8[]   memory tiers,
         uint256[] memory prices
     ) {
-        uint256 total  = listingIds.length;
-        uint256 end    = offset + limit > total ? total : offset + limit;
-        uint256 len    = end > offset ? end - offset : 0;
-        ids         = new uint256[](len);
-        sellers     = new address[](len);
-        eggMonetIds = new uint256[](len);
-        playerIds   = new uint8[](len);
-        tiers       = new uint8[](len);
-        prices      = new uint256[](len);
+        ListingPageBuffers memory page;
+        uint256 len = _listingPageLength(offset, limit);
+        page.ids         = new uint256[](len);
+        page.sellers     = new address[](len);
+        page.eggMonetIds = new uint256[](len);
+        page.playerIds   = new uint8[](len);
+        page.tiers       = new uint8[](len);
+        page.prices      = new uint256[](len);
+
         for (uint256 i = 0; i < len; i++) {
             Listing memory l = listings[listingIds[offset + i]];
-            ids[i]          = l.id;
-            sellers[i]      = l.seller;
-            eggMonetIds[i]  = l.eggMonetId;
-            playerIds[i]    = l.playerId;
-            tiers[i]        = l.tier;
-            prices[i]       = l.price;
+            page.ids[i]         = l.id;
+            page.sellers[i]     = l.seller;
+            page.eggMonetIds[i] = l.eggMonetId;
+            page.playerIds[i]   = l.playerId;
+            page.tiers[i]       = l.tier;
+            page.prices[i]      = l.price;
         }
+
+        return (page.ids, page.sellers, page.eggMonetIds, page.playerIds, page.tiers, page.prices);
+    }
+
+    function _listingPageLength(uint256 offset, uint256 limit) internal view returns (uint256) {
+        uint256 total = listingIds.length;
+        uint256 end = offset + limit > total ? total : offset + limit;
+        return end > offset ? end - offset : 0;
     }
 
     function getFeesBps() external pure returns (uint256) {

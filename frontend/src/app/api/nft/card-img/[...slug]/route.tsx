@@ -24,7 +24,7 @@ export async function GET(
 
   return NextResponse.json({
     name: `${name} Card`,
-    description: `CoinDeck NFT — ${ticker} (${role})`,
+    description: `HeavyEggs NFT — ${ticker} (${role})`,
     image: `${origin}/cards/${playerId}_0.png`,
     attributes: [
       { trait_type: "Coin", value: ticker },

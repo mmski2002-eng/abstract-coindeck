@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   HEROES, COIN_TICKERS, COIN_ICONS, PLAYER_TEAMS,
-  TIER_COLORS, TIER_NAMES, TIER_MULTS, PLAYER_ROLE_IDS, CARD_TIER_STYLES,
+  TIER_NAMES, TIER_MULTS, PLAYER_ROLE_IDS, CARD_TIER_STYLES,
 } from "../constants";
 import type { TournamentStateData } from "../types";
 
@@ -123,8 +123,8 @@ export function TournamentTab({
       <div className="mt-2 flex flex-col items-center justify-center py-16 gap-4">
         <div style={{
           width: 40, height: 40, borderRadius: "50%",
-          border: "3px solid rgba(176,38,255,0.15)",
-          borderTop: "3px solid #B026FF",
+          border: "3px solid var(--mint-soft)",
+          borderTop: "3px solid var(--mint)",
           animation: "spin 0.9s linear infinite",
         }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -134,10 +134,10 @@ export function TournamentTab({
 
   return (
     <div className="mt-2 space-y-4">
-      {tnError && <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-200">{tnError}</div>}
+      {tnError && <div className="rounded-xl p-3 text-sm font-semibold" style={{ border: "2px solid var(--down)", background: "var(--paper-2)", color: "var(--down)", boxShadow: "2px 2px 0 var(--down)" }}>{tnError}</div>}
 
       {!tnState && !tnRefreshing && (
-        <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 text-center text-sm text-amber-200">
+        <div className="rounded-xl p-4 text-center text-sm font-semibold" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--outline)" }}>
           {lang === "ru" ? "Инвестирование ещё не запущено администратором" : "Investing not started yet"}
         </div>
       )}
@@ -168,22 +168,22 @@ export function TournamentTab({
         return (
           <div className="flex items-end justify-end gap-3 flex-wrap sm:flex-nowrap">
             <div className="flex items-center gap-[10px] shrink-0">
-              <div className="rounded-xl backdrop-blur px-4 py-2.5 flex items-center gap-3" style={{ width: 210, border: "2.5px solid var(--ink)", background: "var(--my-lots-bg)", boxShadow: "4px 4px 0 var(--card-shadow)" }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-cyan-400 shrink-0">
+              <div className="flex items-center gap-3 rounded-xl px-4 py-2.5" style={{ width: 210, border: "2.5px solid var(--outline)", background: "var(--paper-2)", boxShadow: "4px 4px 0 var(--card-shadow)" }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0" style={{ color: "var(--info)" }}>
                   <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                 </svg>
                 <div className="min-w-0">
-                  {timerSubLabel && <div className="text-[9px] font-semibold uppercase tracking-widest text-white/30 leading-none mb-0.5">{timerSubLabel}</div>}
+                  {timerSubLabel && <div className="mb-0.5 text-[9px] font-semibold uppercase tracking-widest leading-none" style={{ color: "var(--ink-3)" }}>{timerSubLabel}</div>}
                   <div className="font-mono text-lg font-black tracking-tight tabular-nums leading-none"
-                    style={{ background: "linear-gradient(90deg,#00F0FF,#B026FF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", filter: "drop-shadow(0 0 6px rgba(0,240,255,0.35))" }}>
+                    style={{ color: "var(--ink)" }}>
                     {dayCountdown || "00:00:00"}
                   </div>
-                  <div className="text-[9px] text-white/30 mt-0.5 leading-none truncate">{timerLabel}</div>
+                  <div className="mt-0.5 truncate text-[9px] leading-none" style={{ color: "var(--ink-3)" }}>{timerLabel}</div>
                 </div>
               </div>
               {tnLineups.length > 0 && (
-                <div className="rounded-xl border border-cyan-400/40 bg-cyan-500/10 px-3 shrink-0 shadow-lg shadow-cyan-400/20 self-stretch flex items-center">
-                  <div className="text-sm font-bold text-white drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
+                <div className="flex shrink-0 items-center self-stretch rounded-xl px-3" style={{ border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--outline)" }}>
+                  <div className="text-sm font-bold">
                     TOTAL {weeklyTotal} pts
                   </div>
                 </div>
@@ -196,24 +196,24 @@ export function TournamentTab({
       {/* Lineup builder */}
       <style>{`
         @keyframes eligiblePulse {
-          0%, 100% { box-shadow: inset 0 0 0 0 rgba(234,179,8,0); }
-          50% { box-shadow: inset 0 0 14px 4px rgba(234,179,8,0.50), inset 0 0 4px 1px rgba(234,179,8,0.30); }
+          0%, 100% { box-shadow: 2px 2px 0 var(--outline), inset 0 0 0 0 var(--warn); }
+          50% { box-shadow: 2px 2px 0 var(--outline), inset 0 0 0 4px var(--warn); }
         }
         .eligible-glow { animation: eligiblePulse 1.8s ease-in-out infinite; }
       `}</style>
       {tnState?.active && tnState.startTimestamp * 1000 > nowMs && hasWalletAccount && (
-        <div className="rounded-2xl border border-violet-500/20 bg-violet-500/10 p-4 text-center text-sm text-violet-200">
+        <div className="rounded-xl p-4 text-center text-sm font-semibold" style={{ border: "2px solid var(--outline)", background: "var(--sky-soft)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--outline)" }}>
           {lang === "ru" ? "Турнир стартует завтра — выставить портфель можно будет после старта" : "Tournament starts tomorrow — you can submit your portfolio once it begins"}
         </div>
       )}
       {tnState?.active && tnState.currentDay === 0 && !tnRefreshing && (viewEpoch === null || viewEpoch === tnState.epoch) && (
-        <div className="rounded-2xl border border-amber-500/25 bg-amber-950/30 p-4 flex items-start gap-3">
+        <div className="flex items-start gap-3 rounded-xl p-4" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--outline)" }}>
           <div className="text-xl mt-0.5">⏳</div>
           <div>
-            <div className="text-sm font-semibold text-amber-200">
+            <div className="text-sm font-semibold">
               {lang === "ru" ? "Предыдущий турнир завершён — рассчитываются результаты" : "Previous tournament ended — results are being calculated"}
             </div>
-            <div className="text-xs text-amber-400/70 mt-1">
+            <div className="mt-1 text-xs" style={{ color: "var(--ink-2)" }}>
               {lang === "ru" ? "Новый раунд начнётся автоматически. Выставить портфель можно будет с первого дня новой эпохи." : "A new round will start automatically. You can submit a portfolio from day 1 of the new epoch."}
             </div>
           </div>
@@ -228,17 +228,17 @@ export function TournamentTab({
             .filter((c): c is (typeof flCards)[number] => !!c && !seenKeys.has(c.cardAddr) && (seenKeys.add(c.cardAddr), true));
           const feeMove = cancelFee > 0 ? (cancelFee / 1e18).toFixed(4) : null;
           return (
-            <div className="rounded-2xl backdrop-blur-xl overflow-hidden" style={{ border: "2.5px solid var(--ink)", background: "var(--my-lots-bg)", boxShadow: "4px 4px 0 var(--card-shadow)" }}>
+            <div className="overflow-hidden rounded-2xl" style={{ border: "2.5px solid var(--outline)", background: "var(--paper-2)", boxShadow: "4px 4px 0 var(--card-shadow)" }}>
               {/* Header */}
-              <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.06]">
-                <div className="w-8 h-8 rounded-xl bg-violet-500/15 border border-violet-500/30 flex items-center justify-center text-violet-300 text-sm shrink-0">
+              <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: "2px solid var(--outline)" }}>
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-sm" style={{ border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--ink)" }}>
                   🔒
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-white">
+                  <div className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
                     {lang === "ru" ? `День ${tnState.currentDay} · Портфель заблокирован` : `Day ${tnState.currentDay} · Portfolio locked`}
                   </div>
-                  <div className="text-[11px] text-zinc-500 mt-0.5">
+                  <div className="mt-0.5 text-[11px]" style={{ color: "var(--ink-3)" }}>
                     {lang === "ru" ? "Карточки защищены от продажи и передачи" : "Cards are protected from sale and transfer"}
                   </div>
                 </div>
@@ -252,16 +252,15 @@ export function TournamentTab({
                       const ts = CARD_TIER_STYLES[card.tier] ?? CARD_TIER_STYLES[0];
                       return (
                         <div key={card.cardAddr} className="relative flex flex-col items-center gap-1 w-[13%] min-w-0">
-                          <div className="relative w-full aspect-square rounded-xl overflow-hidden border" style={{ borderColor: ts.border }}>
-                            <div className="absolute inset-0" style={{ background: ts.gradient, opacity: 0.4 }} />
+                          <div className="relative w-full aspect-square overflow-hidden rounded-xl" style={{ border: "2px solid var(--outline)", background: ts.color }}>
                             <img src={COIN_ICONS[card.playerId]} alt="" className="absolute inset-0 w-full h-full object-contain p-1 opacity-80" />
                             <div className="absolute inset-0 flex items-end justify-center pb-1">
                               <span className="text-[7px] font-bold uppercase tracking-widest" style={{ color: ts.color }}>{TIER_NAMES[card.tier]}</span>
                             </div>
                             {/* Lock badge */}
-                            <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-black/70 flex items-center justify-center text-[8px]">🔒</div>
+                            <div className="absolute top-0.5 right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full text-[8px]" style={{ border: "1px solid var(--outline)", background: "var(--paper-2)" }}>🔒</div>
                           </div>
-                          <div className="text-[8px] font-semibold text-zinc-400 truncate w-full text-center leading-tight">{HEROES[card.playerId]}</div>
+                          <div className="w-full truncate text-center text-[8px] font-semibold leading-tight" style={{ color: "var(--ink-3)" }}>{HEROES[card.playerId]}</div>
                         </div>
                       );
                     })}
@@ -271,13 +270,13 @@ export function TournamentTab({
 
               {/* Cancel button */}
               <div className="px-5 pb-4">
-                <div className="rounded-xl border border-red-500/10 bg-red-950/20 p-3 mb-3">
-                  <div className="text-[11px] text-zinc-400 leading-relaxed">
+                <div className="mb-3 rounded-xl p-3" style={{ border: "2px solid var(--down)", background: "var(--paper-2)" }}>
+                  <div className="text-[11px] leading-relaxed" style={{ color: "var(--ink-2)" }}>
                     {lang === "ru"
                       ? "Отмена снимет лайнап и разблокирует карточки до конца дня."
                       : "Cancelling removes the lineup and unlocks cards until day end."}
                     {feeMove && (
-                      <span className="font-bold ml-1" style={{ color: "var(--red-text, #b91c1c)" }}>
+                      <span className="ml-1 font-bold" style={{ color: "var(--down)" }}>
                         {lang === "ru" ? `Стоимость: ${feeMove} ETH` : `Fee: ${feeMove} ETH`}
                       </span>
                     )}
@@ -286,7 +285,7 @@ export function TournamentTab({
                 <button
                   onClick={() => setCancelConfirmOpen(true)}
                   disabled={busy !== null}
-                  className="w-full rounded-xl border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 py-2.5 text-sm font-semibold text-red-400 hover:text-red-300 transition disabled:opacity-40">
+                  className="btn-sticker-destructive w-full py-2.5 text-sm">
                   {busy === "tn_cancel" ? "…" : (lang === "ru" ? "Отменить лайнап" : "Cancel lineup")}
                 </button>
               </div>
@@ -294,21 +293,21 @@ export function TournamentTab({
               {/* Confirm modal */}
               {cancelConfirmOpen && createPortal(
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setCancelConfirmOpen(false)} />
-                  <div className="relative z-10 w-full max-w-sm rounded-3xl border border-white/10 shadow-2xl overflow-hidden" style={{ background: "rgba(8,10,22,0.98)" }}>
+                  <div className="absolute inset-0" style={{ background: "var(--overlay-backdrop)" }} onClick={() => setCancelConfirmOpen(false)} />
+                  <div className="card-sticker relative z-10 w-full max-w-sm overflow-hidden">
                     <div className="p-6 space-y-4">
                       <div className="text-center">
                         <div className="text-2xl mb-2">⚠️</div>
-                        <div className="font-display font-bold text-base text-white mb-1">
+                        <div className="mb-1 font-display text-base font-bold" style={{ color: "var(--ink)" }}>
                           {lang === "ru" ? "Отменить лайнап?" : "Cancel lineup?"}
                         </div>
-                        <div className="text-sm text-zinc-400">
+                        <div className="text-sm" style={{ color: "var(--ink-2)" }}>
                           {lang === "ru"
                             ? "Очки за этот день не будут засчитаны. Действие необратимо."
                             : "Points for this day will not be counted. This cannot be undone."}
                         </div>
                         {feeMove && (
-                          <div className="mt-2 rounded-xl bg-red-500/10 border border-red-500/20 px-3 py-2 text-sm font-bold" style={{ color: "var(--red-text, #b91c1c)" }}>
+                          <div className="mt-2 rounded-xl px-3 py-2 text-sm font-bold" style={{ border: "2px solid var(--down)", background: "var(--paper-2)", color: "var(--down)" }}>
                             {lang === "ru" ? `Комиссия: ${feeMove} ETH` : `Fee: ${feeMove} ETH`}
                           </div>
                         )}
@@ -316,13 +315,13 @@ export function TournamentTab({
                       <div className="grid grid-cols-2 gap-2">
                         <button
                           onClick={() => setCancelConfirmOpen(false)}
-                          className="rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 py-2.5 text-sm font-semibold text-zinc-300 transition">
+                          className="btn-sticker-outline py-2.5 text-sm">
                           {lang === "ru" ? "Назад" : "Back"}
                         </button>
                         <button
                           onClick={() => { setCancelConfirmOpen(false); onCancelLineup(); }}
                           disabled={busy !== null}
-                          className="rounded-xl bg-red-600 hover:bg-red-500 py-2.5 text-sm font-bold text-white transition disabled:opacity-40">
+                          className="btn-sticker-destructive py-2.5 text-sm">
                           {lang === "ru" ? "Подтвердить" : "Confirm"}
                         </button>
                       </div>
@@ -335,17 +334,17 @@ export function TournamentTab({
           );
         }
         return (
-          <div className="rounded-2xl p-4 space-y-4" style={{ border: "2.5px solid var(--ink)", background: "var(--my-lots-bg)", boxShadow: "4px 4px 0 var(--card-shadow)" }} data-tour="invest-portfolio">
+          <div className="rounded-2xl p-4 space-y-4" style={{ border: "2.5px solid var(--outline)", background: "var(--my-lots-bg)", boxShadow: "4px 4px 0 var(--card-shadow)" }} data-tour="invest-portfolio">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
                   {lang === "ru" ? `День ${tnState.currentDay} · Взвешивание` : `Day ${tnState.currentDay} · Weigh-in`}
                 </div>
-                <div className="text-xs text-zinc-500 mt-0.5">
+                <div className="mt-0.5 text-xs" style={{ color: "var(--ink-3)" }}>
                   {lang === "ru" ? "Выбери яйцо для каждой категории" : "Pick an egg for each category"}
                 </div>
               </div>
-              <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 text-[11px] font-semibold text-amber-300 shrink-0">
+              <div className="shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-semibold" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)" }}>
                 ⚡ +{roleBonusPct}% {lang === "ru" ? "за роль" : "role bonus"}
               </div>
             </div>
@@ -357,34 +356,34 @@ export function TournamentTab({
                 const card = addr ? flCards.find((c) => c.cardAddr === addr) : null;
                 const isRoleMatch = card ? PLAYER_ROLE_IDS[card.playerId] === slotIdx : false;
                 const isOpen = lineupPickerSlot === slotIdx;
-                const tc = card ? TIER_COLORS[card.tier] : null;
+                const tierStyle = card ? CARD_TIER_STYLES[card.tier] : null;
                 return (
                   <button key={role}
                     onClick={() => { setLineupPickerSlot(isOpen ? null : slotIdx); setLineupPickerSearch(""); }}
-                    className={`relative flex flex-col items-center gap-1 rounded-xl border p-2 text-center transition ${card ? tc!.border : ""}${slotIdx === firstEmptySlot && !card && lineupPickerSlot === null ? " slot-invite" : ""}`}
+                    className={`relative flex flex-col items-center gap-1 rounded-xl p-2 text-center transition${slotIdx === firstEmptySlot && !card && lineupPickerSlot === null ? " slot-invite" : ""}`}
                     style={isOpen
-                      ? { borderColor: "var(--panel-border)", background: "var(--slot-empty-bg)" }
+                      ? { border: "2.5px solid var(--outline)", background: "var(--sky-soft)", boxShadow: "2px 2px 0 var(--outline)" }
                       : card
-                        ? { background: "var(--my-lots-bg)" }
-                        : { borderStyle: "dashed", borderColor: "var(--panel-border)", background: "var(--slot-empty-bg)" }
+                        ? { border: "2.5px solid var(--outline)", background: "var(--paper-2)", boxShadow: "2px 2px 0 var(--outline)" }
+                        : { border: "2.5px dashed var(--ink)", background: "var(--paper-2)" }
                     }
                   >
                     {card ? (
                       <>
-                        <div className="text-[9px] font-semibold text-zinc-400 uppercase tracking-wider leading-tight">{role}</div>
+                        <div className="text-[9px] font-semibold uppercase tracking-wider leading-tight" style={{ color: "var(--ink-3)" }}>{role}</div>
                         {/* Egg + coin overlay */}
                         <div className="relative w-full aspect-square flex items-center justify-center">
-                          <img src="/egg.webp" alt="" className="w-full h-full object-contain" style={{ filter: `drop-shadow(0 2px 8px ${CARD_TIER_STYLES[card.tier]?.glow ?? "rgba(168,85,247,0.4)"})` }} />
+                          <img src="/egg.webp" alt="" className="w-full h-full object-contain" />
                           <img src={COIN_ICONS[card.playerId]} alt="" className="absolute" style={{ width: "42%", height: "42%", objectFit: "contain", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
                           {isRoleMatch && <div className="absolute top-0.5 right-0.5 text-[10px] leading-none">⚡</div>}
                         </div>
-                        <div className="text-[10px] font-semibold text-white leading-tight truncate w-full">{HEROES[card.playerId]}</div>
-                        <span className={`text-[9px] rounded px-1 py-0.5 font-bold ${tc!.badge}`}>{TIER_NAMES[card.tier]}</span>
+                        <div className="w-full truncate text-[10px] font-semibold leading-tight" style={{ color: "var(--ink-2)" }}>{HEROES[card.playerId]}</div>
+                        <span className="rounded px-1 py-0.5 text-[9px] font-bold" style={{ border: "1.5px solid var(--outline)", background: tierStyle?.color ?? "var(--rarity-common)", color: "var(--ink)" }}>{TIER_NAMES[card.tier]}</span>
                       </>
                     ) : (
                       <div className="relative w-full aspect-square flex items-center justify-center">
                         <img src="/egg.webp" alt="" className="w-full h-full object-contain opacity-30" />
-                        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold uppercase tracking-wider text-center px-1 leading-tight" style={{ color: "#3A4049" }}>{role}</span>
+                        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold uppercase tracking-wider text-center px-1 leading-tight" style={{ color: "var(--ink-2)" }}>{role}</span>
                       </div>
                     )}
                   </button>
@@ -414,38 +413,36 @@ export function TournamentTab({
               });
               return createPortal(
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                  <div className="absolute inset-0 backdrop-blur-sm" style={{ background: "var(--overlay-backdrop)" }} onClick={() => { setLineupPickerSlot(null); setLineupPickerSearch(""); }} />
-                  <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-3xl shadow-2xl" style={{ background: "var(--modal-bg)", border: "1px solid var(--panel-border)", boxShadow: "var(--modal-shadow)" }}>
-                    <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid var(--panel-border)" }}>
+                  <div className="absolute inset-0" style={{ background: "var(--overlay-backdrop)" }} onClick={() => { setLineupPickerSlot(null); setLineupPickerSearch(""); }} />
+                  <div className="card-sticker relative z-10 w-full max-w-lg overflow-hidden">
+                    <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "2px solid var(--outline)" }}>
                       <div>
                         <div className="font-display font-bold text-sm uppercase tracking-widest" style={{ color: "var(--panel-text)" }}>
                           {lang === "ru" ? `Слот ${si + 1}` : `Slot ${si + 1}`}
-                          <span className="ml-2 text-cyan-400">{SLOT_ROLES[si]}</span>
+                          <span className="ml-2" style={{ color: "var(--info)" }}>{SLOT_ROLES[si]}</span>
                         </div>
                         {tnSelectedCards[si] && (
                           <button onClick={() => { const n = [...tnSelectedCards]; n[si] = null; setTnSelectedCards(n); }}
-                            className="mt-0.5 text-[10px] text-zinc-500 hover:text-red-400 transition">
+                            className="mt-0.5 text-[10px] transition" style={{ color: "var(--down)" }}>
                             {lang === "ru" ? "✕ снять текущую" : "✕ clear current"}
                           </button>
                         )}
                       </div>
                       <button onClick={() => { setLineupPickerSlot(null); setLineupPickerSearch(""); }}
-                        className="grid h-8 w-8 place-items-center rounded-xl transition text-base"
-                        style={{ background: "var(--button-secondary-bg)", color: "var(--button-secondary-text)", border: "1px solid var(--panel-border)" }}>✕</button>
+                        className="btn-sticker-ghost h-8 w-8 p-0 text-base">✕</button>
                     </div>
                     <div className="px-5 pt-4 pb-3 space-y-2.5">
                       <input type="text"
                         placeholder={lang === "ru" ? "Поиск по названию…" : "Search by name…"}
                         value={lineupPickerSearch}
                         onChange={(e) => setLineupPickerSearch(e.target.value)}
-                        className="w-full rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
-                        style={{ border: "2.5px solid var(--ink)", background: "var(--my-lots-bg)", boxShadow: "4px 4px 0 var(--card-shadow)", color: "var(--panel-text)" }}
+                        className="input-sticker w-full px-3 py-2 text-xs"
                       />
                       <div className="flex gap-2 flex-wrap">
                         {([null, 0, 1, 2, 3] as (number | null)[]).map((t) => (
                           <button key={t ?? "all"} onClick={() => setLineupPickerTier(t)}
-                            className={`whitespace-nowrap font-display font-bold uppercase tracking-widest text-[10px] px-3 py-1.5 rounded-md border transition-all${lineupPickerTier === t ? " nav-tab-active" : ""}`}
-                            style={lineupPickerTier === t ? { color: "var(--filter-chip-active-text)", borderColor: "var(--filter-chip-active-border)" } : { color: "var(--filter-chip-text)", background: "var(--filter-chip-bg)", borderColor: "var(--filter-chip-border)" }}>
+                            className="whitespace-nowrap rounded-full px-3 py-1.5 font-display text-[10px] font-bold uppercase tracking-widest transition-all"
+                            style={{ border: "2px solid var(--outline)", background: lineupPickerTier === t ? "var(--mint)" : "var(--paper-2)", color: lineupPickerTier === t ? "var(--ink)" : "var(--ink-2)", boxShadow: lineupPickerTier === t ? "2px 2px 0 var(--outline)" : "none" }}>
                             {t === null ? (lang === "ru" ? "Все" : "All") : TIER_NAMES[t]}
                           </button>
                         ))}
@@ -453,28 +450,28 @@ export function TournamentTab({
                     </div>
                     <div className="px-5 pb-5">
                       {options.length === 0 ? (
-                        <div className="py-10 text-center text-sm text-zinc-500">
+                        <div className="py-10 text-center text-sm" style={{ color: "var(--ink-3)" }}>
                           {lang === "ru" ? "Нет доступных карточек" : "No cards available"}
                         </div>
                       ) : (
                         <div className="grid grid-cols-5 gap-2 max-h-72 overflow-y-auto pr-0.5">
                           {options.map((c) => {
                             const isRoleMatch = PLAYER_ROLE_IDS[c.playerId] === si;
-                            const tc = TIER_COLORS[c.tier];
+                            const tierStyle = CARD_TIER_STYLES[c.tier] ?? CARD_TIER_STYLES[0];
                             return (
                               <button key={c.cardAddr}
                                 onClick={() => {
                                   const n = [...tnSelectedCards]; n[si] = c.cardAddr; setTnSelectedCards(n);
                                   setLineupPickerSlot(null); setLineupPickerSearch("");
                                 }}
-                                className={`flex flex-col items-center gap-1 rounded-xl border p-1.5 text-center transition hover:scale-105 active:scale-95 ${tc.border}${isRoleMatch ? " eligible-glow" : ""}`}
-                                style={{ background: "var(--my-lots-bg)" }}>
-                                <div className="relative w-full aspect-square rounded-lg overflow-hidden" style={{ background: "var(--panel-bg)" }}>
+                                className={`flex flex-col items-center gap-1 rounded-xl p-1.5 text-center transition hover:scale-105 active:scale-95${isRoleMatch ? " eligible-glow" : ""}`}
+                                style={{ border: "2px solid var(--outline)", background: "var(--paper-2)", boxShadow: "2px 2px 0 var(--outline)" }}>
+                                <div className="relative w-full aspect-square overflow-hidden rounded-lg" style={{ border: "1.5px solid var(--outline)", background: tierStyle.color }}>
                                   <img src={COIN_ICONS[c.playerId]} alt="" className="w-full h-full object-contain p-1 opacity-90" />
                                   {isRoleMatch && <div className="absolute top-0.5 right-0.5 text-[9px] leading-none">⚡</div>}
                                 </div>
                                 <div className="text-[9px] font-semibold truncate w-full leading-tight" style={{ color: "var(--panel-text)" }}>{HEROES[c.playerId]}</div>
-                                <span className={`text-[8px] rounded px-1 font-bold ${tc.badge}`}>{TIER_NAMES[c.tier]}</span>
+                                <span className="rounded px-1 text-[8px] font-bold" style={{ border: "1.5px solid var(--outline)", background: tierStyle.color, color: "var(--ink)" }}>{TIER_NAMES[c.tier]}</span>
                               </button>
                             );
                           })}
@@ -494,7 +491,7 @@ export function TournamentTab({
               style={{
                 width: "100%", padding: "12px 20px", whiteSpace: "nowrap",
                 background: "var(--header-btn-bg)", color: "var(--header-btn-color)",
-                border: "2.5px solid var(--ink)", borderRadius: 999,
+                border: "2.5px solid var(--outline)", borderRadius: 999,
                 fontSize: 13, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
                 boxShadow: "4px 4px 0 var(--card-shadow)", transition: "background .12s",
               }}>
@@ -506,7 +503,7 @@ export function TournamentTab({
 
       {/* My portfolios history */}
       {tnLineups.length > 0 && (
-        <div className="rounded-2xl p-4" style={{ border: "2.5px solid var(--ink)", background: "var(--my-lots-bg)", boxShadow: "4px 4px 0 var(--card-shadow)" }}>
+        <div className="rounded-2xl p-4" style={{ border: "2.5px solid var(--outline)", background: "var(--my-lots-bg)", boxShadow: "4px 4px 0 var(--card-shadow)" }}>
           <div className="text-xs font-semibold mb-3" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Мои портфели" : "My portfolios"}</div>
           <div className="space-y-3">
             {tnLineups.map((l) => {
@@ -517,7 +514,7 @@ export function TournamentTab({
               const totalPts = l.slots ? l.slots.reduce((sum, slot, si) => sum + heroScore(slot.playerId, slot.tier, si, dayScores), 0) : 0;
               const isExpanded = expandedPortfolios.has(l.day);
               return (
-                <div key={l.day} className="rounded-xl overflow-hidden" style={{ border: "2.5px solid var(--ink)", background: "var(--my-lots-bg)", boxShadow: "4px 4px 0 var(--card-shadow)" }}>
+                <div key={l.day} className="rounded-xl overflow-hidden" style={{ border: "2.5px solid var(--outline)", background: "var(--my-lots-bg)", boxShadow: "4px 4px 0 var(--card-shadow)" }}>
                   <button
                     onClick={() => {
                       const newSet = new Set(expandedPortfolios);
@@ -525,40 +522,41 @@ export function TournamentTab({
                       else newSet.add(l.day);
                       setExpandedPortfolios(newSet);
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 transition text-left">
-                    <span className="text-xs text-zinc-400 w-14 shrink-0">{lang === "ru" ? `День ${l.day}` : `Day ${l.day}`}</span>
-                    <span className={`text-[10px] rounded px-1.5 py-0.5 font-semibold shrink-0 ${l.league === 2 ? "bg-amber-900/60 text-amber-300" : l.league === 1 ? "bg-blue-900/60 text-blue-300" : "bg-zinc-800 text-zinc-300"}`}>{leagueLabel}</span>
-                    <span className="flex-1 text-sm font-black text-white">{hasScores ? <>{totalPts} <span className="text-xs font-normal text-zinc-400">pts</span></> : <span className="text-zinc-600 text-xs">—</span>}</span>
+                    className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition"
+                    style={{ background: isExpanded ? "var(--paper-3)" : "transparent" }}>
+                    <span className="w-14 shrink-0 text-xs" style={{ color: "var(--ink-3)" }}>{lang === "ru" ? `День ${l.day}` : `Day ${l.day}`}</span>
+                    <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold" style={{ border: "1.5px solid var(--outline)", background: l.league === 2 ? "var(--warn)" : l.league === 1 ? "var(--sky)" : "var(--rarity-common)", color: "var(--ink)" }}>{leagueLabel}</span>
+                    <span className="flex-1 text-sm font-black" style={{ color: "var(--ink)" }}>{hasScores ? <>{totalPts} <span className="text-xs font-normal" style={{ color: "var(--ink-3)" }}>pts</span></> : <span className="text-xs" style={{ color: "var(--ink-3)" }}>—</span>}</span>
                     <svg className={`w-4 h-4 shrink-0 transition-transform ${isExpanded ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
                   {isExpanded && l.slots && l.slots.length > 0 && (
-                    <div className="border-t border-white/5 divide-y divide-white/5">
+                    <div style={{ borderTop: "2px solid var(--outline)" }}>
                       {l.slots.map((slot, si) => {
                         const pts = cached ? heroScore(slot.playerId, slot.tier, si, dayScores) : 0;
-                        const tc = TIER_COLORS[slot.tier];
+                        const tierStyle = CARD_TIER_STYLES[slot.tier] ?? CARD_TIER_STYLES[0];
                         const hasRoleBonus = PLAYER_ROLE_IDS[slot.playerId] === si;
                         return (
                           <div key={si}>
-                            <div className="flex items-center gap-2 px-4 py-1.5">
-                              <img src={COIN_ICONS[slot.playerId]} alt="" className="h-6 w-10 rounded object-cover object-top shrink-0 opacity-80" />
-                              <span className="text-xs text-white/80 w-24 shrink-0 truncate">{HEROES[slot.playerId]}</span>
-                              <span className={`text-[9px] rounded px-1 py-0.5 font-semibold shrink-0 ${tc.badge}`}>{TIER_NAMES[slot.tier]}</span>
-                              <span className="text-[9px] text-zinc-500 shrink-0">{SLOT_ROLES[si]}</span>
-                              {hasRoleBonus && <span className="text-[9px] text-emerald-400 shrink-0">+role</span>}
+                            <div className="flex items-center gap-2 px-4 py-1.5" style={{ borderBottom: "1px solid var(--divider)" }}>
+                              <img src={COIN_ICONS[slot.playerId]} alt="" className="h-6 w-10 shrink-0 rounded object-cover object-top opacity-80" style={{ border: "1.5px solid var(--outline)", background: tierStyle.color }} />
+                              <span className="w-24 shrink-0 truncate text-xs" style={{ color: "var(--ink-2)" }}>{HEROES[slot.playerId]}</span>
+                              <span className="shrink-0 rounded px-1 py-0.5 text-[9px] font-semibold" style={{ border: "1.5px solid var(--outline)", background: tierStyle.color, color: "var(--ink)" }}>{TIER_NAMES[slot.tier]}</span>
+                              <span className="shrink-0 text-[9px]" style={{ color: "var(--ink-3)" }}>{SLOT_ROLES[si]}</span>
+                              {hasRoleBonus && <span className="shrink-0 text-[9px] font-semibold" style={{ color: "var(--up)" }}>+role</span>}
                               {hasScores && (
-                                <div className="text-xs text-white/80 shrink-0 ml-2 flex flex-col items-start">
+                                <div className="ml-2 flex shrink-0 flex-col items-start text-xs" style={{ color: "var(--ink-2)" }}>
                                   <div className="flex items-center gap-1">
                                     <span>{dayScores[slot.playerId] ?? 0} pts</span>
                                     <span>×</span>
                                     <span>{TIER_MULTS[slot.tier] ?? 100}%</span>
-                                    <span className="text-zinc-500">({lang === "ru" ? "редкость" : "rarity"})</span>
+                                    <span style={{ color: "var(--ink-3)" }}>({lang === "ru" ? "редкость" : "rarity"})</span>
                                     {hasRoleBonus && (
                                       <>
                                         <span>×</span>
                                         <span>{((100 + roleBonusPct) / 100).toFixed(2)}</span>
-                                        <span className="text-zinc-500">({lang === "ru" ? "роль" : "role"})</span>
+                                        <span style={{ color: "var(--ink-3)" }}>({lang === "ru" ? "роль" : "role"})</span>
                                       </>
                                     )}
                                     <span>=</span>
@@ -567,7 +565,7 @@ export function TournamentTab({
                                 </div>
                               )}
                               <span className="flex-1" />
-                              <span className={`text-xs font-bold shrink-0 ${hasScores ? "text-white" : "text-zinc-600"}`}>{hasScores ? pts : "—"} pts</span>
+                              <span className="shrink-0 text-xs font-bold" style={{ color: hasScores ? "var(--ink)" : "var(--ink-3)" }}>{hasScores ? pts : "—"} pts</span>
                             </div>
                           </div>
                         );
@@ -575,7 +573,7 @@ export function TournamentTab({
                     </div>
                   )}
                   {isExpanded && (!l.slots || l.slots.length === 0) && (
-                    <div className="border-t border-white/5 px-4 py-2 text-[10px] text-zinc-600">
+                    <div className="px-4 py-2 text-[10px]" style={{ borderTop: "2px solid var(--outline)", color: "var(--ink-3)" }}>
                       {lang === "ru" ? "Портфель не сохранён (сабмит до обновления)" : "Portfolio not cached (submitted before update)"}
                     </div>
                   )}
@@ -636,20 +634,20 @@ export function TournamentTab({
 
         return (
           <div className="mt-2 space-y-4">
-            <details className="rounded-xl" style={{ border: "2.5px solid var(--ink)", background: "var(--my-lots-bg)", boxShadow: "4px 4px 0 var(--card-shadow)" }}>
-              <summary className="cursor-pointer px-3 py-2 text-xs text-zinc-400 hover:text-white transition select-none">
+            <details className="rounded-xl" style={{ border: "2.5px solid var(--outline)", background: "var(--my-lots-bg)", boxShadow: "4px 4px 0 var(--card-shadow)" }}>
+              <summary className="cursor-pointer select-none px-3 py-2 text-xs transition" style={{ color: "var(--ink-2)" }}>
                 {lang === "ru" ? "ℹ️ Формула рассчета pts" : "ℹ️ How scoring works"}
               </summary>
               <div className="px-3 pb-3 pt-1 overflow-x-auto">
                 <table className="w-full text-[11px] border-collapse">
                   <thead>
-                    <tr className="text-zinc-500 border-b border-white/10">
+                    <tr style={{ borderBottom: "2px solid var(--outline)", color: "var(--ink-3)" }}>
                       <th className="text-left py-1 pr-3 font-semibold">{lang === "ru" ? "Категория" : "Category"}</th>
                       <th className="text-left py-1 pr-3 font-semibold">{lang === "ru" ? "Формула" : "Formula"}</th>
                       <th className="text-right py-1 font-semibold">Cap</th>
                     </tr>
                   </thead>
-                  <tbody className="text-zinc-300 divide-y divide-white/5">
+                  <tbody style={{ color: "var(--ink-2)" }}>
                     {([
                       { cat: lang === "ru" ? "Изменение цены" : "Price change",  formula: lang === "ru" ? "±10 pts за 1%" : "±10 pts per 1%",                                          cap: "±300" },
                       { cat: lang === "ru" ? "Объём торгов"   : "Trading volume", formula: lang === "ru" ? "Ступени $10M→$500M+" : "Steps $10M→$500M+",                                 cap: "+100" },
@@ -659,8 +657,8 @@ export function TournamentTab({
                     ] as { cat: string; formula: string; cap: string }[]).map(({ cat, formula, cap }) => (
                       <tr key={cat}>
                         <td className="py-1.5 pr-3 font-medium" style={{ color: "var(--panel-text)" }}>{cat}</td>
-                        <td className="py-1.5 pr-3 text-zinc-400">{formula}</td>
-                        <td className="py-1.5 text-right font-mono text-emerald-400">{cap}</td>
+                        <td className="py-1.5 pr-3" style={{ color: "var(--ink-2)" }}>{formula}</td>
+                        <td className="py-1.5 text-right font-mono" style={{ color: "var(--up)" }}>{cap}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -669,11 +667,11 @@ export function TournamentTab({
             </details>
 
             {claimState?.active && userClaimable > 0 && (
-              <div className="rounded-2xl border border-amber-500/40 bg-amber-900/20 p-4 space-y-3">
+              <div className="space-y-3 rounded-xl p-4" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--outline)" }}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-sm font-bold text-amber-300">🎉 {lang === "ru" ? "Ваш приз готов к получению" : "Your prize is ready to claim"}</div>
-                    <div className="text-xs text-amber-400/80 mt-0.5">
+                    <div className="text-sm font-bold">🎉 {lang === "ru" ? "Ваш приз готов к получению" : "Your prize is ready to claim"}</div>
+                    <div className="mt-0.5 text-xs font-semibold" style={{ color: "var(--ink-2)" }}>
                       {(userClaimable / 1e18).toFixed(4)} ETH
                       {claimState.deadline > 0 && (
                         <> · {lang === "ru" ? "Дедлайн" : "Deadline"}: {new Date(claimState.deadline * 1000).toLocaleString(lang === "ru" ? "ru-RU" : "en-US", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</>
@@ -681,7 +679,7 @@ export function TournamentTab({
                     </div>
                   </div>
                   <button onClick={onClaim} disabled={busy !== null}
-                    className="shrink-0 rounded-xl bg-amber-500 hover:bg-amber-400 px-5 py-2.5 text-sm font-black text-black disabled:opacity-50 transition">
+                    className="btn-sticker-outline shrink-0 px-5 py-2.5 text-sm">
                     {busy === "claim" ? "…" : (lang === "ru" ? "Забрать" : "Claim")}
                   </button>
                 </div>
@@ -689,7 +687,7 @@ export function TournamentTab({
             )}
 
             <div className="space-y-1">
-                <div className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">{lang === "ru" ? "Выбери день" : "Select day"}</div>
+                <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--ink-3)" }}>{lang === "ru" ? "Выбери день" : "Select day"}</div>
                 <div className="flex flex-wrap gap-1.5">
                   {Array.from({ length: Math.max(totalDays, 1) }, (_, i) => i + 1).map(d => {
                     const past = isDayPast(d);
@@ -698,57 +696,54 @@ export function TournamentTab({
                     const date = dayToDate(d);
                     const dayNum = date.getDate();
                     const mon = date.toLocaleDateString(lang === "ru" ? "ru-RU" : "en-US", { month: "short" });
-                    const btnClass = resultsDay === d && !isToday
-                      ? "bg-violet-600 text-white"
-                      : !past && !isToday
-                        ? "cursor-not-allowed"
-                        : "";
+                    const btnClass = !past && !isToday ? "cursor-not-allowed" : "";
                     return (
                       <button key={d}
                         onClick={() => { setResultsDay(d); if (past) fetchOracleDays([d]); }}
                         disabled={!past && !isToday}
                         className={`w-12 h-12 rounded-lg text-xs font-bold transition relative flex flex-col items-center justify-center leading-none ${btnClass}`}
                         style={isToday
-                          ? { border: "1px solid rgba(34,211,238,0.6)", background: "rgba(6,182,212,0.12)", color: "var(--panel-text)" }
+                          ? { border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--ink)", boxShadow: "2px 2px 0 var(--outline)" }
                           : resultsDay === d
-                            ? {}
+                            ? { border: "2px solid var(--outline)", background: "var(--mint)", color: "var(--ink)", boxShadow: "2px 2px 0 var(--outline)" }
                             : !past
-                              ? { background: "var(--my-lots-bg)", color: "var(--nft-muted)", borderStyle: "dashed", borderWidth: "1px", borderColor: "var(--panel-border)" }
-                              : { background: "var(--my-lots-bg)", color: "var(--panel-text-muted)", border: "1px solid var(--panel-border)" }}>
+                              ? { background: "var(--paper-2)", color: "var(--ink-3)", border: "2px dashed var(--ink)" }
+                              : { background: "var(--paper-2)", color: "var(--ink-2)", border: "2px solid var(--outline)" }}>
                         <span className="text-sm font-black">{dayNum}</span>
                         <span className="text-[9px] font-normal opacity-70">{mon}</span>
                         {isToday && <span className="text-[7px] font-bold uppercase tracking-wider opacity-70 leading-none mt-0.5">{lang === "ru" ? "сегодня" : "today"}</span>}
-                        {finalized && <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-emerald-400" />}
+                        {finalized && <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full" style={{ background: "var(--up)" }} />}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-            <div className="rounded-2xl overflow-hidden" style={{ border: "2.5px solid var(--ink)", background: "var(--my-lots-bg)", boxShadow: "4px 4px 0 var(--card-shadow)" }} data-tour="invest-coins">
+            <div className="rounded-2xl overflow-hidden" style={{ border: "2.5px solid var(--outline)", background: "var(--my-lots-bg)", boxShadow: "4px 4px 0 var(--card-shadow)" }} data-tour="invest-coins">
               <button
                 type="button"
                 onClick={() => setCoinListOpen(o => !o)}
-                className="w-full flex items-center justify-between px-4 py-3 border-b border-white/5 hover:bg-white/[0.03] transition text-left">
-                <div className="text-xs font-semibold text-zinc-400">
+                className="flex w-full items-center justify-between px-4 py-3 text-left transition"
+                style={{ borderBottom: "2px solid var(--outline)" }}>
+                <div className="text-xs font-semibold" style={{ color: "var(--ink-2)" }}>
                   {lang === "ru" ? "Монеты" : "Coins"}{` · ${fmtDay(resultsDay)}`}
                 </div>
                 <div className="flex items-center gap-2">
                   {(resultsDaysLoading || (!allDaysLoaded && activeDays.length > 0)) && (
-                    <span className="text-xs text-zinc-500">⏳</span>
+                    <span className="text-xs" style={{ color: "var(--ink-3)" }}>⏳</span>
                   )}
-                  <svg className={`w-4 h-4 text-zinc-500 transition-transform ${coinListOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={`w-4 h-4 transition-transform ${coinListOpen ? "rotate-180" : ""}`} style={{ color: "var(--ink-3)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
               </button>
               <div className="hidden">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">{lang === "ru" ? "Фильтр" : "Filter"}</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--ink-3)" }}>{lang === "ru" ? "Фильтр" : "Filter"}</span>
                 <select
                   value={coinCategoryFilter}
                   onChange={(e) => setCoinCategoryFilter(e.target.value === "all" ? "all" : Number(e.target.value))}
-                  className="h-8 rounded-lg px-2 text-xs font-semibold outline-none transition focus:border-cyan-400/50"
-                  style={{ border: "2.5px solid var(--ink)", background: "var(--my-lots-bg)", boxShadow: "4px 4px 0 var(--card-shadow)", color: "var(--panel-text)" }}>
+                  className="input-sticker h-8 px-2 text-xs font-semibold"
+                  style={{ border: "2.5px solid var(--outline)", background: "var(--my-lots-bg)", boxShadow: "4px 4px 0 var(--card-shadow)", color: "var(--panel-text)" }}>
                   {coinCategoryOptions.map((option) => (
                     <option key={option.value} value={option.value}>{option.label}</option>
                   ))}
@@ -758,7 +753,7 @@ export function TournamentTab({
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="border-b border-white/5 text-[10px] text-zinc-500">
+                      <tr className="text-[10px]" style={{ borderBottom: "2px solid var(--outline)", color: "var(--ink-3)" }}>
                         <th className="px-3 py-2 text-left w-7">#</th>
                         <th className="px-2 py-2 text-left">{lang === "ru" ? "Монета" : "Coin"}</th>
                         <th className="px-2 py-2 text-center">
@@ -773,7 +768,7 @@ export function TournamentTab({
                               </svg>
                             </button>
                             {coinCatOpen && (
-                              <div style={{ position: "absolute", left: 0, top: "calc(100% + 6px)", zIndex: 50, background: "var(--paper-2)", border: "2.5px solid var(--ink)", borderRadius: 14, boxShadow: "4px 4px 0 var(--shadow-sticker-color)", minWidth: 150 }}>
+                              <div style={{ position: "absolute", left: 0, top: "calc(100% + 6px)", zIndex: 50, background: "var(--paper-2)", border: "2.5px solid var(--outline)", borderRadius: 14, boxShadow: "4px 4px 0 var(--shadow-sticker-color)", minWidth: 150 }}>
                                 {coinCategoryOptions.map(({ value, label }, i, arr) => (
                                   <button key={String(value)} type="button"
                                     onClick={() => { setCoinCategoryFilter(value); setCoinCatOpen(false); }}
@@ -781,7 +776,7 @@ export function TournamentTab({
                                     style={{
                                       color: coinCategoryFilter === value ? "var(--ink)" : "var(--ink-2)",
                                       background: coinCategoryFilter === value ? "var(--mint-soft)" : "transparent",
-                                      borderBottom: i < arr.length - 1 ? "1.5px solid rgba(15,17,21,0.12)" : "none",
+                                      borderBottom: i < arr.length - 1 ? "1.5px solid var(--divider)" : "none",
                                       borderRadius: i === 0 ? "11px 11px 0 0" : i === arr.length - 1 ? "0 0 11px 11px" : 0,
                                     }}
                                     onMouseEnter={e => { if (coinCategoryFilter !== value) e.currentTarget.style.background = "var(--filter-btn-hover-bg)"; }}
@@ -794,20 +789,20 @@ export function TournamentTab({
                           </div>
                         </th>
                         {marketData && (<>
-                          <th className="px-2 py-2 text-right text-emerald-500/80">{lang === "ru" ? "Цена%" : "Price%"}</th>
-                          <th className="px-2 py-2 text-right text-zinc-400">{lang === "ru" ? "Объём" : "Vol"}</th>
-                          <th className="px-2 py-2 text-right text-zinc-400">High</th>
-                          <th className="px-2 py-2 text-right text-zinc-400">Low</th>
-                          <th className="px-2 py-2 text-right text-cyan-500/80">{lang === "ru" ? "Темп%" : "Temp%"}</th>
-                          <th className="px-2 py-2 text-center text-violet-400">ХАЙП</th>
+                          <th className="px-2 py-2 text-right" style={{ color: "var(--up)" }}>{lang === "ru" ? "Цена%" : "Price%"}</th>
+                          <th className="px-2 py-2 text-right" style={{ color: "var(--ink-3)" }}>{lang === "ru" ? "Объём" : "Vol"}</th>
+                          <th className="px-2 py-2 text-right" style={{ color: "var(--ink-3)" }}>High</th>
+                          <th className="px-2 py-2 text-right" style={{ color: "var(--ink-3)" }}>Low</th>
+                          <th className="px-2 py-2 text-right" style={{ color: "var(--info)" }}>{lang === "ru" ? "Темп%" : "Temp%"}</th>
+                          <th className="px-2 py-2 text-center" style={{ color: "var(--mint-deep)" }}>ХАЙП</th>
                         </>)}
-                        <th className="px-3 py-2 text-right font-semibold text-blue-400">{lang === "ru" ? "Очки" : "Score"}</th>
+                        <th className="px-3 py-2 text-right font-semibold" style={{ color: "var(--info)" }}>{lang === "ru" ? "Очки" : "Score"}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {coinRows.map(({ pid, name, score, rank, market }) => (
-                        <tr key={pid} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                          <td className="px-3 py-1.5 text-zinc-500 tabular-nums">
+                        <tr key={pid} style={{ borderBottom: "1px solid var(--divider)" }}>
+                          <td className="px-3 py-1.5 tabular-nums" style={{ color: "var(--ink-3)" }}>
                             {rank === 0 ? "🥇" : rank === 1 ? "🥈" : rank === 2 ? "🥉" : `#${rank + 1}`}
                           </td>
                           <td className="px-2 py-1.5">
@@ -815,39 +810,39 @@ export function TournamentTab({
                               <img src={COIN_ICONS[pid]} alt={name} className="h-5 w-5 rounded-full object-cover shrink-0" referrerPolicy="no-referrer" />
                               <div>
                                 <div className="font-semibold leading-none" style={{ color: "var(--panel-text)" }}>{name}</div>
-                                <div className="text-[9px] text-zinc-500">{COIN_TICKERS[pid]}</div>
+                                <div className="text-[9px]" style={{ color: "var(--ink-3)" }}>{COIN_TICKERS[pid]}</div>
                               </div>
                             </div>
                           </td>
-                          <td className="px-2 py-1.5 text-center text-zinc-500">{PLAYER_TEAMS[pid]}</td>
+                          <td className="px-2 py-1.5 text-center" style={{ color: "var(--ink-3)" }}>{PLAYER_TEAMS[pid]}</td>
                           {marketData && (<>
                             <td className="px-2 py-1.5 text-right tabular-nums font-mono text-[11px]">
                               {market ? (
-                                <span className={market.priceChg >= 0 ? "text-emerald-400" : "text-red-400"}>
+                                <span style={{ color: market.priceChg >= 0 ? "var(--up)" : "var(--down)" }}>
                                   {market.priceChg >= 0 ? "+" : ""}{market.priceChg.toFixed(2)}%
                                 </span>
-                              ) : <span className="text-zinc-700">—</span>}
+                              ) : <span style={{ color: "var(--ink-3)" }}>—</span>}
                             </td>
-                            <td className="px-2 py-1.5 text-right tabular-nums font-mono text-[11px] text-zinc-400">
-                              {market ? fmtVol(market.vol24h) : <span className="text-zinc-700">—</span>}
+                            <td className="px-2 py-1.5 text-right tabular-nums font-mono text-[11px]" style={{ color: "var(--ink-2)" }}>
+                              {market ? fmtVol(market.vol24h) : <span style={{ color: "var(--ink-3)" }}>—</span>}
                             </td>
-                            <td className="px-2 py-1.5 text-right tabular-nums font-mono text-[11px] text-zinc-400">
-                              {market ? fmtPrice(market.high24h) : <span className="text-zinc-700">—</span>}
+                            <td className="px-2 py-1.5 text-right tabular-nums font-mono text-[11px]" style={{ color: "var(--ink-2)" }}>
+                              {market ? fmtPrice(market.high24h) : <span style={{ color: "var(--ink-3)" }}>—</span>}
                             </td>
-                            <td className="px-2 py-1.5 text-right tabular-nums font-mono text-[11px] text-zinc-400">
-                              {market ? fmtPrice(market.low24h) : <span className="text-zinc-700">—</span>}
+                            <td className="px-2 py-1.5 text-right tabular-nums font-mono text-[11px]" style={{ color: "var(--ink-2)" }}>
+                              {market ? fmtPrice(market.low24h) : <span style={{ color: "var(--ink-3)" }}>—</span>}
                             </td>
-                            <td className="px-2 py-1.5 text-right tabular-nums font-mono text-[11px] text-cyan-400">
-                              {market ? `${market.tempRatio.toFixed(1)}%` : <span className="text-zinc-700">—</span>}
+                            <td className="px-2 py-1.5 text-right tabular-nums font-mono text-[11px]" style={{ color: "var(--info)" }}>
+                              {market ? `${market.tempRatio.toFixed(1)}%` : <span style={{ color: "var(--ink-3)" }}>—</span>}
                             </td>
                             <td className="px-2 py-1.5 text-center">
                               {market?.hype
-                                ? <span className="text-emerald-400 font-bold tabular-nums font-mono text-[11px]">🔥{lineupStats?.[pid] ?? ""}</span>
-                                : <span className="text-zinc-700 tabular-nums font-mono text-[11px]">{lineupStats ? lineupStats[pid] || "—" : "—"}</span>}
+                                ? <span className="font-mono text-[11px] font-bold tabular-nums" style={{ color: "var(--up)" }}>🔥{lineupStats?.[pid] ?? ""}</span>
+                                : <span className="font-mono text-[11px] tabular-nums" style={{ color: "var(--ink-3)" }}>{lineupStats ? lineupStats[pid] || "—" : "—"}</span>}
                             </td>
                           </>)}
                           <td className="px-3 py-1.5 text-right font-black tabular-nums">
-                            <span className={score > 0 ? "text-emerald-400" : score < 0 ? "text-red-400" : "text-zinc-600"}>{score}</span>
+                            <span style={{ color: score > 0 ? "var(--up)" : score < 0 ? "var(--down)" : "var(--ink-3)" }}>{score}</span>
                           </td>
                         </tr>
                       ))}

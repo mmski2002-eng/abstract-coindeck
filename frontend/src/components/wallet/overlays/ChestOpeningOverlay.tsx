@@ -5,9 +5,9 @@ import { createPortal } from "react-dom";
 import { COIN_ICONS } from "../constants";
 
 const CHEST_ASSETS = [
-  { closed: "/chests/wooden_closed.webp", open: "/chests/wooden_open.webp", particle: "#38BDF8", glow: "rgba(56,189,248,0.7)" },
-  { closed: "/chests/iron_closed.webp",   open: "/chests/iron_open.webp",   particle: "#60a5fa", glow: "rgba(96,165,250,0.7)" },
-  { closed: "/chests/silver_closed.webp", open: "/chests/silver_open.webp", particle: "#c084fc", glow: "rgba(192,132,252,0.7)" },
+  { closed: "/chests/wooden_closed.webp", open: "/chests/wooden_open.webp", particle: "var(--rarity-common)" },
+  { closed: "/chests/iron_closed.webp",   open: "/chests/iron_open.webp",   particle: "var(--rarity-rare)" },
+  { closed: "/chests/silver_closed.webp", open: "/chests/silver_open.webp", particle: "var(--rarity-epic)" },
 ];
 
 // Pre-shuffled static card reel — same order every render to avoid hydration issues
@@ -49,7 +49,7 @@ export function ChestOpeningOverlay({
   }, [cardFound, phase]);
 
   return createPortal(
-    <div className="fixed inset-0 z-[180] flex items-center justify-center backdrop-blur-md" style={{ background: "var(--overlay-backdrop)" }}>
+    <div className="fixed inset-0 z-[180] flex items-center justify-center" style={{ background: "var(--overlay-backdrop)" }}>
 
       {txConfirmed && onSkip && (
         <button
@@ -57,7 +57,7 @@ export function ChestOpeningOverlay({
           className="absolute top-5 right-5 w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
           style={{
             background: "var(--modal-bg)",
-            border: "2px solid var(--ink)",
+            border: "2px solid var(--outline)",
           }}
           aria-label={lang === "ru" ? "Пропустить" : "Skip"}
         >
@@ -69,8 +69,8 @@ export function ChestOpeningOverlay({
 
       <style>{`
         @keyframes chestWaitGlow {
-          0%,100% { filter: drop-shadow(0 0 8px var(--gc)); }
-          50%     { filter: drop-shadow(0 0 22px var(--gc)) drop-shadow(0 0 40px var(--gc)); }
+          0%,100% { opacity: 0.86; }
+          50%     { opacity: 1; }
         }
         @keyframes chestShakeAmplify {
           0%   { transform: rotate(0deg) scale(1); }
@@ -101,8 +101,8 @@ export function ChestOpeningOverlay({
           100% { transform: rotate(0deg) scale(1); }
         }
         @keyframes chestShakeGlow {
-          0%,100% { filter: drop-shadow(0 0 10px var(--gc)); }
-          50%     { filter: drop-shadow(0 0 50px var(--gc)) drop-shadow(0 0 100px var(--gc)); }
+          0%,100% { opacity: 0.9; }
+          50%     { opacity: 1; }
         }
         @keyframes burstFlash {
           0%   { opacity: 0; transform: scale(0.4); }
@@ -119,8 +119,8 @@ export function ChestOpeningOverlay({
           to   { transform: scale(1); }
         }
         @keyframes openWaitGlow {
-          0%,100% { filter: drop-shadow(0 0 20px var(--gc)); }
-          50%     { filter: drop-shadow(0 0 50px var(--gc)) drop-shadow(0 0 80px var(--gc)); }
+          0%,100% { opacity: 0.92; }
+          50%     { opacity: 1; }
         }
         @keyframes cardFlyOut {
           0%   { opacity: 0; transform: translate(calc(-50% + 0px), calc(-50% + 0px)) scale(0.15) rotate(0deg); }
@@ -131,13 +131,14 @@ export function ChestOpeningOverlay({
       `}</style>
 
       <div className="relative flex flex-col items-center gap-6">
-        <div className="relative" style={{ width: 540, height: 540, "--gc": chest.glow } as CSSProperties & Record<"--gc", string>}>
+        <div className="relative" style={{ width: 540, height: 540 }}>
           {/* Burst flash */}
           {phase === "burst" && (
             <div
               className="absolute inset-[-80px] rounded-full pointer-events-none"
               style={{
-                background: `radial-gradient(circle, ${chest.particle}cc 0%, ${chest.particle}55 35%, ${chest.particle}22 60%, transparent 75%)`,
+                background: chest.particle,
+                opacity: 0.16,
                 animation: "burstFlash 1000ms ease-out both",
               }}
             />
@@ -152,7 +153,7 @@ export function ChestOpeningOverlay({
                 width: `${6 + (i % 3) * 4}px`,
                 height: `${6 + (i % 3) * 4}px`,
                 background: chest.particle,
-                boxShadow: `0 0 12px ${chest.particle}, 0 0 24px ${chest.particle}`,
+                border: "1.5px solid var(--outline)",
                 marginLeft: `-${3 + (i % 3) * 2}px`,
                 marginTop: `-${3 + (i % 3) * 2}px`,
                 "--pa": `${i * (360 / 20)}deg`,
@@ -210,10 +211,10 @@ export function ChestOpeningOverlay({
                 top: "50%", left: "50%",
                 width: 46, height: 63,
                 borderRadius: 7,
-                border: `1px solid ${chest.particle}60`,
+                border: "1.5px solid var(--panel-border)",
                 background: "var(--card)",
                 overflow: "hidden",
-                boxShadow: `0 0 10px ${chest.particle}40`,
+                boxShadow: "var(--shadow-sticker-sm)",
                 "--tx": `${tx}px`,
                 "--ty": `${ty}px`,
                 "--rot": `${rot}deg`,

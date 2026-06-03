@@ -48,9 +48,9 @@ export function RankingsTab({
   const displayEpoch = epoch - (epochRange[0] ?? 1) + 1;
 
   const LEAGUE_LABELS = [
-    { en: "Bronze", ru: "Bronze", color: "text-zinc-500",   border: "border-zinc-600/40",   bg: "bg-zinc-800/20" },
-    { en: "Silver", ru: "Silver", color: "text-zinc-200",   border: "border-zinc-300/50",   bg: "bg-zinc-100/10" },
-    { en: "Gold",   ru: "Gold",   color: "text-amber-300",  border: "border-amber-400/45",  bg: "bg-amber-900/20" },
+    { en: "Bronze", ru: "Bronze", accent: "var(--rarity-common)", soft: "var(--paper-2)" },
+    { en: "Silver", ru: "Silver", accent: "var(--rarity-rare)", soft: "var(--sky-soft)" },
+    { en: "Gold",   ru: "Gold",   accent: "var(--warn)", soft: "var(--warn-soft)" },
   ];
 
   const totalDays  = tnState?.totalDays ?? 6;
@@ -131,11 +131,10 @@ export function RankingsTab({
     const league = leagueByDay.get(day);
     return { day, league };
   });
-  const leagueDotStyles = [
-    { color: "#71717a", glow: "rgba(113,113,122,0.38)" },
-    { color: "#e5e7eb", glow: "rgba(229,231,235,0.62)" },
-    { color: "#fcd34d", glow: "rgba(252,211,77,0.72)" },
-  ];
+  const leagueDotStyles = LEAGUE_LABELS.map((league) => ({
+    color: league.accent,
+    soft: league.soft,
+  }));
 
   return (
     <div className="mt-2 space-y-4">
@@ -205,7 +204,7 @@ export function RankingsTab({
             <div className="relative mt-2 flex items-center gap-1.5">
               {ll ? (
                 <>
-                  <span className={`font-mono text-[11px] font-semibold ${ll.color}`}>{ll.en}</span>
+                  <span className="font-mono text-[11px] font-semibold" style={{ color: ll.accent }}>{ll.en}</span>
                   <span className="font-mono text-[11px]" style={{ color: "var(--info-block-meta)" }}>{lang === "ru" ? "лига" : "league"}</span>
                 </>
               ) : (
@@ -226,11 +225,15 @@ export function RankingsTab({
         </div>
       </section>
 
-      {lbError && <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-200">{lbError}</div>}
+      {lbError && (
+        <div className="card-sticker rounded-xl p-3 text-sm" style={{ background: "var(--down-soft)", color: "var(--down)" }}>
+          {lbError}
+        </div>
+      )}
 
       {/* League filter — no "All" option */}
       <div className="space-y-2">
-        <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{lang === "ru" ? "Лига" : "League"}</div>
+        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--ink-3)" }}>{lang === "ru" ? "Лига" : "League"}</div>
         <div className="flex gap-1.5 flex-wrap">
           {LEAGUE_LABELS.map((l, i) => (
             <button key={i}
@@ -253,8 +256,8 @@ export function RankingsTab({
 
       {/* Refresh indicator */}
       {lbLoading && lbRows.length > 0 && (
-        <div className="flex items-center gap-2 px-1 pb-1 text-xs text-zinc-500">
-          <span className="inline-block w-2 h-2 rounded-full bg-zinc-500 animate-pulse" />
+        <div className="flex items-center gap-2 px-1 pb-1 text-xs" style={{ color: "var(--ink-3)" }}>
+          <span className="inline-block w-2 h-2 rounded-full animate-pulse" style={{ background: "var(--ink-3)" }} />
           {lang === "ru" ? "Лидерборд обновляется раз в сутки" : "Refreshing rankings, showing cached data…"}
         </div>
       )}
@@ -268,7 +271,7 @@ export function RankingsTab({
       {lbLoading && lbRows.length === 0 ? (
         <div className="rounded-2xl p-10 text-center text-sm" style={{ border: "1px solid var(--panel-border)", background: "var(--my-lots-bg)", color: "var(--panel-text-muted)" }}>
           <div className="animate-pulse">{lang === "ru" ? "Загрузка рейтинга…" : "Loading rankings…"}</div>
-          <div className="text-xs text-zinc-600 mt-1">{lang === "ru" ? "Запрашиваем данные участников" : "Fetching participant data"}</div>
+          <div className="text-xs mt-1" style={{ color: "var(--ink-3)" }}>{lang === "ru" ? "Запрашиваем данные участников" : "Fetching participant data"}</div>
         </div>
       ) : !lbLoading && visibleRows.length === 0 ? (
         <div className="rounded-2xl p-10 text-center text-sm" style={{ border: "1px solid var(--panel-border)", background: "var(--my-lots-bg)", color: "var(--nft-muted)" }}>
@@ -277,7 +280,10 @@ export function RankingsTab({
       ) : (
         <>
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--panel-border)", background: "var(--my-lots-bg)" }} data-tour="rankings-table">
-            <div className="grid grid-cols-[2rem_1fr_5rem_3.5rem_5rem] gap-3 px-4 py-2 border-b border-white/10 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+            <div
+              className="grid grid-cols-[2rem_1fr_5rem_3.5rem_5rem] gap-3 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider"
+              style={{ borderBottom: "2px solid var(--outline)", color: "var(--ink-3)" }}
+            >
               <div>#</div>
               <div className="flex items-center justify-between">
                 <span>{lang === "ru" ? "Кошелёк" : "Wallet"}</span>
@@ -289,13 +295,18 @@ export function RankingsTab({
             </div>
             {pageRows.map((row, idx) => {
               const globalIdx = (rankByAddr.get(row.addr.toLowerCase()) ?? (lbPage * PAGE_SIZE + idx + 1)) - 1;
-              const rowLL = LEAGUE_LABELS[row.league];
+              const rowLL = LEAGUE_LABELS[row.league] ?? LEAGUE_LABELS[0];
               const isMe  = accountAddress && row.addr.toLowerCase() === accountAddress.toLowerCase();
-              const TIER_DOTS = ["#71717a", "#60a5fa", "#a78bfa", "#fbbf24"]; // zinc, blue, violet, amber
+              const TIER_DOTS = ["var(--rarity-common)", "var(--rarity-rare)", "var(--rarity-epic)", "var(--rarity-legendary)"];
               return (
                 <div key={row.addr}
-                  className={`grid grid-cols-[2rem_1fr_5rem_3.5rem_5rem] gap-3 px-4 py-3 border-b border-white/5 last:border-0 items-center transition-colors ${isMe ? "bg-violet-900/15 border-l-2 border-l-violet-500" : "hover:bg-white/5"}`}>
-                  <div className={`text-sm font-black ${globalIdx === 0 ? "text-white" : globalIdx === 1 ? "text-zinc-300" : globalIdx === 2 ? "text-zinc-400" : "text-zinc-600"}`}>
+                  className="grid grid-cols-[2rem_1fr_5rem_3.5rem_5rem] gap-3 px-4 py-3 items-center transition-colors"
+                  style={{
+                    borderBottom: "1.5px solid var(--divider)",
+                    borderLeft: isMe ? "3px solid var(--mint)" : "3px solid transparent",
+                    background: isMe ? "var(--mint-soft)" : "transparent",
+                  }}>
+                  <div className="text-sm font-black" style={{ color: globalIdx < 3 ? "var(--ink)" : "var(--ink-3)" }}>
                     {globalIdx === 0 ? "🥇" : globalIdx === 1 ? "🥈" : globalIdx === 2 ? "🥉" : globalIdx + 1}
                   </div>
                   <div className="min-w-0 flex items-center gap-2">
@@ -303,13 +314,14 @@ export function RankingsTab({
                       {row.nickname && (
                         <div className={`text-xs font-semibold truncate leading-tight`} style={isMe ? { color: "var(--panel-text)" } : {}}>
                           {row.nickname}
-                          {isMe && <span className="ml-1.5 text-[9px] font-black rounded px-1" style={{ color: "var(--panel-text)", background: "rgba(109,40,217,0.12)" }}>YOU</span>}
+                          {isMe && <span className="ml-1.5 text-[9px] font-black rounded px-1" style={{ color: "var(--ink)", background: "var(--mint-soft)", border: "1px solid var(--outline)" }}>YOU</span>}
                         </div>
                       )}
-                      <div className={`font-mono truncate leading-tight ${row.nickname ? "text-[10px] text-zinc-500" : `text-xs ${!isMe ? "text-zinc-300" : "font-bold"}`}`}
-                        style={!row.nickname && isMe ? { color: "var(--panel-text)" } : {}}>
+                      <div
+                        className={`font-mono truncate leading-tight ${row.nickname ? "text-[10px]" : `text-xs ${isMe ? "font-bold" : ""}`}`}
+                        style={{ color: isMe ? "var(--panel-text)" : "var(--ink-3)" }}>
                         {row.addr.slice(0, 6)}…{row.addr.slice(-4)}
-                        {!row.nickname && isMe && <span className="ml-1.5 text-[9px] font-black rounded px-1" style={{ color: "var(--panel-text)", background: "rgba(109,40,217,0.12)" }}>YOU</span>}
+                        {!row.nickname && isMe && <span className="ml-1.5 text-[9px] font-black rounded px-1" style={{ color: "var(--ink)", background: "var(--mint-soft)", border: "1px solid var(--outline)" }}>YOU</span>}
                       </div>
                     </div>
                     {row.prevDayPids && row.prevDayPids.length > 0 && (
@@ -328,10 +340,10 @@ export function RankingsTab({
                       </div>
                     )}
                   </div>
-                  <div className={`text-xs font-semibold text-right ${rowLL.color}`}>
+                  <div className="text-xs font-semibold text-right" style={{ color: rowLL.accent }}>
                     {lang === "ru" ? rowLL.ru : rowLL.en}
                   </div>
-                  <div className="text-xs text-zinc-500 text-right tabular-nums">{row.days}/{totalDays}</div>
+                  <div className="text-xs text-right tabular-nums" style={{ color: "var(--ink-3)" }}>{row.days}/{totalDays}</div>
                   <div className="text-sm font-black text-right tabular-nums" style={{ color: "var(--panel-text)" }}>
                     {row.score.toLocaleString()}
                   </div>
@@ -346,20 +358,20 @@ export function RankingsTab({
               <button
                 disabled={lbPage === 0}
                 onClick={() => setLbPage(p => p - 1)}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition">
+                className="btn-sticker-outline px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition">
                 ‹
               </button>
               {Array.from({ length: totalPages }, (_, i) => (
                 <button key={i}
                   onClick={() => setLbPage(i)}
-                  className={`w-7 h-7 rounded-lg text-xs font-semibold transition ${lbPage === i ? "bg-cyan-400/15 text-cyan-400" : "text-zinc-500 hover:text-white hover:bg-white/5"}`}>
+                  className={lbPage === i ? "btn-sticker-primary w-7 h-7 rounded-lg p-0 text-xs font-semibold transition" : "btn-sticker-outline w-7 h-7 rounded-lg p-0 text-xs font-semibold transition"}>
                   {i + 1}
                 </button>
               ))}
               <button
                 disabled={lbPage === totalPages - 1}
                 onClick={() => setLbPage(p => p + 1)}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition">
+                className="btn-sticker-outline px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition">
                 ›
               </button>
             </div>
@@ -373,7 +385,7 @@ export function RankingsTab({
         onClose={() => setPrizeInfoOpen(false)}
         title={lang === "ru" ? "Призовой фонд" : "Prize Pool"}
       >
-        <div className="space-y-3 text-sm text-white/70 leading-relaxed">
+        <div className="space-y-3 text-sm leading-relaxed" style={{ color: "var(--panel-text-muted)" }}>
           <p>
             {lang === "ru"
               ? "100% дохода от покупки сундуков поступает в призовой пул турнира — без комиссий платформы."
@@ -395,36 +407,36 @@ export function RankingsTab({
       >
         <div className="space-y-6 text-sm">
           <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-white/40">{lang === "ru" ? "Как определяется лига" : "How leagues are determined"}</p>
-            <p className="text-white/60 text-xs leading-relaxed">
+            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--ink-3)" }}>{lang === "ru" ? "Как определяется лига" : "How leagues are determined"}</p>
+            <p className="text-xs leading-relaxed" style={{ color: "var(--panel-text-muted)" }}>
               {lang === "ru"
                 ? "Лига определяется по взвешенному среднему: Бронза=0, Сильвер=1, Голд=2. Среднее <0.5 → Бронза, 0.5–1.5 → Сильвер, ≥1.5 → Голд. Прогресс в высшую лигу повышает итоговую лигу. Карты делятся на тиры: Common (T1), Rare (T2), Epic (T3), Legendary (T4)."
                 : "League is determined by weighted average: Bronze=0, Silver=1, Gold=2. avg<0.5→Bronze, 0.5–1.5→Silver, ≥1.5→Gold. Progressing to a higher league raises your final league. Cards have tiers: Common (T1), Rare (T2), Epic (T3), Legendary (T4)."}
             </p>
             <div className="space-y-2">
-              <div className="flex items-start gap-3 p-3 rounded-xl bg-violet-900/20 border border-violet-500/20">
+              <div className="flex items-start gap-3 p-3 rounded-xl" style={{ background: "var(--warn-soft)", border: "1.5px solid var(--outline)" }}>
                 <span className="text-base shrink-0">🥇</span>
                 <div>
-                  <div className="font-bold text-violet-300 text-sm">Gold — {prizeConfig.goldPct}% {lang === "ru" ? "призового фонда" : "of prize pool"}</div>
-                  <div className="text-white/50 text-xs mt-0.5">
+                  <div className="font-bold text-sm" style={{ color: "var(--warn)" }}>Gold — {prizeConfig.goldPct}% {lang === "ru" ? "призового фонда" : "of prize pool"}</div>
+                  <div className="text-xs mt-0.5" style={{ color: "var(--ink-3)" }}>
                     {lang === "ru" ? "1 Legendary или 5 Epic карт в составе." : "1 Legendary or 5 Epic cards in lineup."}
                   </div>
                 </div>
               </div>
-              <div className="flex items-start gap-3 p-3 rounded-xl bg-zinc-800/40 border border-zinc-600/20">
+              <div className="flex items-start gap-3 p-3 rounded-xl" style={{ background: "var(--sky-soft)", border: "1.5px solid var(--outline)" }}>
                 <span className="text-base shrink-0">🥈</span>
                 <div>
-                  <div className="font-bold text-zinc-300 text-sm">Silver — {prizeConfig.silverPct}% {lang === "ru" ? "призового фонда" : "of prize pool"}</div>
-                  <div className="text-white/50 text-xs mt-0.5">
+                  <div className="font-bold text-sm" style={{ color: "var(--ink)" }}>Silver — {prizeConfig.silverPct}% {lang === "ru" ? "призового фонда" : "of prize pool"}</div>
+                  <div className="text-xs mt-0.5" style={{ color: "var(--ink-3)" }}>
                     {lang === "ru" ? "Хотя бы 1 Epic или все 5 карт Rare." : "At least 1 Epic or all 5 cards Rare."}
                   </div>
                 </div>
               </div>
-              <div className="flex items-start gap-3 p-3 rounded-xl bg-zinc-900/40 border border-zinc-700/30">
+              <div className="flex items-start gap-3 p-3 rounded-xl" style={{ background: "var(--paper-2)", border: "1.5px solid var(--outline)" }}>
                 <span className="text-base shrink-0">🥉</span>
                 <div>
-                  <div className="font-bold text-zinc-400 text-sm">Bronze — {prizeConfig.bronzePct}% {lang === "ru" ? "призового фонда" : "of prize pool"}</div>
-                  <div className="text-white/50 text-xs mt-0.5">
+                  <div className="font-bold text-sm" style={{ color: "var(--ink-2)" }}>Bronze — {prizeConfig.bronzePct}% {lang === "ru" ? "призового фонда" : "of prize pool"}</div>
+                  <div className="text-xs mt-0.5" style={{ color: "var(--ink-3)" }}>
                     {lang === "ru" ? "Только Common (T1) карты." : "Only Common (T1) cards."}
                   </div>
                 </div>
@@ -433,20 +445,20 @@ export function RankingsTab({
           </div>
 
           <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-white/40">{lang === "ru" ? "Распределение внутри лиги" : "Distribution within each league"}</p>
-            <div className="rounded-xl border border-white/10 overflow-hidden">
-              <div className="grid grid-cols-2 text-[10px] font-semibold text-white/40 uppercase tracking-wider px-4 py-2 border-b border-white/10 bg-white/5">
+            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--ink-3)" }}>{lang === "ru" ? "Распределение внутри лиги" : "Distribution within each league"}</p>
+            <div className="card-sticker rounded-xl overflow-hidden">
+              <div className="grid grid-cols-2 text-[10px] font-semibold uppercase tracking-wider px-4 py-2" style={{ borderBottom: "2px solid var(--outline)", background: "var(--sunken)", color: "var(--ink-3)" }}>
                 <div>{lang === "ru" ? "Позиция" : "Position"}</div>
                 <div className="text-right">{lang === "ru" ? "% от фонда лиги" : "% of league pool"}</div>
               </div>
               {positionPayouts.map(({ pos, pct }, idx) => (
-                <div key={idx} className="grid grid-cols-2 px-4 py-2.5 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
-                  <div className="text-white/70 text-xs">{pos}</div>
-                  <div className="text-right font-mono text-cyan-300 text-xs font-semibold">{pct}</div>
+                <div key={idx} className="grid grid-cols-2 px-4 py-2.5 transition-colors" style={{ borderBottom: "1.5px solid var(--divider)" }}>
+                  <div className="text-xs" style={{ color: "var(--panel-text-muted)" }}>{pos}</div>
+                  <div className="text-right font-mono text-xs font-semibold" style={{ color: "var(--info)" }}>{pct}</div>
                 </div>
               ))}
             </div>
-            <p className="text-white/30 text-[10px] leading-relaxed">
+            <p className="text-[10px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
               {lang === "ru"
                 ? "Приз = процент × фонд лиги. Игроки вне призовых позиций награду не получают."
                 : "Prize = percentage × league pool. Players outside payout tiers receive no reward."}
@@ -467,7 +479,7 @@ function LeagueDayDots({
 }: {
   lang: string;
   leagueDots: Array<{ day: number; league: number | undefined }>;
-  leagueDotStyles: Array<{ color: string; glow: string }>;
+  leagueDotStyles: Array<{ color: string; soft: string }>;
   leagueLabels: Array<{ en: string; ru: string }>;
   compact?: boolean;
 }) {
@@ -476,26 +488,19 @@ function LeagueDayDots({
 
   return (
     <>
-      <style>{`
-        @keyframes leagueDayGlow {
-          0%, 100% { filter: brightness(0.82); box-shadow: 0 0 6px var(--league-glow); }
-          50% { filter: brightness(1.35); box-shadow: 0 0 16px var(--league-glow), 0 0 28px var(--league-glow); }
-        }
-      `}</style>
       <div className={`grid grid-cols-6 ${gridGap}`}>
         {leagueDots.map(({ day, league }) => {
           const active = league !== undefined;
-          const colors = active ? leagueDotStyles[league] : { color: "#52525b", glow: "rgba(82,82,91,0)" };
+          const colors = active ? leagueDotStyles[league] : { color: "var(--ink-3)", soft: "var(--sunken)" };
           return (
             <div
               key={day}
               className={`grid ${dotSize} place-items-center rounded-full border font-black tabular-nums`}
               style={{
-                color: active ? "#ffffff" : "var(--nft-semi)",
-                background: active ? colors.color : "var(--card)",
+                color: active ? "var(--ink)" : "var(--nft-semi)",
+                background: active ? colors.soft : "var(--card)",
                 borderColor: active ? colors.color : "var(--panel-border)",
-                ["--league-glow" as string]: colors.glow,
-                animation: active ? "leagueDayGlow 2.2s ease-in-out infinite" : undefined,
+                boxShadow: active ? "var(--shadow-sticker-sm)" : "none",
               }}
               title={active ? leagueLabels[league].en : (lang === "ru" ? "Неактивный день" : "Inactive day")}
             >

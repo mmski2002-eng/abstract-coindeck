@@ -233,7 +233,8 @@ export function TourOverlay({
           left: spot.left,
           width: spot.width,
           height: spot.height,
-          boxShadow: "0 0 0 2px rgba(0,240,255,0.9), 0 0 28px rgba(0,240,255,0.5)",
+          border: "2.5px solid var(--outline)",
+          boxShadow: "4px 4px 0 var(--mint)",
           zIndex: 1000,
         }}
       />
@@ -249,15 +250,15 @@ export function TourOverlay({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="rounded-2xl p-5 shadow-2xl backdrop-blur-xl" style={{ border: "1px solid var(--panel-border)", background: "var(--modal-bg)" }}>
+        <div className="card-sticker p-5">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <div className="text-[10px] font-black uppercase tracking-[0.22em] text-cyan-500">
+            <div className="text-[10px] font-black uppercase tracking-[0.22em]" style={{ color: "var(--ink-2)" }}>
               {lang === "ru" ? "Обучение" : "Tutorial"} {step + 1}/{total}
             </div>
-            <div className="h-1.5 min-w-24 flex-1 overflow-hidden rounded-full" style={{ background: "var(--panel-border)" }}>
+            <div className="h-2 min-w-24 flex-1 overflow-hidden rounded-full" style={{ border: "1.5px solid var(--outline)", background: "var(--sunken)" }}>
               <div
-                className="h-full rounded-full bg-cyan-300 transition-all"
-                style={{ width: `${((step + 1) / total) * 100}%` }}
+                className="h-full rounded-full transition-all"
+                style={{ width: `${((step + 1) / total) * 100}%`, background: "var(--mint)" }}
               />
             </div>
           </div>
@@ -270,7 +271,7 @@ export function TourOverlay({
           </p>
 
           <div className="flex items-center justify-between gap-3">
-            <button type="button" onClick={finish} className="text-xs transition" style={{ color: "var(--nft-muted)" }}>
+            <button type="button" onClick={finish} className="btn-sticker-ghost px-2 py-1 text-xs">
               {lang === "ru" ? "Пропустить" : "Skip"}
             </button>
             <div className="flex gap-2">
@@ -278,8 +279,7 @@ export function TourOverlay({
                 <button
                   type="button"
                   onClick={() => setStep((s) => Math.max(0, s - 1))}
-                  className="rounded-lg px-3 py-1.5 text-xs font-semibold transition"
-                  style={{ border: "1px solid var(--panel-border)", background: "var(--button-secondary-bg)", color: "var(--button-secondary-text)" }}
+                  className="btn-sticker-outline px-3 py-1.5 text-xs"
                 >
                   ←
                 </button>
@@ -287,8 +287,7 @@ export function TourOverlay({
               <button
                 type="button"
                 onClick={() => (isLast ? finish() : setStep((s) => Math.min(total - 1, s + 1)))}
-                className="rounded-lg px-4 py-1.5 text-xs font-black text-black transition hover:brightness-110"
-                style={{ background: "linear-gradient(90deg, #00F0FF, #B026FF)" }}
+                className="btn-sticker-primary px-4 py-1.5 text-xs"
               >
                 {isLast ? (lang === "ru" ? "Готово" : "Done") : (lang === "ru" ? "Далее" : "Next")}
               </button>

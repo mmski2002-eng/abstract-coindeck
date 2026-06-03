@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import { COIN_ICONS, TIER_HEX, TIER_COLORS } from "../constants";
+import { COIN_ICONS } from "../constants";
+
+const TIER_ACCENTS = ["var(--rarity-common)", "var(--rarity-rare)", "var(--rarity-epic)", "var(--rarity-legendary)"] as const;
 
 export function MergeAnimation({
   card,
@@ -20,9 +22,8 @@ export function MergeAnimation({
   const [phase, setPhase] = useState<"waiting" | "gathering" | "fusion" | "burst" | "awaiting">("waiting");
   const animDoneRef = useRef(false);
   const cardReadyRef = useRef(cardReady);
-  const resultColor = TIER_HEX[Math.min(card.tier + 1, 3)];
-  const currentColor = TIER_HEX[card.tier];
-  const tc = TIER_COLORS[card.tier];
+  const resultColor = TIER_ACCENTS[Math.min(card.tier + 1, 3)] ?? TIER_ACCENTS[0];
+  const currentColor = TIER_ACCENTS[card.tier] ?? TIER_ACCENTS[0];
 
   const pentagon = Array.from({ length: 5 }, (_, i) => {
     const a = (i * 72 - 90) * (Math.PI / 180);
@@ -51,20 +52,20 @@ export function MergeAnimation({
   }, [cardReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return createPortal(
-    <div className="fixed inset-0 z-[180] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md gap-10">
+    <div className="fixed inset-0 z-[180] flex flex-col items-center justify-center gap-10" style={{ background: "var(--overlay-backdrop)" }}>
 
       {txConfirmed && (
         <button
           onClick={onComplete}
           className="absolute top-5 right-5 w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
           style={{
-            background: "linear-gradient(#0d0f22, #08091a) padding-box, linear-gradient(135deg, rgba(0,240,255,0.3), rgba(176,38,255,0.3)) border-box",
-            border: "1px solid transparent",
-            boxShadow: "0 0 14px rgba(0,240,255,0.12)",
+            background: "var(--modal-bg)",
+            border: "2px solid var(--outline)",
+            boxShadow: "var(--shadow-sticker-sm)",
           }}
           aria-label={lang === "ru" ? "Пропустить" : "Skip"}
         >
-          <svg className="w-4 h-4 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg className="w-4 h-4" style={{ color: "var(--panel-text-muted)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 6L6 18M6 6l12 12"/>
           </svg>
         </button>
@@ -72,8 +73,8 @@ export function MergeAnimation({
 
       <style>{`
         @keyframes mergeWait {
-          0%,100% { opacity:0.65; transform:translate(var(--mx),var(--my)) scale(1); filter:drop-shadow(0 0 4px var(--mc)); }
-          50%     { opacity:1;    transform:translate(var(--mx),var(--my)) scale(1.08); filter:drop-shadow(0 0 12px var(--mc)); }
+          0%,100% { opacity:0.65; transform:translate(var(--mx),var(--my)) scale(1); }
+          50%     { opacity:1;    transform:translate(var(--mx),var(--my)) scale(1.08); }
         }
         @keyframes mergeGather {
           from { transform:translate(var(--mx),var(--my)) scale(1); opacity:1; }
@@ -86,8 +87,8 @@ export function MergeAnimation({
           to   { transform:rotate(720deg) scale(1.1); opacity:1; }
         }
         @keyframes fusionPulse {
-          0%,100% { filter:blur(6px) brightness(1); }
-          50%     { filter:blur(3px) brightness(2); }
+          0%,100% { opacity: 0.72; }
+          50%     { opacity: 1; }
         }
         @keyframes mergeBurstFlash {
           0%   { opacity:0; transform:scale(0.5); }
@@ -114,9 +115,11 @@ export function MergeAnimation({
         {(phase === "waiting" || phase === "gathering") && pentagon.map(({ x, y }, i) => (
           <div
             key={i}
-            className={`absolute overflow-hidden rounded-xl border-2 ${tc.border}`}
+            className="absolute overflow-hidden rounded-xl"
             style={{
               width: 52, height: 70,
+              border: "2px solid var(--outline)",
+              background: currentColor,
               top: "50%", left: "50%",
               marginTop: -35, marginLeft: -26,
               "--mx": `${x}px`,
@@ -128,7 +131,7 @@ export function MergeAnimation({
             } as CSSProperties & Record<"--mx" | "--my" | "--mc", string>}
           >
             <img src={COIN_ICONS[card.playerId]} alt="" className="h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+            <div className="absolute inset-0" style={{ background: "var(--ink)", opacity: 0.16 }} />
           </div>
         ))}
 
@@ -139,7 +142,8 @@ export function MergeAnimation({
               style={{
                 width: 140, height: 140,
                 borderRadius: "50%",
-                background: `conic-gradient(from 0deg, ${resultColor}, transparent 40%, ${resultColor}88 60%, transparent 80%, ${resultColor})`,
+                background: resultColor,
+                border: "4px solid var(--outline)",
                 animation: phase === "fusion"
                   ? "fusionSpin 700ms ease-in-out both, fusionPulse 700ms ease-in-out both"
                   : "mergeBurstFlash 500ms ease-out both",
@@ -147,8 +151,8 @@ export function MergeAnimation({
             />
             <div className="absolute rounded-full" style={{
               width: 40, height: 40,
-              background: `radial-gradient(circle, white 0%, ${resultColor} 50%, transparent 70%)`,
-              filter: "blur(3px)",
+              background: "var(--paper)",
+              border: `3px solid ${resultColor}`,
               animation: phase === "fusion" ? "fusionPulse 700ms ease-in-out both" : "mergeBurstFlash 500ms ease-out both",
             }} />
           </div>
@@ -158,7 +162,8 @@ export function MergeAnimation({
         {phase === "burst" && (
           <>
             <div className="absolute inset-[-70px] rounded-full pointer-events-none" style={{
-              background: `radial-gradient(circle, ${resultColor}bb 0%, ${resultColor}44 40%, transparent 70%)`,
+              background: resultColor,
+              opacity: 0.18,
               animation: "mergeBurstFlash 700ms ease-out both",
             }} />
             {Array.from({ length: 18 }, (_, i) => (
@@ -167,7 +172,7 @@ export function MergeAnimation({
                   width: 8 + (i % 3) * 4, height: 8 + (i % 3) * 4,
                   marginLeft: -(4 + (i % 3) * 2), marginTop: -(4 + (i % 3) * 2),
                   background: resultColor,
-                  boxShadow: `0 0 10px ${resultColor}, 0 0 20px ${resultColor}`,
+                  border: "1.5px solid var(--outline)",
                   "--pa": `${i * (360 / 18)}deg`,
                   animation: `mergeParticle ${600 + (i % 4) * 130}ms ease-out ${i * 20}ms both`,
                 } as CSSProperties & Record<"--pa", string>}
@@ -181,20 +186,21 @@ export function MergeAnimation({
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div style={{
               width: 140, height: 140, borderRadius: "50%",
-              background: `conic-gradient(from 0deg, ${resultColor}, transparent 40%, ${resultColor}88 60%, transparent 80%, ${resultColor})`,
+              background: resultColor,
+              border: "4px solid var(--outline)",
               animation: "mergeAwaitSpin 1.4s linear infinite",
             }} />
             <div className="absolute rounded-full" style={{
               width: 50, height: 50,
-              background: `radial-gradient(circle, white 0%, ${resultColor} 50%, transparent 70%)`,
-              filter: "blur(4px)",
+              background: "var(--paper)",
+              border: `3px solid ${resultColor}`,
               animation: "mergeAwaitPulse 1s ease-in-out infinite",
             }} />
           </div>
         )}
       </div>
 
-      <div className="text-sm tracking-wide" style={{ color: "rgba(255,255,255,0.45)" }}>
+      <div className="text-sm tracking-wide" style={{ color: "var(--panel-text-muted)" }}>
         {phase === "waiting"
           ? (lang === "ru" ? "Подтвердите транзакцию в кошельке…" : "Confirm transaction in wallet…")
           : phase === "awaiting"

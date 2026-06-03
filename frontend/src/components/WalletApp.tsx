@@ -77,6 +77,10 @@ function Inner({
   tourDemoMode,
   onStartTour,
   isDark,
+  theme,
+  setTheme,
+  themeReady,
+  onEnterApp,
 }: {
   activeTab: Tab;
   setActiveTab: (t: Tab) => void;
@@ -84,6 +88,10 @@ function Inner({
   tourDemoMode?: boolean;
   onStartTour?: () => void;
   isDark?: boolean;
+  theme?: "light" | "dark";
+  setTheme?: (t: "light" | "dark") => void;
+  themeReady?: boolean;
+  onEnterApp?: () => void;
 }) {
   const { lang } = useI18n();
   const { address, isConnected } = useAccount();
@@ -371,7 +379,7 @@ function Inner({
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
-    <div className="text-zinc-50">
+    <div style={{ color: "var(--panel-text)" }}>
       <ModalKeyframes />
 
       <WrongNetworkBlocker lang={lang} />
@@ -463,9 +471,10 @@ function Inner({
         />
       )}
 
-      <ConnectPortals lang={lang} ctaHost={ctaHost} />
+      <ConnectPortals lang={lang} ctaHost={ctaHost} theme={theme ?? "light"} setTheme={setTheme ?? (() => {})} themeReady={themeReady ?? false} onEnterApp={onEnterApp} />
 
       <main className="mx-auto w-full max-w-6xl px-6 py-6" data-tour="tour-finish">
+        {!(isConnected || !!tourDemoMode) ? null : (<>
 
         {/* ── Roster tab ── */}
         {activeTab === "roster" && (
@@ -703,6 +712,7 @@ function Inner({
               walletSignMessage={signMessageAsync as any} // eslint-disable-line @typescript-eslint/no-explicit-any
             />
         )}
+        </>)}
 
       </main>
     </div>
@@ -716,6 +726,10 @@ export function WalletApp({
   tourDemoMode,
   onStartTour,
   isDark,
+  theme,
+  setTheme,
+  themeReady,
+  onEnterApp,
 }: {
   activeTab: Tab;
   setActiveTab: (t: Tab) => void;
@@ -723,6 +737,10 @@ export function WalletApp({
   tourDemoMode?: boolean;
   onStartTour?: () => void;
   isDark?: boolean;
+  theme?: "light" | "dark";
+  setTheme?: (t: "light" | "dark") => void;
+  themeReady?: boolean;
+  onEnterApp?: () => void;
 }) {
   return (
     <Inner
@@ -732,6 +750,10 @@ export function WalletApp({
       tourDemoMode={tourDemoMode}
       onStartTour={onStartTour}
       isDark={isDark}
+      theme={theme}
+      setTheme={setTheme}
+      themeReady={themeReady}
+      onEnterApp={onEnterApp}
     />
   );
 }

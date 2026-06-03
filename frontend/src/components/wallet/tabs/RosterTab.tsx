@@ -99,15 +99,15 @@ export function RosterTab({
       {/* Stats bar */}
       {walletConnected && (
         <section className="relative mb-6" data-tour="roster-info">
-          <div className="relative grid grid-cols-2 gap-3 rounded-3xl p-3 lg:grid-cols-4" style={{ border: "2.5px solid var(--ink)", background: "var(--info-block-shell)", boxShadow: "4px 4px 0 var(--info-shell-shadow)" }}>
+          <div className="relative grid grid-cols-2 gap-3 rounded-3xl p-3 lg:grid-cols-4" style={{ border: "2.5px solid var(--outline)", background: "var(--info-block-shell)", boxShadow: "4px 4px 0 var(--info-shell-shadow)" }}>
             {([
-              { label: lang === "ru" ? "НФТ" : "NFTs", value: String(flCards.length + chestCounts.wooden + chestCounts.iron + chestCounts.silver), unit: lang === "ru" ? "шт" : "pcs", accent: "from-violet-400/40 to-violet-600/10", delta: `${new Set(flCards.map((c) => c.playerId)).size} ${lang === "ru" ? "монет" : "coins"}`, rot: -4.5 },
-              { label: lang === "ru" ? "Яиц" : "Eggs", value: String(chestCounts.wooden + chestCounts.iron + chestCounts.silver), unit: lang === "ru" ? "шт" : "pcs", accent: "from-amber-400/40 to-amber-600/10", delta: `🪵×${chestCounts.wooden} 🪨×${chestCounts.iron} 🪙×${chestCounts.silver}`, rot: 2.4 },
-              { label: lang === "ru" ? "Готово к слиянию" : "Merge ready", value: String(mergeReadyCount), unit: lang === "ru" ? "стаков" : "stacks", accent: "from-fuchsia-400/40 to-fuchsia-600/10", delta: lang === "ru" ? "×5 → уровень выше" : "×5 → tier up", rot: -1.8 },
-              { label: lang === "ru" ? "Тяжелое / Супер тяжелое" : "Heavy / Super Heavy", value: String(flCards.filter((c) => c.tier >= 2).length), unit: lang === "ru" ? "яиц" : "eggs", accent: "from-blue-400/40 to-blue-600/10", delta: lang === "ru" ? "Тяжелые яйца" : "Heavy eggs", rot: 3.6 },
+              { label: lang === "ru" ? "НФТ" : "NFTs", value: String(flCards.length + chestCounts.wooden + chestCounts.iron + chestCounts.silver), unit: lang === "ru" ? "шт" : "pcs", delta: `${new Set(flCards.map((c) => c.playerId)).size} ${lang === "ru" ? "монет" : "coins"}`, rot: -4.5 },
+              { label: lang === "ru" ? "Яиц" : "Eggs", value: String(chestCounts.wooden + chestCounts.iron + chestCounts.silver), unit: lang === "ru" ? "шт" : "pcs", delta: `🪵×${chestCounts.wooden} 🪨×${chestCounts.iron} 🪙×${chestCounts.silver}`, rot: 2.4 },
+              { label: lang === "ru" ? "Готово к слиянию" : "Merge ready", value: String(mergeReadyCount), unit: lang === "ru" ? "стаков" : "stacks", delta: lang === "ru" ? "×5 → уровень выше" : "×5 → tier up", rot: -1.8 },
+              { label: lang === "ru" ? "Тяжелое / Супер тяжелое" : "Heavy / Super Heavy", value: String(flCards.filter((c) => c.tier >= 2).length), unit: lang === "ru" ? "яиц" : "eggs", delta: lang === "ru" ? "Тяжелые яйца" : "Heavy eggs", rot: 3.6 },
             ] as const).map((s, i) => (
               <div key={i} style={{ transform: `rotate(${s.rot}deg)` }}>
-                <div className="relative group overflow-hidden rounded-2xl p-5 anim-card-entry" style={{ animationDelay: `${i * 80}ms`, border: "2.5px solid var(--ink)", background: "var(--info-block-card)", boxShadow: "2px 2px 0 var(--card-shadow)" }}>
+                <div className="relative group overflow-hidden rounded-2xl p-5 anim-card-entry" style={{ animationDelay: `${i * 80}ms`, border: "2.5px solid var(--outline)", background: "var(--info-block-card)", boxShadow: "2px 2px 0 var(--card-shadow)" }}>
                   <div className="relative flex items-start justify-between mb-4">
                     <span className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: "var(--info-block-label)" }}>{s.label}</span>
                   </div>
@@ -153,13 +153,29 @@ export function RosterTab({
           .chest-buy-flash  { animation: chestBuyPop 2s ease-out forwards; }
           .chest-float-up   { animation: floatUp 1.8s ease-out forwards; }
           .chest-buy-bounce { animation: chestBuyBounce 0.65s cubic-bezier(.17,.67,.35,1.3) both; }
+          @keyframes coinPass {
+            0%   { left: 5%;    transform: translateY(-50%) scale(0.25); opacity: 0; }
+            12%  { opacity: 1; }
+            50%  { left: 32.5%; transform: translateY(-50%) scale(1);    opacity: 1; }
+            88%  { opacity: 1; }
+            100% { left: 60%;   transform: translateY(-50%) scale(0.25); opacity: 0; }
+          }
+          .coin-pass {
+            position: absolute;
+            top: 50%;
+            width: 35%;
+            height: 35%;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+            animation: coinPass 4.5s ease-in-out infinite;
+          }
         `}</style>
         {/* Секция Магазин сундуков — отдельная зона с paper-фоном */}
         <div
           data-tour="roster-chests"
           style={{
             background: "var(--paper)",
-            border: "2.5px solid var(--ink)",
+            border: "2.5px solid var(--outline)",
             borderRadius: 20,
             boxShadow: "4px 4px 0 var(--card-shadow)",
             padding: "20px 20px 24px",
@@ -172,7 +188,7 @@ export function RosterTab({
               <span className="font-mono text-[13px] font-black uppercase tracking-[0.2em]" style={{ color: "var(--section-label)" }}>{lang === "ru" ? "Магазин сундуков" : "Chest Shop"}</span>
             </div>
             <div className="hidden items-center gap-2 font-mono text-xs font-bold uppercase tracking-widest md:flex" style={{ color: "var(--section-label)" }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full" style={{ background: "var(--up)" }} />
               Drop rate · Live
             </div>
           </div>
@@ -184,8 +200,8 @@ export function RosterTab({
                 tierLabel: lang === "ru" ? "Маленькое" : "Small",
                 rarity:    lang === "ru" ? "Маленькое" : "Small",
                 dropLabel: lang === "ru" ? "Маленькие карточки" : "Small cards",
-                accent:    "#D9D3C2",
-                accentSoft:"rgba(217,211,194,0.25)",
+                accent:    "var(--rarity-common)",
+                accentSoft:"var(--paper-2)",
                 floatCls:  "anim-float",
                 count: chestCounts.wooden,
                 price: chestPrices.wooden,
@@ -196,8 +212,8 @@ export function RosterTab({
                 tierLabel: lang === "ru" ? "Среднее" : "Medium",
                 rarity:    lang === "ru" ? "Среднее" : "Medium",
                 dropLabel: lang === "ru" ? "Средние карточки" : "Medium cards",
-                accent:    "#7AC7E8",
-                accentSoft:"rgba(122,199,232,0.20)",
+                accent:    "var(--rarity-rare)",
+                accentSoft:"var(--sky-soft)",
                 floatCls:  "anim-float-delay",
                 count: chestCounts.iron,
                 price: chestPrices.iron,
@@ -208,8 +224,8 @@ export function RosterTab({
                 tierLabel: lang === "ru" ? "Тяжелое" : "Heavy",
                 rarity:    lang === "ru" ? "Тяжелое" : "Heavy",
                 dropLabel: lang === "ru" ? "Большие карточки" : "Large cards",
-                accent:    "#26C6A8",
-                accentSoft:"rgba(38,198,168,0.18)",
+                accent:    "var(--rarity-epic)",
+                accentSoft:"var(--mint-soft)",
                 floatCls:  "anim-float-delay-2",
                 count: chestCounts.silver,
                 price: chestPrices.silver,
@@ -219,7 +235,6 @@ export function RosterTab({
               const isBuying = busy === `fl_buy_${type}`;
               const isOpening = busy === `fl_open_${type}`;
               const justBought = chestBuySuccess === type;
-              const chestImg = ["/chests/wooden_closed.webp", "/chests/iron_closed.webp", "/chests/silver_closed.webp"][type];
               const descMap: Record<number, { ru: string; en: string; emoji: string }> = {
                 0: { emoji: "🐹", ru: "Гарантированное маленькое яйцо. Хороший старт для новичков.", en: "Guaranteed small egg. A great start for newcomers." },
                 1: { emoji: "🐻", ru: "Гарантированное среднее яйцо. Сильнее обычного — больше очков в турнире.", en: "Guaranteed medium egg. Stronger than common — more points in tournaments." },
@@ -231,7 +246,7 @@ export function RosterTab({
                   className={`select-none relative${justBought ? " chest-buy-bounce" : ""}`}
                   style={{
                     background: "var(--paper-2)",
-                    border: "2.5px solid var(--ink)",
+                    border: "2.5px solid var(--outline)",
                     borderRadius: 18,
                     boxShadow: "4px 4px 0 var(--card-shadow)",
                     padding: 20,
@@ -243,7 +258,7 @@ export function RosterTab({
                     <div style={{
                       display: "inline-flex", alignItems: "center", gap: 6,
                       background: accent, color: "var(--ink)",
-                      border: "2.5px solid var(--ink)", borderRadius: 999,
+                      border: "2.5px solid var(--outline)", borderRadius: 999,
                       padding: "4px 10px", fontSize: 10, letterSpacing: 1.6,
                       fontWeight: 800, boxShadow: "2px 2px 0 var(--card-shadow)",
                     }}>
@@ -252,10 +267,10 @@ export function RosterTab({
                     {has && (
                       <div style={{
                         background: accent, color: "var(--ink)",
-                        border: "2.5px solid var(--ink)", borderRadius: 999,
+                        border: "2.5px solid var(--outline)", borderRadius: 999,
                         padding: "2px 8px", fontSize: 11, fontWeight: 800,
                         boxShadow: "2px 2px 0 var(--card-shadow)",
-                        fontFamily: "ui-monospace, monospace",
+                        fontFamily: "Roobert, system-ui, sans-serif",
                       }}>
                         ×{count}
                       </div>
@@ -287,7 +302,7 @@ export function RosterTab({
                   <div style={{ marginTop: 16 }}>
                     <div style={{
                       color: "var(--ink-3)", fontSize: 12,
-                      fontFamily: 'ui-monospace,"JetBrains Mono",monospace', fontWeight: 600,
+                      fontFamily: "Roobert, system-ui, sans-serif", fontWeight: 600,
                     }}>
                       <span style={{ fontSize: 18, fontWeight: 800, color: "var(--ink-2)", fontFamily: "inherit" }}>
                         {(price / 1e18).toFixed(4)}
@@ -334,15 +349,15 @@ export function RosterTab({
         </div>{/* /Магазин сундуков wrapper */}
 
         {flError && (
-          <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-200">{flError}</div>
+          <div className="rounded-xl p-3 text-sm font-semibold" style={{ border: "2px solid var(--down)", background: "var(--paper-2)", color: "var(--down)", boxShadow: "2px 2px 0 var(--down)" }}>{flError}</div>
         )}
 
         {/* Claim banner */}
         {claimState?.active && userClaimable > 0 && (
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-amber-500/40 bg-amber-900/20 px-4 py-3">
+          <div className="flex items-center justify-between gap-4 rounded-xl px-4 py-3" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--outline)" }}>
             <div>
-              <div className="text-sm font-bold text-amber-300">🎉 {lang === "ru" ? "Доступен приз!" : "Prize available!"}</div>
-              <div className="text-xs text-amber-400/80 mt-0.5">
+              <div className="text-sm font-bold">🎉 {lang === "ru" ? "Доступен приз!" : "Prize available!"}</div>
+              <div className="mt-0.5 text-xs font-semibold" style={{ color: "var(--ink-2)" }}>
                 {(userClaimable / 1e18).toFixed(4)} ETH
                 {claimState.deadline > 0 && (
                   <> · {lang === "ru" ? "до" : "until"} {new Date(claimState.deadline * 1000).toLocaleDateString(lang === "ru" ? "ru-RU" : "en-US", { day: "numeric", month: "short" })}</>
@@ -351,7 +366,7 @@ export function RosterTab({
             </div>
             <button
               onClick={() => setActiveTab("tournament")}
-              className="shrink-0 rounded-xl bg-amber-500 hover:bg-amber-400 px-4 py-2 text-xs font-black text-black transition">
+              className="btn-sticker-outline shrink-0 px-4 py-2 text-xs">
               {lang === "ru" ? "Забрать →" : "Claim →"}
             </button>
           </div>
@@ -369,20 +384,6 @@ export function RosterTab({
         )}
 
         {/* Filter & sort bar */}
-        <style>{`
-          @keyframes legendaryBorder {
-            0%   { background-position: 0% 50%; }
-            50%  { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-          }
-          .card-legendary-border::before {
-            content:''; position:absolute; inset:-1px; border-radius:inherit; z-index:0;
-            background: linear-gradient(90deg,#f59e0b,#fbbf24,#f97316,#ef4444,#f59e0b);
-            background-size: 300% 300%;
-            animation: legendaryBorder 3s ease infinite;
-          }
-          .card-legendary-border > * { position:relative; z-index:1; }
-        `}</style>
         {flCards.length > 0 && (
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", paddingBottom: 4 }}>
             {/* Tier filter */}
@@ -395,7 +396,7 @@ export function RosterTab({
                 </svg>
               </button>
               {tierOpen && (
-                <div className="absolute left-0 top-full z-50 mt-2" style={{ background: "var(--paper-2)", border: "2.5px solid var(--ink)", borderRadius: 14, boxShadow: "4px 4px 0 var(--shadow-sticker-color)", minWidth: 160 }}>
+                <div className="absolute left-0 top-full z-50 mt-2" style={{ background: "var(--paper-2)", border: "2.5px solid var(--outline)", borderRadius: 14, boxShadow: "4px 4px 0 var(--shadow-sticker-color)", minWidth: 160 }}>
                   {TIER_OPTIONS.map(({ id, label }, i, arr) => (
                     <button key={String(id)} type="button"
                       onClick={() => { setFilterTier(id); setTierOpen(false); }}
@@ -403,7 +404,7 @@ export function RosterTab({
                       style={{
                         color: filterTier === id ? "var(--ink)" : "var(--ink-2)",
                         background: filterTier === id ? "var(--mint-soft)" : "transparent",
-                        borderBottom: i < arr.length - 1 ? "1.5px solid rgba(15,17,21,0.12)" : "none",
+                        borderBottom: i < arr.length - 1 ? "1.5px solid var(--divider)" : "none",
                         borderRadius: i === 0 ? "11px 11px 0 0" : i === arr.length - 1 ? "0 0 11px 11px" : 0,
                       }}
                       onMouseEnter={e => { if (filterTier !== id) e.currentTarget.style.background = "var(--filter-btn-hover-bg)"; }}
@@ -424,7 +425,7 @@ export function RosterTab({
                 </svg>
               </button>
               {teamOpen && (
-                <div className="absolute left-0 top-full z-50 mt-2" style={{ background: "var(--paper-2)", border: "2.5px solid var(--ink)", borderRadius: 14, boxShadow: "4px 4px 0 var(--shadow-sticker-color)", minWidth: 160 }}>
+                <div className="absolute left-0 top-full z-50 mt-2" style={{ background: "var(--paper-2)", border: "2.5px solid var(--outline)", borderRadius: 14, boxShadow: "4px 4px 0 var(--shadow-sticker-color)", minWidth: 160 }}>
                   {TEAM_OPTIONS.map(({ id, label }, i, arr) => (
                     <button key={String(id)} type="button"
                       onClick={() => { setFilterTeam(id); setTeamOpen(false); }}
@@ -432,7 +433,7 @@ export function RosterTab({
                       style={{
                         color: filterTeam === id ? "var(--ink)" : "var(--ink-2)",
                         background: filterTeam === id ? "var(--mint-soft)" : "transparent",
-                        borderBottom: i < arr.length - 1 ? "1.5px solid rgba(15,17,21,0.12)" : "none",
+                        borderBottom: i < arr.length - 1 ? "1.5px solid var(--divider)" : "none",
                         borderRadius: i === 0 ? "11px 11px 0 0" : i === arr.length - 1 ? "0 0 11px 11px" : 0,
                       }}
                       onMouseEnter={e => { if (filterTeam !== id) e.currentTarget.style.background = "var(--filter-btn-hover-bg)"; }}
@@ -444,7 +445,7 @@ export function RosterTab({
               )}
             </div>
             {/* Sort — segmented switch */}
-            <div style={{ marginLeft: "auto", flexShrink: 0, display: "inline-flex", border: "2.5px solid var(--ink)", borderRadius: 12, overflow: "hidden", boxShadow: "2px 2px 0 var(--card-shadow)" }}>
+            <div style={{ marginLeft: "auto", flexShrink: 0, display: "inline-flex", border: "2.5px solid var(--outline)", borderRadius: 12, overflow: "hidden", boxShadow: "2px 2px 0 var(--card-shadow)" }}>
               {([
                 { value: "rarity" as const,   labelRu: "РЕДКОСТЬ",  labelEn: "RARITY" },
                 { value: "progress" as const, labelRu: "ПРОГРЕСС",  labelEn: "PROGRESS" },
@@ -457,7 +458,7 @@ export function RosterTab({
                       textTransform: "uppercase" as const,
                       background: active ? "var(--ink)" : "transparent",
                       color: active ? "var(--paper)" : "var(--ink-2)",
-                      borderRight: i === 0 ? "2px solid var(--ink)" : "none",
+                      borderRight: i === 0 ? "2px solid var(--outline)" : "none",
                       transition: "background 0.15s, color 0.15s",
                       cursor: "pointer",
                     }}
@@ -475,7 +476,7 @@ export function RosterTab({
           <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 items-stretch" data-tour="roster-cards">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} style={{
-                border: "2.5px solid var(--ink)", borderRadius: 18, background: "var(--paper-2)",
+                border: "2.5px solid var(--outline)", borderRadius: 18, background: "var(--paper-2)",
                 boxShadow: "4px 4px 0 var(--card-shadow)", opacity: 0.45, padding: 16,
                 display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
                 gap: 10, minHeight: 180,
@@ -485,7 +486,7 @@ export function RosterTab({
                   <div style={{
                     position: "absolute", bottom: -6, right: -10,
                     width: 22, height: 22, borderRadius: "50%",
-                    background: "var(--paper)", border: "2px solid var(--ink)",
+                    background: "var(--paper)", border: "2px solid var(--outline)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 11, fontWeight: 800, color: "var(--ink-2)",
                   }}>?</div>
@@ -494,18 +495,18 @@ export function RosterTab({
                 <div style={{ height: 5, width: 30, background: "var(--ink)", borderRadius: 4, opacity: 0.12 }} />
               </div>
             ))}
-            <div className="col-span-2 sm:col-span-3 md:col-span-4 lg:col-span-5 text-center text-sm text-zinc-500 pt-2">
+            <div className="col-span-2 pt-2 text-center text-sm sm:col-span-3 md:col-span-4 lg:col-span-5" style={{ color: "var(--ink-3)" }}>
               {lang === "ru" ? "Почеши яйцо, чтобы получить первое нфт" : "Scratch an egg to get your first NFT"}
             </div>
           </div>
         ) : flGroups.length === 0 && (filterTeam !== null || filterTier !== null) ? (
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center">
+          <div className="card-sticker p-8 text-center">
             <div className="text-2xl mb-2">🔍</div>
-            <div className="text-sm text-zinc-400">
+            <div className="text-sm" style={{ color: "var(--ink-2)" }}>
               {lang === "ru" ? "Нет карточек по выбранному фильтру" : "No cards match the selected filter"}
             </div>
             <button onClick={() => { setFilterTeam(null); setFilterTier(null); }}
-              className="mt-4 rounded-xl bg-white/10 px-4 py-2 text-xs font-medium text-white hover:bg-white/15 transition">
+              className="btn-sticker-outline mt-4 px-4 py-2 text-xs">
               {lang === "ru" ? "Сбросить фильтры" : "Clear filters"}
             </button>
           </div>
@@ -513,18 +514,17 @@ export function RosterTab({
           <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 items-stretch" data-tour="roster-cards">
             {/* Chest items in the grid */}
             {!filterTeam && ([
-              { type: 0 as const, label: lang === "ru" ? "Маленькое яйцо" : "Small Egg", grad: "from-sky-900/50 to-cyan-900/30",    ring: "ring-sky-500/60",    buyBg: "bg-sky-700/70 hover:bg-sky-700",       count: chestCounts.wooden, tier: 0, emoji: "🐹" },
-              { type: 1 as const, label: lang === "ru" ? "Среднее яйцо" : "Medium Egg",   grad: "from-slate-700/50 to-blue-900/30",  ring: "ring-blue-500/60",   buyBg: "bg-blue-700/70 hover:bg-blue-700",     count: chestCounts.iron,   tier: 1, emoji: "🐻" },
-              { type: 2 as const, label: lang === "ru" ? "Тяжелое яйцо" : "Large Egg",      grad: "from-purple-900/50 to-violet-900/30", ring: "ring-purple-500/60", buyBg: "bg-purple-700/70 hover:bg-purple-700", count: chestCounts.silver, tier: 2, emoji: "🐂" },
+              { type: 0 as const, label: lang === "ru" ? "Маленькое яйцо" : "Small Egg", grad: "", ring: "", buyBg: "", count: chestCounts.wooden, tier: 0, emoji: "🐹" },
+              { type: 1 as const, label: lang === "ru" ? "Среднее яйцо" : "Medium Egg", grad: "", ring: "", buyBg: "", count: chestCounts.iron, tier: 1, emoji: "🐻" },
+              { type: 2 as const, label: lang === "ru" ? "Тяжелое яйцо" : "Large Egg", grad: "", ring: "", buyBg: "", count: chestCounts.silver, tier: 2, emoji: "🐂" },
             ]).filter(c => c.count > 0 && (filterTier === null || filterTier === c.tier)).map(({ type, label, grad, ring, buyBg, count, tier, emoji }) => {
               const isOpening = busy === `fl_open_${type}`;
-              const chestImg = ["/chests/wooden_closed.webp", "/chests/iron_closed.webp", "/chests/silver_closed.webp"][type];
-              const chestFill = (["#D9D3C2","#7AC7E8","#26C6A8"] as const)[type] ?? "#D9D3C2";
+              const chestFill = (["var(--rarity-common)","var(--rarity-rare)","var(--rarity-epic)"] as const)[type] ?? "var(--rarity-common)";
               const tierLabel = type === 0 ? (lang === "ru" ? "Маленькое" : "Small") : type === 1 ? (lang === "ru" ? "Среднее" : "Medium") : (lang === "ru" ? "Тяжелое" : "Heavy");
               return (
                 <article key={`chest_${type}`} className="anim-card-entry select-none" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
                   <div style={{
-                    background: "var(--paper-2)", border: "2.5px solid var(--ink)", borderRadius: 18,
+                    background: "var(--paper-2)", border: "2.5px solid var(--outline)", borderRadius: 18,
                     boxShadow: "4px 4px 0 var(--card-shadow)", padding: 16,
                     height: "100%", justifyContent: "flex-start",
                     display: "flex", flexDirection: "column", gap: 12, position: "relative",
@@ -534,27 +534,26 @@ export function RosterTab({
                       <div style={{
                         display: "inline-flex", alignItems: "center", gap: 5,
                         background: chestFill, color: "var(--ink)",
-                        border: "2.5px solid var(--ink)", borderRadius: 999,
+                        border: "2.5px solid var(--outline)", borderRadius: 999,
                         padding: "3px 9px", fontSize: 9, letterSpacing: 1.6, fontWeight: 800,
                         boxShadow: "2px 2px 0 var(--card-shadow)",
                       }}>{tierLabel}</div>
                       <div style={{
                         fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 999,
                         background: chestFill, color: "var(--ink)",
-                        border: "2.5px solid var(--ink)", boxShadow: "2px 2px 0 var(--card-shadow)",
-                        fontFamily: "ui-monospace, monospace",
+                        border: "2.5px solid var(--outline)", boxShadow: "2px 2px 0 var(--card-shadow)",
+                        fontFamily: "Roobert, system-ui, sans-serif",
                       }}>×{count}</div>
                     </div>
                     {/* image plate */}
                     <div style={{
                       height: 140, borderRadius: 14, background: chestFill,
-                      border: "2.5px solid var(--ink)", display: "grid", placeItems: "center",
+                      border: "2.5px solid var(--outline)", display: "grid", placeItems: "center",
                       position: "relative", overflow: "hidden",
                     }}>
                       <div aria-hidden style={{
                         position: "absolute", inset: 0,
-                        backgroundImage: "radial-gradient(var(--ink) 1.2px, transparent 1.4px)",
-                        backgroundSize: "14px 14px", opacity: 0.12,
+                        background: "transparent", opacity: 0.12,
                       }} />
                       <img src="/egg2.webp" alt={label} loading="lazy"
                         className={isOpening ? "animate-bounce" : "anim-float"}
@@ -617,18 +616,18 @@ export function RosterTab({
                 : cardAddr;
 
               const ts = CARD_TIER_STYLES[tier] ?? CARD_TIER_STYLES[0];
-              const brand = COIN_BRAND_COLORS[playerId] ?? "#6B7280";
+              const brand = COIN_BRAND_COLORS[playerId] ?? "var(--ink-3)";
               const ticker = COIN_TICKERS[playerId];
               const coinIcon = COIN_ICONS[playerId];
               const eggW = ([72, 88, 108, 120] as const)[tier] ?? 88;
               const eggH = eggW;
               const isLegendary = tier === 3;
-              const primerFill = (["#D9D3C2","#7AC7E8","#26C6A8","#88FC00"] as const)[tier] ?? "#D9D3C2";
+              const primerFill = (["var(--rarity-common)","var(--rarity-rare)","var(--rarity-epic)","var(--rarity-legendary)"] as const)[tier] ?? "var(--rarity-common)";
               return (
                 <article key={`${playerId}_${tier}`} className="anim-card-entry" style={{ animationDelay: `${cardIdx * 40}ms`, height: "100%", minHeight: 260, display: "flex", flexDirection: "column" }}>
                   <div style={{
-                    background: "var(--paper-2)", border: "2.5px solid var(--ink)", borderRadius: 18,
-                    boxShadow: isLegendary ? "4px 4px 0 var(--card-shadow), 8px 8px 0 #88FC00" : "4px 4px 0 var(--card-shadow)",
+                    background: "var(--paper-2)", border: "2.5px solid var(--outline)", borderRadius: 18,
+                    boxShadow: isLegendary ? "4px 4px 0 var(--card-shadow), 8px 8px 0 var(--rarity-legendary)" : "4px 4px 0 var(--card-shadow)",
                     padding: 16, display: "flex", flexDirection: "column", gap: 12, position: "relative", height: "100%", justifyContent: "flex-start",
                   }}>
                     {/* top row: rarity chip + badges */}
@@ -636,18 +635,18 @@ export function RosterTab({
                       <div style={{
                         display: "inline-flex", alignItems: "center", gap: 5,
                         background: primerFill, color: "var(--ink)",
-                        border: "2.5px solid var(--ink)", borderRadius: 999,
+                        border: "2.5px solid var(--outline)", borderRadius: 999,
                         padding: "3px 9px", fontSize: 10, letterSpacing: 1.4, fontWeight: 800,
                         boxShadow: "2px 2px 0 var(--card-shadow)",
                       }}>
-                        {(["◇","◈","✦","★"] as const)[tier] ?? "◇"}{" "}{lang === "ru" ? ts.label : ts.enLabel}
+                        {lang === "ru" ? ts.label : ts.enLabel}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                         <div style={{
                           fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 999,
                           background: primerFill, color: "var(--ink)",
-                          border: "2.5px solid var(--ink)", boxShadow: "2px 2px 0 var(--card-shadow)",
-                          fontFamily: "ui-monospace, monospace",
+                          border: "2.5px solid var(--outline)", boxShadow: "2px 2px 0 var(--card-shadow)",
+                          fontFamily: "Roobert, system-ui, sans-serif",
                         }}>×{count}</div>
                       </div>
                     </div>
@@ -655,53 +654,62 @@ export function RosterTab({
                     {/* image plate */}
                     <div style={{
                       height: 140, borderRadius: 14, background: primerFill,
-                      border: "2.5px solid var(--ink)", display: "grid", placeItems: "center",
-                      position: "relative", overflow: "hidden",
+                      border: "2.5px solid var(--outline)", display: "flex", alignItems: "center", justifyContent: "center",
+                      position: "relative",
                     }}>
-                      <div aria-hidden style={{
-                        position: "absolute", inset: 0,
-                        backgroundImage: "radial-gradient(var(--ink) 1.2px, transparent 1.4px)",
-                        backgroundSize: "14px 14px", opacity: 0.12,
-                      }} />
-                      <div className="anim-float" style={{ position: "relative", width: eggW, height: eggH, animationDelay: `${(cardIdx % 3) * -2}s` }}>
-                        <img src="/egg.webp" alt="" aria-hidden style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-                        {coinIcon && (
-                          <img src={coinIcon} alt="" aria-hidden style={{
-                            position: "absolute", width: "35%", height: "35%", objectFit: "contain",
-                            top: "50%", left: "50%", transform: "translate(-50%, -50%)",
-                            mixBlendMode: "multiply", opacity: 0.9,
-                          }} />
-                        )}
+                      <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                        <div className="egg-ripple"   style={{ color: primerFill, animationDelay: `${(cardIdx % 3) * -3}s` }} />
+                        <div className="egg-ripple-2" style={{ color: primerFill, animationDelay: `${(cardIdx % 3) * -3}s` }} />
+                        {([
+                          { top: "-18px", left: "50%",    animationDelay: "0s",   animationDuration: "2.1s" },
+                          { top: "10%",   left: "-20px",  animationDelay: "0.7s", animationDuration: "1.8s" },
+                          { top: "10%",   right: "-20px", animationDelay: "1.3s", animationDuration: "2.4s" },
+                          { bottom: "5%", left: "-18px",  animationDelay: "0.4s", animationDuration: "1.6s" },
+                          { bottom: "5%", right: "-18px", animationDelay: "1.0s", animationDuration: "2.2s" },
+                          { bottom: "-16px", left: "40%", animationDelay: "1.6s", animationDuration: "1.9s" },
+                        ] as { top?: string; left?: string; right?: string; bottom?: string; animationDelay: string; animationDuration: string }[]).map((pos, i) => (
+                          <span key={i} className="egg-star" style={{ ...pos, color: primerFill }}>✦</span>
+                        ))}
+                        <div className="egg-shake egg-glow" style={{ position: "relative", width: eggW, height: eggH, zIndex: 1, animationDelay: `${(cardIdx % 3) * -2}s`, color: primerFill }}>
+                          <img src="/egg.webp" alt="" aria-hidden style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                          {coinIcon && (
+                            <img src={coinIcon} alt="" aria-hidden style={{
+                              position: "absolute", width: "35%", height: "35%", objectFit: "contain",
+                              top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+                              mixBlendMode: "multiply", opacity: 0.9,
+                            }} />
+                          )}
+                        </div>
                       </div>
                       {isAllLocked && (
-                        <div style={{ position: "absolute", inset: 0, background: "rgba(251,247,236,0.88)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                        <div style={{ position: "absolute", inset: 0, background: "var(--paper-2)", opacity: 0.92, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2A2A2A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                               <rect x="3" y="11" width="18" height="11" rx="2"/>
                               <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                             </svg>
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#E25C5C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--down)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M5 12h14M12 5l7 7-7 7"/>
                             </svg>
                           </div>
-                          <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: 1.5, color: "#2A2A2A" }}>{lang === "ru" ? "В ИГРЕ" : "IN PLAY"}</span>
+                          <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: 1.5, color: "var(--ink)" }}>{lang === "ru" ? "В ИГРЕ" : "IN PLAY"}</span>
                         </div>
                       )}
                       {isPartialLocked && (
-                        <div style={{ position: "absolute", bottom: 6, right: 6, display: "flex", alignItems: "center", gap: 3, background: "rgba(226,92,92,0.15)", borderRadius: 6, padding: "2px 6px" }}>
-                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#E25C5C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <div style={{ position: "absolute", bottom: 6, right: 6, display: "flex", alignItems: "center", gap: 3, background: "var(--down-soft)", border: "1px solid var(--outline)", borderRadius: 6, padding: "2px 6px" }}>
+                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="var(--down)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <rect x="3" y="11" width="18" height="11" rx="2"/>
                             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                           </svg>
-                          <span style={{ fontSize: 9, fontWeight: 800, color: "#E25C5C" }}>{lockedCount}</span>
+                          <span style={{ fontSize: 9, fontWeight: 800, color: "var(--down)" }}>{lockedCount}</span>
                         </div>
                       )}
                     </div>
 
                     {/* name + role */}
-                    <div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6 }}>
                       <div style={{ color: "var(--ink-2)", fontWeight: 800, fontSize: 17, letterSpacing: -0.2 }}>{HEROES[playerId]}</div>
-                      <div style={{ color: "var(--ink-2)", fontSize: 10, letterSpacing: 1.6, marginTop: 2, fontWeight: 700, textTransform: "uppercase" }}>{PLAYER_ROLES[playerId]}</div>
+                      <div style={{ color: "var(--ink-2)", fontSize: 10, letterSpacing: 1.6, fontWeight: 700, textTransform: "uppercase", flexShrink: 0 }}>{PLAYER_ROLES[playerId]}</div>
                     </div>
 
                     {/* progress segments */}
@@ -716,7 +724,7 @@ export function RosterTab({
                             <div key={i} style={{
                               flex: 1, height: 10, borderRadius: 4,
                               background: i < Math.min(availableCount, 5) ? (tier === 0 ? "var(--progress-filled)" : primerFill) : "var(--ink-3)",
-                              border: "2px solid var(--ink)",
+                              border: "2px solid var(--outline)",
                             }} />
                           ))}
                         </div>
@@ -767,14 +775,14 @@ export function RosterTab({
         {flGroups.length > ROSTER_PAGE_SIZE && (
           <div className="flex items-center justify-center gap-2 pt-2">
             <button onClick={() => setRosterPage((p) => Math.max(0, p - 1))} disabled={rosterPage === 0}
-              className="rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-white/10 disabled:opacity-30 transition">
+              className="btn-sticker-outline px-3 py-1.5 text-xs">
               ←
             </button>
-            <span className="text-xs text-zinc-400">
+            <span className="text-xs font-semibold" style={{ color: "var(--ink-3)" }}>
               {rosterPage + 1} / {Math.ceil(flGroups.length / ROSTER_PAGE_SIZE)}
             </span>
             <button onClick={() => setRosterPage((p) => Math.min(Math.ceil(flGroups.length / ROSTER_PAGE_SIZE) - 1, p + 1))} disabled={rosterPage >= Math.ceil(flGroups.length / ROSTER_PAGE_SIZE) - 1}
-              className="rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-white/10 disabled:opacity-30 transition">
+              className="btn-sticker-outline px-3 py-1.5 text-xs">
               →
             </button>
           </div>
@@ -782,7 +790,7 @@ export function RosterTab({
 
         {/* Brand logo */}
         <div className="flex justify-center pt-2 pb-1">
-          <img src="/logo.svg" alt="CoinDeck" className="h-10 w-auto opacity-80" />
+          <img src="/logo.svg" alt="HeavyEggs" className="h-10 w-auto opacity-80" />
         </div>
       </div>
     </>

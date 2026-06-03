@@ -1,11 +1,4 @@
 {
-  "light": {
-    "--shadow-sticker-color": "#0f1115"
-  },
-  "dark": {
-    "--shadow-sticker": "4px 4px 0 #0f1115",
-    "--shadow-sticker-sm": "2px 2px 0 #0f1115",
-    "--shadow-sticker-color": "#696969",
-    "--filter-btn-hover-bg": "#1B232C"
-  }
+  "light": {},
+  "dark": {}
 }

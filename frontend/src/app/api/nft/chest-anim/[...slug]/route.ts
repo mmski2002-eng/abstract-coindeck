@@ -1,10 +1,17 @@
 import { NextRequest } from "next/server";
-
-const CHESTS = [
-  { label: "Small",  fill: "#D9D3C2" },
-  { label: "Medium", fill: "#7AC7E8" },
-  { label: "Heavy",  fill: "#26C6A8" },
-];
+import {
+  NFT_CHEST_ANIM_STYLES,
+  NFT_DOT_PATTERN,
+  NFT_EGG_DROP_SOFT,
+  NFT_EGG_DROP_STRONG,
+  NFT_EGG_GLOW,
+  NFT_EGG_GLOW_MID,
+  NFT_FOOTER_SHADE,
+  NFT_INK,
+  NFT_LIGHT_GLASS,
+  NFT_LIGHT_GLASS_SOFT,
+  NFT_SHADOW_SOFT,
+} from "../../palette";
 
 export async function GET(
   req: NextRequest,
@@ -17,7 +24,7 @@ export async function GET(
   const proto  = req.headers.get("x-forwarded-proto") ?? "https";
   const host   = req.headers.get("host") ?? "escape.isgood.host";
   const origin = `${proto}://${host}`;
-  const chest  = CHESTS[type];
+  const chest  = NFT_CHEST_ANIM_STYLES[type];
 
   const html = `<!DOCTYPE html>
 <html>
@@ -27,19 +34,19 @@ export async function GET(
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;background:${chest.fill};display:flex;align-items:center;justify-content:center;overflow:hidden;font-family:Impact,sans-serif}
-.dots{position:fixed;inset:0;background-image:radial-gradient(rgba(0,0,0,.18) 1px,transparent 1px);background-size:14px 14px;pointer-events:none}
-.card{width:300px;height:390px;background:${chest.fill};border:3px solid #000;box-shadow:6px 6px 0 #000;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.dots{position:fixed;inset:0;background-image:radial-gradient(${NFT_DOT_PATTERN} 1px,transparent 1px);background-size:14px 14px;pointer-events:none}
+.card{width:300px;height:390px;background:${chest.fill};border:3px solid ${NFT_INK};box-shadow:6px 6px 0 ${NFT_INK};display:flex;flex-direction:column;position:relative;overflow:hidden}
 .header{padding:12px 14px 0;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:3}
-.rarity{font-size:12px;font-weight:900;letter-spacing:.08em;color:#000;text-transform:uppercase;background:rgba(255,255,255,.55);border:2px solid #000;border-radius:6px;padding:3px 10px;box-shadow:2px 2px 0 #000}
-.brand{font-size:14px;font-weight:900;color:#000;letter-spacing:.04em;-webkit-text-stroke:.5px #000;text-shadow:2px 2px 0 rgba(0,0,0,.15)}
+.rarity{font-size:12px;font-weight:900;letter-spacing:.08em;color:${NFT_INK};text-transform:uppercase;background:${NFT_LIGHT_GLASS};border:2px solid ${NFT_INK};border-radius:6px;padding:3px 10px;box-shadow:2px 2px 0 ${NFT_INK}}
+.brand{font-size:14px;font-weight:900;color:${NFT_INK};letter-spacing:.04em;-webkit-text-stroke:.5px ${NFT_INK};text-shadow:2px 2px 0 ${NFT_SHADOW_SOFT}}
 .art{flex:1;display:flex;align-items:center;justify-content:center;position:relative;z-index:2}
 .egg-wrap{position:relative;width:200px;height:200px;display:flex;align-items:center;justify-content:center;animation:float 3s ease-in-out infinite}
-.glow{position:absolute;inset:-25px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.75) 0%,rgba(255,255,255,.2) 40%,transparent 70%);animation:pulse 3s ease-in-out infinite}
-.egg{width:160px;height:160px;object-fit:contain;position:relative;z-index:2;filter:drop-shadow(0 0 14px rgba(255,255,255,.9)) drop-shadow(0 0 28px rgba(255,255,255,.5))}
+.glow{position:absolute;inset:-25px;border-radius:50%;background:radial-gradient(circle,${NFT_EGG_GLOW} 0%,${NFT_EGG_GLOW_MID} 40%,transparent 70%);animation:pulse 3s ease-in-out infinite}
+.egg{width:160px;height:160px;object-fit:contain;position:relative;z-index:2;filter:drop-shadow(0 0 14px ${NFT_EGG_DROP_STRONG}) drop-shadow(0 0 28px ${NFT_EGG_DROP_SOFT})}
 .star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--d,2s) ease-in-out infinite var(--del,0s)}
-.footer{padding:10px 14px 13px;border-top:2.5px solid #000;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:3;background:rgba(0,0,0,.07)}
-.fname{font-size:17px;font-weight:900;color:#000;letter-spacing:-.2px}
-.badge{font-size:11px;font-weight:900;color:#000;letter-spacing:.12em;text-transform:uppercase;border:2px solid #000;border-radius:5px;padding:2px 9px;background:rgba(255,255,255,.45);box-shadow:2px 2px 0 #000}
+.footer{padding:10px 14px 13px;border-top:2.5px solid ${NFT_INK};display:flex;justify-content:space-between;align-items:center;position:relative;z-index:3;background:${NFT_FOOTER_SHADE}}
+.fname{font-size:17px;font-weight:900;color:${NFT_INK};letter-spacing:-.2px}
+.badge{font-size:11px;font-weight:900;color:${NFT_INK};letter-spacing:.12em;text-transform:uppercase;border:2px solid ${NFT_INK};border-radius:5px;padding:2px 9px;background:${NFT_LIGHT_GLASS_SOFT};box-shadow:2px 2px 0 ${NFT_INK}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
 @keyframes pulse{0%,100%{opacity:.5;transform:scale(.95)}50%{opacity:.9;transform:scale(1.08)}}
 @keyframes twinkle{0%,100%{opacity:0;transform:scale(0)}50%{opacity:1;transform:scale(1)}}

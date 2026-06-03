@@ -19,6 +19,18 @@ type TransactionPayload = { function: string; typeArguments: unknown[]; function
 type ClaimState = { active: boolean; startTs: number; deadline: number; vaultBalance: number; claimDays: number } | null;
 type OracleDay = { scores: number[]; finalized: boolean };
 type ChestPrices = { wooden: number; iron: number; silver: number };
+const ADMIN_PANEL = "card-sticker rounded-2xl p-4";
+const ADMIN_SECTION = "rounded-xl p-3";
+const ADMIN_INPUT = "input-sticker px-3 py-1.5 text-xs";
+const ADMIN_INPUT_SM = "input-sticker px-2 py-1 text-xs";
+const ADMIN_LABEL = "text-xs font-semibold";
+const ADMIN_HINT = "text-[11px] leading-relaxed";
+const ADMIN_TABLE = "w-full";
+const ADMIN_BTN_PRIMARY = "btn-sticker-primary px-4 py-2 text-xs";
+const ADMIN_BTN_SECONDARY = "btn-sticker-secondary px-4 py-2 text-xs";
+const ADMIN_BTN_OUTLINE = "btn-sticker-outline px-4 py-2 text-xs";
+const ADMIN_BTN_GHOST = "btn-sticker-ghost px-3 py-1.5 text-xs";
+const ADMIN_BTN_DANGER = "btn-sticker-destructive px-4 py-2 text-xs";
 type BotStatus = {
   config: { mode: "manual" | "auto"; enabled: boolean; claimDays: number; updatedAt: number };
   state: {
@@ -39,8 +51,8 @@ type BotStatus = {
 function AdminTip({ text }: { text: string }) {
   return (
     <span className="relative group/tip inline-flex shrink-0 self-center">
-      <span className="w-4 h-4 rounded-full border border-white/20 bg-white/10 text-white/50 text-[9px] font-bold inline-flex items-center justify-center cursor-default select-none hover:bg-white/20 hover:text-white/80 transition">i</span>
-      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 rounded-xl p-3 text-[11px] leading-relaxed shadow-2xl z-50 pointer-events-none opacity-0 group-hover/tip:opacity-100 transition-opacity whitespace-normal" style={{ background: "var(--modal-bg)", border: "1px solid var(--panel-border)", color: "var(--panel-text-muted)" }}>{text}</span>
+      <span className="chip-sticker h-5 w-5 justify-center p-0 text-[9px] cursor-default select-none transition">i</span>
+      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 rounded-xl p-3 text-[11px] leading-relaxed z-50 pointer-events-none opacity-0 group-hover/tip:opacity-100 transition-opacity whitespace-normal" style={{ background: "var(--modal-bg)", border: "2px solid var(--panel-border)", boxShadow: "var(--shadow-sticker-sm)", color: "var(--panel-text-muted)" }}>{text}</span>
     </span>
   );
 }
@@ -436,15 +448,15 @@ export function AdminTab({
       <div className="font-display font-bold text-2xl tracking-tight" style={{ color: "var(--panel-text)" }}>⚙️ {lang === "ru" ? "Панель администратора" : "Admin panel"}</div>
 
       {!isAdmin && (
-        <div className="rounded-2xl border border-red-500/20 bg-red-950 p-4 text-sm text-red-200">
+        <div className="card-sticker rounded-2xl p-4 text-sm" style={{ color: "var(--down)" }}>
           {lang === "ru" ? "Подключи admin-кошелёк для доступа." : "Connect admin wallet to access."}
         </div>
       )}
 
       {isAdmin && (
         <div className="space-y-4">
-          {adminError && <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-200">{adminError}</div>}
-          {adminOk && <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-200">{adminOk}</div>}
+          {adminError && <div className="rounded-xl p-3 text-sm" style={{ background: "var(--warn-soft)", border: "2px solid var(--down)", color: "var(--down)", boxShadow: "var(--shadow-sticker-sm)" }}>{adminError}</div>}
+          {adminOk && <div className="rounded-xl p-3 text-sm" style={{ background: "var(--mint-soft)", border: "2px solid var(--up)", color: "var(--up)", boxShadow: "var(--shadow-sticker-sm)" }}>{adminOk}</div>}
 
           <AdminInfoPanel
             lang={lang}
@@ -464,19 +476,23 @@ export function AdminTab({
           />
 
 
-          <div className="rounded-2xl border border-cyan-400/20 p-4 space-y-3" style={{ background: "var(--card)" }}>
+          <div className={`${ADMIN_PANEL} space-y-3`}>
             <div className="flex items-center gap-2">
-              <div className="text-xs font-semibold text-cyan-300">{lang === "ru" ? "Автобот турнира" : "Tournament bot"}</div>
+              <div className={ADMIN_LABEL} style={{ color: "var(--panel-text)" }}>{lang === "ru" ? "Автобот турнира" : "Tournament bot"}</div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex rounded-lg border border-white/10 bg-black/30 p-1 shrink-0">
+              <div className="inline-flex rounded-xl p-1 shrink-0" style={{ background: "var(--sunken)", border: "2px solid var(--panel-border)" }}>
                 {(["manual", "auto"] as const).map((mode) => (
                   <button
                     key={mode}
                     onClick={() => botAction("set-mode", mode)}
                     disabled={botBusy !== null}
-                    className={`px-3 py-1 text-[11px] font-bold rounded-md transition ${botStatus?.config.mode === mode ? "bg-cyan-400/20 text-cyan-200" : "text-zinc-500 hover:text-white"}`}
+                    className="px-3 py-1 text-[11px] font-bold rounded-lg transition"
+                    style={{
+                      background: botStatus?.config.mode === mode ? "var(--sky-soft)" : "transparent",
+                      color: botStatus?.config.mode === mode ? "var(--panel-text)" : "var(--panel-text-muted)",
+                    }}
                   >
                     {mode === "manual" ? "MANUAL" : "БОТ АВТО"}
                   </button>
@@ -484,13 +500,13 @@ export function AdminTab({
               </div>
 
             {botStatus?.state.pendingTimelock && (
-              <div className="rounded-xl border border-amber-400/20 bg-amber-400/10 p-3 text-xs text-amber-100">
+              <div className={`${ADMIN_SECTION} text-xs`} style={{ background: "var(--warn-soft)", border: "2px solid var(--warn)", color: "var(--amber-text)" }}>
                 {lang === "ru" ? "Ожидает timelock" : "Waiting for timelock"}: {botStatus.state.pendingTimelock.action} · {new Date(botStatus.state.pendingTimelock.executeAfter * 1000).toLocaleString()}
               </div>
             )}
 
             {botStatus?.state.lastError && (
-              <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-200">
+              <div className={`${ADMIN_SECTION} text-xs`} style={{ background: "var(--warn-soft)", border: "2px solid var(--down)", color: "var(--down)" }}>
                 {botStatus.state.lastError}
               </div>
             )}
@@ -498,7 +514,7 @@ export function AdminTab({
               <button
                 onClick={() => botAction("run-once")}
                 disabled={botBusy !== null || botStatus?.state.running}
-                className="rounded-xl bg-cyan-600/80 px-4 py-2 text-xs font-bold text-white hover:bg-cyan-600 disabled:opacity-40 transition"
+                className={ADMIN_BTN_PRIMARY}
               >
                 {botStatus?.state.running || botBusy === "run-once" ? "…" : (lang === "ru" ? "Запустить / продолжить" : "Run / resume")}
               </button>
@@ -506,7 +522,7 @@ export function AdminTab({
               <button
                 onClick={() => botAction("stop")}
                 disabled={botBusy !== null || !botStatus?.state.running}
-                className="rounded-xl bg-zinc-700/80 px-4 py-2 text-xs font-bold text-white hover:bg-zinc-700 disabled:opacity-40 transition"
+                className={ADMIN_BTN_OUTLINE}
               >
                 {lang === "ru" ? "Остановить после шага" : "Stop after step"}
               </button>
@@ -514,7 +530,7 @@ export function AdminTab({
               <button
                 onClick={() => botAction("reset-error")}
                 disabled={botBusy !== null}
-                className="rounded-xl bg-white/5 px-4 py-2 text-xs font-bold text-zinc-300 hover:bg-white/10 disabled:opacity-40 transition"
+                className={ADMIN_BTN_GHOST}
               >
                 {lang === "ru" ? "Сбросить ошибку" : "Reset error"}
               </button>
@@ -523,11 +539,11 @@ export function AdminTab({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-amber-500/20 p-4 space-y-4" style={{ background: "var(--card)" }}>
+          <div className={`${ADMIN_PANEL} space-y-4`}>
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div>
-                <div className="text-xs font-semibold text-amber-300/80">{lang === "ru" ? "Governance и защита админки" : "Governance & admin safeguards"}</div>
-                <div className="mt-1 text-[11px] text-zinc-500">
+                <div className={ADMIN_LABEL} style={{ color: "var(--panel-text)" }}>{lang === "ru" ? "Governance и защита админки" : "Governance & admin safeguards"}</div>
+                <div className={`mt-1 ${ADMIN_HINT}`} style={{ color: "var(--panel-text-muted)" }}>
                   {lang === "ru"
                     ? "Все настройки ниже работают в текущем пакете без миграции адреса. Пока timelock = 0 часов, действия исполняются сразу."
                     : "Everything below works in the current package with no address migration. While a timelock is set to 0 hours, actions execute immediately."}
@@ -537,7 +553,7 @@ export function AdminTab({
                 <button
                   onClick={() => adminTx("admin_control_init", { function: `${MODULE_ADDRESS}::admin_control::initialize`, typeArguments: [], functionArguments: [] })}
                   disabled={adminBusy !== null}
-                  className="rounded-xl bg-emerald-700/80 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-40 transition"
+                  className={ADMIN_BTN_PRIMARY}
                 >
                   {adminBusy === "admin_control_init" ? "…" : (lang === "ru" ? "Инициализировать governance" : "Initialize governance")}
                 </button>
@@ -546,27 +562,27 @@ export function AdminTab({
 
             <div className="grid gap-6 lg:grid-cols-2">
               <div className="space-y-3">
-                <div className="text-xs font-semibold text-zinc-400">{lang === "ru" ? "Параметры защиты" : "Safeguard settings"}</div>
-                <label className="flex items-center gap-3 rounded-xl border border-white/5 bg-black/20 px-3 py-2 text-sm text-zinc-200">
+                <div className={ADMIN_LABEL} style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Параметры защиты" : "Safeguard settings"}</div>
+                <label className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm" style={{ background: "var(--sunken)", border: "2px solid var(--panel-border)", color: "var(--panel-text)" }}>
                   <input id="admin-freeze-during-epoch" type="checkbox" defaultChecked={governancePolicy.freezeDuringEpoch} className="h-4 w-4 accent-emerald-500" />
                   <span>{lang === "ru" ? "Запретить менять чувствительные настройки во время активной эпохи" : "Block sensitive config changes while an epoch is active"}</span>
                 </label>
-                <label className="flex items-center gap-3 rounded-xl border border-white/5 bg-black/20 px-3 py-2 text-sm text-zinc-200">
+                <label className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm" style={{ background: "var(--sunken)", border: "2px solid var(--panel-border)", color: "var(--panel-text)" }}>
                   <input id="admin-withdraw-enabled" type="checkbox" defaultChecked={governancePolicy.withdrawEnabled} className="h-4 w-4 accent-emerald-500" />
                   <span>{lang === "ru" ? "Включить лимиты вывода из prize vault" : "Enable withdrawal limits for the prize vault"}</span>
                 </label>
                 <div className="grid gap-3 md:grid-cols-2">
                   <div>
-                    <label className="mb-1 block text-xs text-zinc-400">{lang === "ru" ? "Лимит на 1 вывод, ETH" : "Per-withdraw limit, ETH"}</label>
-                    <input id="admin-withdraw-per-tx" type="number" min="0" step="0.01" defaultValue={formatMove(governancePolicy.perTxLimit)} className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/20" />
+                    <label className="mb-1 block text-xs" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Лимит на 1 вывод, ETH" : "Per-withdraw limit, ETH"}</label>
+                    <input id="admin-withdraw-per-tx" type="number" min="0" step="0.01" defaultValue={formatMove(governancePolicy.perTxLimit)} className={`w-full ${ADMIN_INPUT} py-2 text-sm`} />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs text-zinc-400">{lang === "ru" ? "Суточный лимит, ETH" : "Daily limit, ETH"}</label>
-                    <input id="admin-withdraw-daily" type="number" min="0" step="0.01" defaultValue={formatMove(governancePolicy.dailyLimit)} className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/20" />
+                    <label className="mb-1 block text-xs" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Суточный лимит, ETH" : "Daily limit, ETH"}</label>
+                    <input id="admin-withdraw-daily" type="number" min="0" step="0.01" defaultValue={formatMove(governancePolicy.dailyLimit)} className={`w-full ${ADMIN_INPUT} py-2 text-sm`} />
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={saveGovernanceSettings} disabled={adminBusy !== null} className="rounded-xl bg-cyan-700/80 px-4 py-2 text-xs font-bold text-white hover:bg-cyan-700 disabled:opacity-40 transition">
+                  <button onClick={saveGovernanceSettings} disabled={adminBusy !== null} className={ADMIN_BTN_PRIMARY}>
                     {lang === "ru" ? "Сохранить governance" : "Save governance"}
                   </button>
                   <AdminTip text={lang === "ru"
@@ -576,7 +592,7 @@ export function AdminTab({
               </div>
 
               <div className="space-y-3">
-                <div className="text-xs font-semibold text-zinc-400">{lang === "ru" ? "Timelock по операциям" : "Per-action timelocks"}</div>
+                <div className={ADMIN_LABEL} style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Timelock по операциям" : "Per-action timelocks"}</div>
                 {(() => {
                   const items = [
                     { id: 0, label: lang === "ru" ? "URI NFT" : "NFT URIs" },
@@ -595,9 +611,9 @@ export function AdminTab({
                   const col2 = items.slice(6);
                   const renderItem = ({ id, label }: { id: number; label: string }) => (
                     <div key={id} className="flex items-center gap-2">
-                      <label className="w-36 shrink-0 text-xs text-zinc-400">{label}</label>
-                      <input id={`admin-delay-${id}`} type="number" min="0" step="0.5" defaultValue={((governancePolicy.actionDelays[id] ?? 0) / 3600).toFixed(1)} className="w-20 rounded-xl border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/20" />
-                      <span className="text-xs text-zinc-500">{lang === "ru" ? "ч" : "h"}</span>
+                      <label className="w-36 shrink-0 text-xs" style={{ color: "var(--panel-text-muted)" }}>{label}</label>
+                      <input id={`admin-delay-${id}`} type="number" min="0" step="0.5" defaultValue={((governancePolicy.actionDelays[id] ?? 0) / 3600).toFixed(1)} className={`w-20 ${ADMIN_INPUT} text-sm`} />
+                      <span className="text-xs" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "ч" : "h"}</span>
                     </div>
                   );
                   return (
@@ -611,38 +627,38 @@ export function AdminTab({
             </div>
 
             <div className="space-y-2">
-              <div className="text-xs font-semibold text-zinc-400">{lang === "ru" ? "Текущая очередь timelock" : "Current timelock queue"}</div>
-              <div className="rounded-xl border border-white/5 bg-black/20 p-3 space-y-2">
+              <div className={ADMIN_LABEL} style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Текущая очередь timelock" : "Current timelock queue"}</div>
+              <div className={`${ADMIN_SECTION} space-y-2`} style={{ background: "var(--sunken)", border: "2px solid var(--panel-border)" }}>
                 {pendingAdminActions.length === 0 ? (
-                  <div className="text-[11px] text-zinc-500">{lang === "ru" ? "Очередь пуста." : "Queue is empty."}</div>
+                  <div className="text-[11px]" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Очередь пуста." : "Queue is empty."}</div>
                 ) : pendingAdminActions.map((item) => (
-                  <div key={`${item.actionType}-${item.payloadHashHex}`} className="rounded-lg border border-white/5 bg-white/[0.03] px-3 py-2">
+                  <div key={`${item.actionType}-${item.payloadHashHex}`} className="rounded-lg px-3 py-2" style={{ background: "var(--paper-2)", border: "1px solid var(--panel-border)" }}>
                     <div className="text-[11px] font-semibold" style={{ color: "var(--panel-text)" }}>{actionTypeLabel(item.actionType)}</div>
-                    <div className="mt-1 text-[10px] text-zinc-500">
+                    <div className="mt-1 text-[10px]" style={{ color: "var(--panel-text-muted)" }}>
                       {lang === "ru" ? "Можно исполнить после" : "Ready after"}: {new Date(item.executeAfter * 1000).toLocaleString(lang === "ru" ? "ru-RU" : "en-US")}
                     </div>
-                    <div className="text-[10px] font-mono text-zinc-600 break-all">{item.payloadHashHex}</div>
+                    <div className="text-[10px] font-mono break-all" style={{ color: "var(--panel-text-muted)" }}>{item.payloadHashHex}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="h-px bg-amber-500/15" />
+            <div className="h-px" style={{ background: "var(--divider)" }} />
 
             <div className="space-y-4">
-              <div className="text-xs font-semibold text-amber-300/80">{lang === "ru" ? "Управление доступом" : "Access management"}</div>
+              <div className={ADMIN_LABEL} style={{ color: "var(--panel-text)" }}>{lang === "ru" ? "Управление доступом" : "Access management"}</div>
               <div className="grid gap-4 lg:grid-cols-2">
                 <div className="space-y-3">
-                  <div className="text-[10px] uppercase tracking-wider text-zinc-500">{lang === "ru" ? "Полный доступ (admin)" : "Full access (admin)"}</div>
+                  <div className="text-[10px] uppercase tracking-wider" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Полный доступ (admin)" : "Full access (admin)"}</div>
                   <div className="flex gap-2 items-center flex-wrap">
                     <input type="text" placeholder="0x..." id="admin-add-addr"
-                      className="flex-1 min-w-[160px] rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white font-mono placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-white/20" />
+                      className={`flex-1 min-w-[160px] ${ADMIN_INPUT} font-mono`} />
                     <button onClick={() => {
                       const addr = (document.getElementById("admin-add-addr") as HTMLInputElement)?.value.trim();
                       if (!addr) return;
                       adminTx("add_admin", { function: `${MODULE_ADDRESS}::fantasy_league::add_admin`, typeArguments: [], functionArguments: [addr] });
                     }} disabled={adminBusy !== null}
-                      className="rounded-xl bg-emerald-700/70 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-40 transition">
+                      className={ADMIN_BTN_PRIMARY}>
                       {adminBusy === "add_admin" ? "…" : "+ " + (lang === "ru" ? "Добавить" : "Add")}
                     </button>
                     <button onClick={() => {
@@ -650,7 +666,7 @@ export function AdminTab({
                       if (!addr) return;
                       adminTx("remove_admin", { function: `${MODULE_ADDRESS}::fantasy_league::remove_admin`, typeArguments: [], functionArguments: [addr] });
                     }} disabled={adminBusy !== null}
-                      className="rounded-xl bg-red-700/70 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-40 transition">
+                      className={ADMIN_BTN_DANGER}>
                       {adminBusy === "remove_admin" ? "…" : "− " + (lang === "ru" ? "Удалить" : "Remove")}
                     </button>
                     <AdminTip text={lang === "ru" ? "Выдаёт / отзывает полные права администратора и все роли." : "Grants / revokes full admin rights and all roles."} />
@@ -658,14 +674,14 @@ export function AdminTab({
                 </div>
 
                 <div className="space-y-3">
-                  <div className="text-[10px] uppercase tracking-wider text-zinc-500">{lang === "ru" ? "Ограниченный доступ (роли)" : "Restricted access (roles)"}</div>
+                  <div className="text-[10px] uppercase tracking-wider" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Ограниченный доступ (роли)" : "Restricted access (roles)"}</div>
                   <div className="flex gap-2 items-center flex-wrap">
                     <input type="text" placeholder="0x..." id="role-addr"
-                      className="flex-1 min-w-[160px] rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white font-mono placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-white/20" />
+                      className={`flex-1 min-w-[160px] ${ADMIN_INPUT} font-mono`} />
                     {ROLE_NAMES.map(r => (
                       <label key={r.key} className="flex items-center gap-1 cursor-pointer select-none">
                         <input type="checkbox" id={`role-check-${r.key}`} className="accent-emerald-500 h-3.5 w-3.5" />
-                        <span className="text-[11px] text-zinc-300">{r.label}</span>
+                        <span className="text-[11px]" style={{ color: "var(--panel-text)" }}>{r.label}</span>
                       </label>
                     ))}
                   </div>
@@ -680,7 +696,7 @@ export function AdminTab({
                       if (mask === 0) return;
                       adminTx("grant_role", { function: `${MODULE_ADDRESS}::admin_control::grant_role`, typeArguments: [], functionArguments: [addr, String(mask)] });
                     }} disabled={adminBusy !== null}
-                      className="rounded-xl bg-cyan-700/70 px-3 py-1.5 text-xs font-bold text-white hover:bg-cyan-700 disabled:opacity-40 transition">
+                      className={ADMIN_BTN_PRIMARY}>
                       {adminBusy === "grant_role" ? "…" : (lang === "ru" ? "Выдать роли" : "Grant roles")}
                     </button>
                     <button onClick={() => {
@@ -693,7 +709,7 @@ export function AdminTab({
                       if (mask === 0) return;
                       adminTx("revoke_role", { function: `${MODULE_ADDRESS}::admin_control::revoke_role`, typeArguments: [], functionArguments: [addr, String(mask)] });
                     }} disabled={adminBusy !== null}
-                      className="rounded-xl bg-red-700/70 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-40 transition">
+                      className={ADMIN_BTN_DANGER}>
                       {adminBusy === "revoke_role" ? "…" : (lang === "ru" ? "Отозвать роли" : "Revoke roles")}
                     </button>
                   </div>
@@ -704,35 +720,35 @@ export function AdminTab({
           </div>
 
           {/* Oracle — daily scores */}
-          <div className="rounded-2xl border border-white/10 p-4 space-y-3" style={{ background: "var(--card)" }}>
-            <div className="text-xs font-semibold text-zinc-400">{lang === "ru" ? "Очки оракула (по дням)" : "Oracle day scores"}</div>
+          <div className={`${ADMIN_PANEL} space-y-3`}>
+            <div className={ADMIN_LABEL} style={{ color: "var(--panel-text)" }}>{lang === "ru" ? "Очки оракула (по дням)" : "Oracle day scores"}</div>
 
-            <div className="rounded-xl border border-white/5 bg-black/20 p-3 space-y-2">
-              <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{lang === "ru" ? "Источники данных" : "Data sources"}</div>
-              <div className="text-[10px] text-zinc-600">{lang === "ru" ? "Данные: CoinGecko Markets + Trending (автоматически)." : "Data: CoinGecko Markets + Trending (automatic)."}</div>
+            <div className={`${ADMIN_SECTION} space-y-2`} style={{ background: "var(--sunken)", border: "2px solid var(--panel-border)" }}>
+              <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Источники данных" : "Data sources"}</div>
+              <div className="text-[10px]" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Данные: CoinGecko Markets + Trending (автоматически)." : "Data: CoinGecko Markets + Trending (automatic)."}</div>
               <div className="flex flex-wrap gap-2 pt-1 items-center">
                 <button onClick={() => fetchAllData(oracleDateInput)} disabled={parseStatus === "running"}
-                  className="rounded-lg bg-gradient-to-r from-violet-600 to-blue-600 px-4 py-1.5 text-xs font-bold text-white hover:opacity-90 disabled:opacity-50 transition">
+                  className={ADMIN_BTN_PRIMARY}>
                   {parseStatus === "running" ? "⏳ …" : (lang === "ru" ? "▶ Парсить данные" : "▶ Parse data")}
                 </button>
                 <AdminTip text={lang === "ru" ? "Загружает рыночные данные с CoinGecko (цена, объём, High/Low, температура, хайп) для выбранной даты. Запускай перед «Запостить очки»." : "Fetches market data from CoinGecko (price, volume, High/Low, temperature, hype) for the selected date. Run before «Post scores»."} />
               </div>
               {parseStatus === "running" && (
                 <div className="space-y-1 pt-1">
-                  <div className="flex items-center justify-between text-[10px] text-zinc-400">
+                  <div className="flex items-center justify-between text-[10px]" style={{ color: "var(--panel-text-muted)" }}>
                     <span className="animate-pulse">{lang === "ru" ? "Получаем данные с CoinGecko…" : "Fetching CoinGecko data…"}</span>
                     <span className="tabular-nums font-mono">{parseProgress}/{parseTotal}</span>
                   </div>
-                  <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-violet-500 to-blue-500 transition-all duration-500"
-                      style={{ width: `${parseTotal > 0 ? Math.round((parseProgress / parseTotal) * 100) : 0}%` }} />
+                  <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "var(--paper-2)", border: "1px solid var(--panel-border)" }}>
+                    <div className="h-full transition-all duration-500"
+                      style={{ background: "var(--mint)", width: `${parseTotal > 0 ? Math.round((parseProgress / parseTotal) * 100) : 0}%` }} />
                   </div>
-                  <div className="text-[9px] text-zinc-600">{lang === "ru" ? "Фон: страницу можно закрыть, процесс не прервётся" : "Background: safe to close the page"}</div>
+                  <div className="text-[9px]" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Фон: страницу можно закрыть, процесс не прервётся" : "Background: safe to close the page"}</div>
                 </div>
               )}
               {parseStatus === "done" && (
                 <div className="flex flex-wrap items-center gap-2">
-                  <div className="text-[10px] text-emerald-400">✓ {lang === "ru" ? "Данные обновлены" : "Data updated"}</div>
+                  <div className="text-[10px]" style={{ color: "var(--up)" }}>✓ {lang === "ru" ? "Данные обновлены" : "Data updated"}</div>
                   {tnState?.startTimestamp && (() => {
                     const _snapshotWindow = getOracleWindow(oracleDateInput);
                     const _snapshotAbsDay = _snapshotWindow.day ?? 1;
@@ -757,21 +773,21 @@ export function AdminTab({
                       }}
                       disabled={snapshotSaveStatus === "saving" || _snapshotDayInvalid}
                       title={_snapshotDayInvalid ? `День ${_snapshotRelDay} вне диапазона (1-6)` : undefined}
-                      className="rounded-lg bg-cyan-600/20 border border-cyan-500/30 px-3 py-1 text-[10px] font-bold text-cyan-300 hover:bg-cyan-600/30 disabled:opacity-50 transition">
+                      className={`${ADMIN_BTN_SECONDARY} px-3 py-1 text-[10px]`}>
                       {snapshotSaveStatus === "saving" ? "⏳" : "💾"} {lang === "ru" ? "Сохранить снапшот" : "Save snapshot"}
                     </button>
                     );
                   })()}
-                  {snapshotSaveStatus === "done" && <span className="text-[10px] text-cyan-400">✓ snapshot сохранён</span>}
-                  {snapshotSaveStatus === "error" && <span className="text-[10px] text-red-400">{snapshotSaveError}</span>}
+                  {snapshotSaveStatus === "done" && <span className="text-[10px]" style={{ color: "var(--up)" }}>✓ snapshot сохранён</span>}
+                  {snapshotSaveStatus === "error" && <span className="text-[10px]" style={{ color: "var(--down)" }}>{snapshotSaveError}</span>}
                 </div>
               )}
-              {parseStatus === "error" && <div className="text-[10px] text-red-400">{parseError}</div>}
+              {parseStatus === "error" && <div className="text-[10px]" style={{ color: "var(--down)" }}>{parseError}</div>}
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2">
-                <label className="text-xs text-zinc-400">{lang === "ru" ? "Дата" : "Date"}</label>
+                <label className="text-xs" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Дата" : "Date"}</label>
                 <input type="datetime-local" value={oracleDateInput}
                   onChange={async e => {
                     const val = e.target.value;
@@ -797,7 +813,7 @@ export function AdminTab({
                       } catch {}
                     }
                   }}
-                  className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-white/20" />
+                  className={ADMIN_INPUT_SM} />
                 {tnState?.startTimestamp ? (() => {
                   const w = getOracleWindow(oracleDateInput);
                   const absDay = w.day ?? 1;
@@ -806,23 +822,23 @@ export function AdminTab({
                   const toTs = w.toTs ?? (fromTs ? fromTs + 86400 : null);
                   const fmtUtc = (ts: number) => new Date(ts * 1000).toISOString().slice(5, 16).replace("T", " ") + " UTC";
                   return (
-                    <span className="text-xs text-zinc-400 flex flex-col gap-0.5">
+                    <span className="text-xs flex flex-col gap-0.5" style={{ color: "var(--panel-text-muted)" }}>
                       <span>
                         → Epoch <span className="font-black" style={{ color: "var(--panel-text)" }}>{tnState.epoch}</span>{" "}
                         {lang === "ru" ? "День" : "Day"}{" "}
-                        <span className={`font-black${relDay < 1 || relDay > 6 ? " text-red-400" : ""}`} style={relDay < 1 || relDay > 6 ? {} : { color: "var(--panel-text)" }}>{relDay}</span>
+                        <span className="font-black" style={{ color: relDay < 1 || relDay > 6 ? "var(--down)" : "var(--panel-text)" }}>{relDay}</span>
                       </span>
                       {fromTs && toTs && (
-                        <span className="text-[9px] text-zinc-600 font-mono">{fmtUtc(fromTs)} → {fmtUtc(toTs)}</span>
+                        <span className="text-[9px] font-mono" style={{ color: "var(--panel-text-muted)" }}>{fmtUtc(fromTs)} → {fmtUtc(toTs)}</span>
                       )}
                     </span>
                   );
                 })() : (
-                  <span className="text-[10px] text-zinc-400">{lang === "ru" ? "Установи дату старта" : "Set start date first"}</span>
+                  <span className="text-[10px]" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Установи дату старта" : "Set start date first"}</span>
                 )}
               </div>
               <button onClick={() => { setHeroStats(Array(50).fill(null).map(mkStats)); setParseStatus("idle"); }}
-                className="rounded-lg bg-white/5 px-3 py-1 text-xs text-zinc-400 hover:text-white transition">
+                className={ADMIN_BTN_GHOST}>
                 {lang === "ru" ? "Сбросить" : "Reset"}
               </button>
               <button onClick={() => setHeroStats(Array(50).fill(null).map(() => ({
@@ -833,15 +849,15 @@ export function AdminTab({
                 tempRatio: parseFloat((Math.random() * 20).toFixed(2)),
                 hype: Math.random() > 0.85,
               })))}
-                className="rounded-lg bg-white/5 px-3 py-1 text-xs text-zinc-400 hover:text-white transition">
+                className={ADMIN_BTN_GHOST}>
                 Mock
               </button>
             </div>
 
-            <div className="overflow-x-auto rounded-xl border border-white/5 bg-black/20">
-              <table className="w-full text-[10px] text-zinc-400">
+            <div className="overflow-x-auto rounded-xl" style={{ background: "var(--sunken)", border: "2px solid var(--panel-border)" }}>
+              <table className={`${ADMIN_TABLE} text-[10px]`} style={{ color: "var(--panel-text-muted)" }}>
                 <thead>
-                  <tr className="border-b border-white/5 text-zinc-500">
+                  <tr style={{ borderBottom: "1px solid var(--divider)", color: "var(--panel-text-muted)" }}>
                     <th className="px-2 py-1.5 text-left font-semibold">{lang === "ru" ? "Категория" : "Category"}</th>
                     <th className="px-2 py-1.5 text-left font-semibold">{lang === "ru" ? "Формула" : "Formula"}</th>
                     <th className="px-2 py-1.5 text-center font-semibold w-16">{lang === "ru" ? "Кап" : "Cap"}</th>
@@ -855,20 +871,20 @@ export function AdminTab({
                     [lang === "ru" ? "Температура (vol/mcap)" : "Temperature",   lang === "ru" ? "+10 pts за 1% отношения" : "+10 pts per 1% ratio",                           "+150"],
                     [lang === "ru" ? "Выборов игроков" : "Player picks",         lang === "ru" ? "+100 топ-15 по выборам игроков за предыдущий день (при равенстве — все)" : "+100 for top-15 by player picks previous day (ties included)", "+100"],
                   ].map(([cat, formula, cap]) => (
-                    <tr key={String(cat)} className="border-b border-white/5 last:border-0">
-                      <td className="px-2 py-1 font-semibold text-zinc-300">{cat}</td>
+                    <tr key={String(cat)} style={{ borderBottom: "1px solid var(--divider)" }}>
+                      <td className="px-2 py-1 font-semibold" style={{ color: "var(--panel-text)" }}>{cat}</td>
                       <td className="px-2 py-1">{formula}</td>
-                      <td className="px-2 py-1 text-center font-bold text-zinc-300">{cap}</td>
+                      <td className="px-2 py-1 text-center font-bold" style={{ color: "var(--panel-text)" }}>{cap}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
 
-            <div className="overflow-x-auto rounded-xl border border-white/5">
-              <table className="w-full text-xs">
+            <div className="overflow-x-auto rounded-xl" style={{ border: "2px solid var(--panel-border)" }}>
+              <table className={`${ADMIN_TABLE} text-xs`}>
                 <thead>
-                  <tr className="border-b border-white/5 bg-black/30 text-[10px] text-zinc-500">
+                  <tr className="text-[10px]" style={{ background: "var(--sunken)", borderBottom: "1px solid var(--divider)", color: "var(--panel-text-muted)" }}>
                     <th className="px-2 py-1.5 text-left font-semibold min-w-[100px]">{lang === "ru" ? "Монета" : "Coin"}</th>
                     <th className="px-1 py-1.5 text-center w-16 font-semibold">{lang === "ru" ? "Цена%" : "Price%"}</th>
                     <th className="px-1 py-1.5 text-center w-20 font-semibold">{lang === "ru" ? "Объём" : "Vol"}</th>
@@ -885,13 +901,13 @@ export function AdminTab({
                     const effectiveHype = hypedPids.has(pid);
                     const pts = calcPts({ ...s, hype: effectiveHype });
                     const spread = s.low24h > 0 ? ((s.high24h - s.low24h) / s.low24h) * 100 : 0;
-                    const inp = "w-full rounded border border-white/10 bg-black/30 px-1 py-0.5 text-center text-white focus:outline-none focus:ring-1 focus:ring-white/20";
+                    const inp = "w-full input-sticker px-1 py-0.5 text-center text-xs";
                     return (
-                      <tr key={pid} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+                      <tr key={pid} style={{ borderBottom: "1px solid var(--divider)" }}>
                         <td className="px-2 py-1">
                           <div className="flex items-center gap-1.5">
                             <img src={COIN_ICONS[pid]} alt={name} className="h-5 w-5 rounded object-cover opacity-80 shrink-0" referrerPolicy="no-referrer" />
-                            <div className="truncate text-zinc-200 leading-none">{name}</div>
+                            <div className="truncate leading-none" style={{ color: "var(--panel-text)" }}>{name}</div>
                           </div>
                         </td>
                         <td className="px-1 py-1"><input type="number" min="-100" max="1000" step="0.1" value={s.priceChg.toFixed(2)} onChange={e => setHero(pid, { priceChg: +e.target.value || 0 })} className={inp} /></td>
@@ -902,13 +918,13 @@ export function AdminTab({
                         <td className="px-1 py-1 text-center tabular-nums font-mono text-[11px]">
                           {lineupPickCounts
                             ? (lineupPickCounts[pid] > 0
-                              ? <span className={hypedPids.has(pid) ? "text-emerald-400 font-bold" : "text-zinc-400"}>{lineupPickCounts[pid]}</span>
-                              : <span className="text-zinc-600">0</span>)
-                            : <span className="text-zinc-600">—</span>}
+                              ? <span className="font-bold" style={{ color: hypedPids.has(pid) ? "var(--up)" : "var(--panel-text-muted)" }}>{lineupPickCounts[pid]}</span>
+                              : <span style={{ color: "var(--panel-text-muted)" }}>0</span>)
+                            : <span style={{ color: "var(--panel-text-muted)" }}>—</span>}
                         </td>
                         <td className="px-2 py-1 text-center font-black tabular-nums">
-                          <div className={pts > 0 ? "text-emerald-400" : pts < 0 ? "text-red-400" : "text-zinc-500"}>{pts}</div>
-                          <div className="text-[9px] text-zinc-600">{spread > 0 ? `${spread.toFixed(1)}%v` : ""}</div>
+                          <div style={{ color: pts > 0 ? "var(--up)" : pts < 0 ? "var(--down)" : "var(--panel-text-muted)" }}>{pts}</div>
+                          <div className="text-[9px]" style={{ color: "var(--panel-text-muted)" }}>{spread > 0 ? `${spread.toFixed(1)}%v` : ""}</div>
                         </td>
                       </tr>
                     );
@@ -931,7 +947,7 @@ export function AdminTab({
                   await refreshTournament();
                 }}
                 disabled={adminBusy !== null}
-                className="flex-1 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-2.5 text-sm font-bold text-white shadow hover:opacity-90 disabled:opacity-50"
+                className={`${ADMIN_BTN_PRIMARY} flex-1 py-2.5 text-sm`}
               >
                 {adminBusy === "oracle_post" ? "…" : (lang === "ru" ? "📊 Запостить очки" : "📊 Post scores")}
               </button>
@@ -940,19 +956,19 @@ export function AdminTab({
           </div>
 
           {/* Oracle + Controls + NFT tools — merged block */}
-          <div className="rounded-2xl border border-cyan-500/20 p-4 space-y-5" style={{ background: "var(--card)" }}>
+          <div className={`${ADMIN_PANEL} space-y-5`}>
 
           <div className="space-y-3">
-            <div className="text-xs font-semibold text-cyan-300/80">{lang === "ru" ? "Инструменты оракула" : "Oracle tools"}</div>
+            <div className={ADMIN_LABEL} style={{ color: "var(--panel-text)" }}>{lang === "ru" ? "Инструменты оракула" : "Oracle tools"}</div>
             <div className="flex flex-wrap gap-2 items-center">
-              <label className="text-xs text-zinc-400 shrink-0">{lang === "ru" ? "День №" : "Day #"}</label>
+              <label className="text-xs shrink-0" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "День №" : "Day #"}</label>
               <input type="number" min="1" max="6" defaultValue="1" id="oracle-tool-day"
-                className="w-16 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-white/20" />
+                className={`w-16 ${ADMIN_INPUT_SM}`} />
               <button onClick={() => {
                 const day = parseInt((document.getElementById("oracle-tool-day") as HTMLInputElement)?.value) || 1;
                 adminTx("oracle_set_posted", { function: `${MODULE_ADDRESS}::oracle::set_posted`, typeArguments: [], functionArguments: [String(day), true] });
               }} disabled={adminBusy !== null}
-                className="rounded-xl bg-blue-700/70 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700 disabled:opacity-40 transition">
+                className={ADMIN_BTN_SECONDARY}>
                 {adminBusy === "oracle_set_posted" ? "…" : (lang === "ru" ? "✓ Отметить опубликованным" : "✓ Mark posted")}
               </button>
               <AdminTip text={lang === "ru" ? "Вручную помечает день как опубликованный, не перезаписывая очки." : "Manually marks a day as posted without rewriting scores."} />
@@ -960,7 +976,7 @@ export function AdminTab({
                 const day = parseInt((document.getElementById("oracle-tool-day") as HTMLInputElement)?.value) || 1;
                 adminTx("oracle_unset_posted", { function: `${MODULE_ADDRESS}::oracle::set_posted`, typeArguments: [], functionArguments: [String(day), false] });
               }} disabled={adminBusy !== null}
-                className="rounded-xl bg-zinc-700/70 px-3 py-1.5 text-xs font-bold text-white hover:bg-zinc-700 disabled:opacity-40 transition">
+                className={ADMIN_BTN_OUTLINE}>
                 {adminBusy === "oracle_unset_posted" ? "…" : (lang === "ru" ? "✕ Снять отметку" : "✕ Unmark")}
               </button>
               <AdminTip text={lang === "ru" ? "Убирает флаг «опубликовано» с выбранного дня." : "Removes the «posted» flag from a day."} />
@@ -970,7 +986,7 @@ export function AdminTab({
                 if (!confirm(lang === "ru" ? "Сбросить все данные оракула? Все очки за все дни будут удалены." : "Reset all oracle data? All scores for all days will be deleted.")) return;
                 queueAdminTx("oracle_reset_queue", { function: `${MODULE_ADDRESS}::oracle::queue_reset_all_days`, typeArguments: [], functionArguments: [] });
               }} disabled={adminBusy !== null}
-                className="rounded-xl bg-red-900/70 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-900 disabled:opacity-40 transition">
+                className={ADMIN_BTN_DANGER}>
                 {adminBusy === "oracle_reset_queue" ? "…" : (lang === "ru" ? "🕒 Поставить сброс в очередь" : "🕒 Queue oracle reset")}
               </button>
               <button onClick={() => {
@@ -978,22 +994,22 @@ export function AdminTab({
                 adminTx("oracle_reset", { function: `${MODULE_ADDRESS}::oracle::reset_all_days`, typeArguments: [], functionArguments: [] })
                   .then(() => { setHeroStats(Array(50).fill(null).map(mkStats)); setParseStatus("idle"); });
               }} disabled={adminBusy !== null}
-                className="rounded-xl bg-red-700/70 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-40 transition">
+                className={ADMIN_BTN_DANGER}>
                 {adminBusy === "oracle_reset" ? "…" : (lang === "ru" ? "🗑 Исполнить сброс" : "🗑 Execute reset")}
               </button>
               <AdminTip text={lang === "ru" ? "Удаляет очки оракула за все дни с блокчейна. Составы игроков сохраняются, но очки обнуляются. Необратимо." : "Deletes oracle scores for all days from the blockchain. Player lineups kept but scores reset. Irreversible."} />
             </div>
           </div>
 
-          <div className="h-px bg-cyan-500/10" />
+          <div className="h-px" style={{ background: "var(--divider)" }} />
 
           <div className="space-y-3">
-            <div className="text-xs font-semibold text-cyan-300/80">{lang === "ru" ? "Управление" : "Controls"}</div>
+            <div className={ADMIN_LABEL} style={{ color: "var(--panel-text)" }}>{lang === "ru" ? "Управление" : "Controls"}</div>
             <div className="flex gap-2 items-center flex-wrap">
-              <label className="text-xs text-zinc-400 shrink-0">{lang === "ru" ? "Дата старта" : "Start date"}</label>
+              <label className="text-xs shrink-0" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Дата старта" : "Start date"}</label>
               <input type="date" id="admin-start-ts-input"
                 defaultValue={tnState?.startTimestamp ? new Date(tnState.startTimestamp * 1000).toISOString().slice(0,10) : ""}
-                className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-white/20" />
+                className={ADMIN_INPUT} />
             </div>
             <div className="flex flex-wrap gap-2 items-center">
               <button onClick={() => {
@@ -1001,18 +1017,18 @@ export function AdminTab({
                 const ts = val ? Math.floor(new Date(val + "T00:01:00Z").getTime() / 1000) : Math.floor(Date.now() / 1000);
                 adminTx("start_tournament", { function: `${MODULE_ADDRESS}::tournament::start_epoch`, typeArguments: [], functionArguments: [String(ts)] });
               }} disabled={adminBusy !== null || tnState?.active}
-                className="rounded-xl bg-emerald-600/80 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-600 disabled:opacity-40 transition">
+                className={ADMIN_BTN_PRIMARY}>
                 {adminBusy === "start_tournament" ? "…" : (lang === "ru" ? "▶ Старт" : "▶ Start")}
               </button>
               <AdminTip text={lang === "ru" ? "Запускает новую эпоху турнира с указанной датой старта." : "Starts a new tournament epoch with the specified start date."} />
               <button onClick={() => queueAdminTx("end_tournament_queue", { function: `${MODULE_ADDRESS}::tournament::queue_stop_and_reset`, typeArguments: [], functionArguments: [] })}
                 disabled={adminBusy !== null || !tnState?.active}
-                className="rounded-xl bg-zinc-600/80 px-4 py-2 text-xs font-bold text-white hover:bg-zinc-600 disabled:opacity-40 transition">
+                className={ADMIN_BTN_OUTLINE}>
                 {adminBusy === "end_tournament_queue" ? "…" : (lang === "ru" ? "🕒 В очередь" : "🕒 Queue end")}
               </button>
               <button onClick={() => adminTx("end_tournament", { function: `${MODULE_ADDRESS}::tournament::stop_and_reset`, typeArguments: [], functionArguments: [] })}
                 disabled={adminBusy !== null || !tnState?.active}
-                className="rounded-xl bg-zinc-700/80 px-4 py-2 text-xs font-bold text-white hover:bg-zinc-700 disabled:opacity-40 transition">
+                className={ADMIN_BTN_OUTLINE}>
                 {adminBusy === "end_tournament" ? "…" : (lang === "ru" ? "⏹ Исполнить" : "⏹ Execute")}
               </button>
               <AdminTip text={lang === "ru" ? "Завершает активный турнир. Данные оракула и составы игроков сохраняются." : "Ends the active tournament. Oracle data and player lineups preserved."} />
@@ -1026,22 +1042,22 @@ export function AdminTab({
                 setViewEpoch(null);
                 adminTx("admin_clear_epochs", { function: `${MODULE_ADDRESS}::tournament::admin_clear_epochs`, typeArguments: [], functionArguments: [] });
               }} disabled={adminBusy !== null}
-                className="rounded-xl bg-zinc-700/80 px-3 py-1.5 text-xs font-bold text-white hover:bg-zinc-700 disabled:opacity-40 transition">
+                className={ADMIN_BTN_OUTLINE}>
                 {adminBusy === "admin_clear_epochs" ? "…" : (lang === "ru" ? "🧹 Стереть эпохи" : "🧹 Clear epochs")}
               </button>
               <AdminTip text={lang === "ru" ? "Скрывает все прошлые эпохи из UI. Данные остаются на блокчейне." : "Hides all past epochs from UI. Data stays on-chain."} />
             </div>
             <div className="flex gap-2 items-center">
-              <label className="text-xs text-zinc-400 shrink-0">{lang === "ru" ? "Плата за отмену лайнапа" : "Cancel lineup fee"}</label>
+              <label className="text-xs shrink-0" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Плата за отмену лайнапа" : "Cancel lineup fee"}</label>
               <input type="number" min="0" step="0.0001" defaultValue="0.0005" id="admin-cancel-fee"
-                className="w-24 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-white/20" />
-              <span className="text-xs text-zinc-400">ETH</span>
+                className={`w-24 ${ADMIN_INPUT}`} />
+              <span className="text-xs" style={{ color: "var(--panel-text-muted)" }}>ETH</span>
               <button onClick={() => {
                 const val = parseFloat((document.getElementById("admin-cancel-fee") as HTMLInputElement)?.value);
                 if (isNaN(val) || val < 0) return;
                 adminTx("set_cancel_fee", { function: `${MODULE_ADDRESS}::tournament::set_cancel_fee`, typeArguments: [], functionArguments: [String(BigInt(Math.round(val * 1e18)))] });
               }} disabled={adminBusy !== null}
-                className="rounded-xl bg-violet-700/70 px-3 py-1.5 text-xs font-bold text-white hover:bg-violet-700 disabled:opacity-40 transition">
+                className={ADMIN_BTN_PRIMARY}>
                 {adminBusy === "set_cancel_fee" ? "…" : (lang === "ru" ? "Установить" : "Set")}
               </button>
               <AdminTip text={lang === "ru" ? "Плата взимается при отмене лайнапа текущего дня. 0 = бесплатно." : "Fee charged when a player cancels their lineup for the current day. 0 = free."} />
@@ -1049,19 +1065,19 @@ export function AdminTab({
 
           </div>
 
-          <div className="h-px bg-cyan-500/10" />
+          <div className="h-px" style={{ background: "var(--divider)" }} />
 
           <div className="space-y-3">
-            <div className="text-xs font-semibold text-cyan-300/80">{lang === "ru" ? "URI изображений NFT" : "NFT image URIs"}</div>
+            <div className={ADMIN_LABEL} style={{ color: "var(--panel-text)" }}>{lang === "ru" ? "URI изображений NFT" : "NFT image URIs"}</div>
             <div className="flex gap-2 items-center">
-              <label className="text-xs text-zinc-400 w-16 shrink-0">{lang === "ru" ? "Карта" : "Card"}</label>
+              <label className="text-xs w-16 shrink-0" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Карта" : "Card"}</label>
               <input type="text" placeholder="https://..." id="admin-uri-card" key={baseUris.card} defaultValue={baseUris.card}
-                className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white font-mono placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-white/20" />
+                className={`flex-1 ${ADMIN_INPUT} font-mono`} />
             </div>
             <div className="flex gap-2 items-center">
-              <label className="text-xs text-zinc-400 w-16 shrink-0">{lang === "ru" ? "Сундук" : "Chest"}</label>
+              <label className="text-xs w-16 shrink-0" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Сундук" : "Chest"}</label>
               <input type="text" placeholder="https://..." id="admin-uri-chest" key={baseUris.chest} defaultValue={baseUris.chest}
-                className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white font-mono placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-white/20" />
+                className={`flex-1 ${ADMIN_INPUT} font-mono`} />
             </div>
             <div className="flex gap-2 items-center">
             <button onClick={() => {
@@ -1071,7 +1087,7 @@ export function AdminTab({
               const toBytes = (s: string) => Array.from(new TextEncoder().encode(s));
               queueAdminTx("queue_set_base_uris", { function: `${MODULE_ADDRESS}::fantasy_league::queue_set_base_uris`, typeArguments: [], functionArguments: [toBytes(cardUri), toBytes(chestUri)] });
             }} disabled={adminBusy !== null}
-              className="rounded-xl bg-teal-700/70 px-4 py-2 text-xs font-bold text-white hover:bg-teal-700 disabled:opacity-40 transition">
+              className={ADMIN_BTN_SECONDARY}>
               {adminBusy === "queue_set_base_uris" ? "…" : (lang === "ru" ? "🕒 Поставить URI в очередь" : "🕒 Queue URI update")}
             </button>
             <button onClick={() => {
@@ -1081,45 +1097,45 @@ export function AdminTab({
               const toBytes = (s: string) => Array.from(new TextEncoder().encode(s));
               adminTx("set_base_uris", { function: `${MODULE_ADDRESS}::fantasy_league::set_base_uris`, typeArguments: [], functionArguments: [toBytes(cardUri), toBytes(chestUri)] });
             }} disabled={adminBusy !== null}
-              className="rounded-xl bg-teal-600/80 px-4 py-2 text-xs font-bold text-white hover:bg-teal-600 disabled:opacity-40 transition">
+              className={ADMIN_BTN_PRIMARY}>
               {adminBusy === "set_base_uris" ? "…" : (lang === "ru" ? "Обновить URI" : "Execute URIs")}
             </button>
             <AdminTip text={lang === "ru" ? "Обновляет базовые URL изображений для карточек и сундуков." : "Updates base image URLs for cards and chests."} />
             </div>
           </div>
 
-          <div className="h-px bg-cyan-500/10" />
+          <div className="h-px" style={{ background: "var(--divider)" }} />
 
           <div className="space-y-3">
-            <div className="text-xs font-semibold text-cyan-300/80">{lang === "ru" ? "Переминтовать карту (исправить URI)" : "Reissue card (fix URI)"}</div>
+            <div className={ADMIN_LABEL} style={{ color: "var(--panel-text)" }}>{lang === "ru" ? "Переминтовать карту (исправить URI)" : "Reissue card (fix URI)"}</div>
             <div className="flex gap-2 items-center">
               <input type="text" placeholder={lang === "ru" ? "Адрес карты 0x..." : "Card address 0x..."} id="admin-reissue-addr"
-                className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white font-mono placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-white/20" />
+                className={`flex-1 ${ADMIN_INPUT} font-mono`} />
             </div>
             <button onClick={() => {
               const addr = (document.getElementById("admin-reissue-addr") as HTMLInputElement)?.value.trim();
               if (!addr) return;
               adminTx("admin_reissue_card", { function: `${MODULE_ADDRESS}::fantasy_league::admin_reissue_card`, typeArguments: [], functionArguments: [addr] });
             }} disabled={adminBusy !== null}
-              className="rounded-xl bg-orange-700/70 px-4 py-2 text-xs font-bold text-white hover:bg-orange-700 disabled:opacity-40 transition">
+              className={ADMIN_BTN_SECONDARY}>
               {adminBusy === "admin_reissue_card" ? "…" : (lang === "ru" ? "🔄 Переминтовать" : "🔄 Reissue")}
             </button>
             <AdminTip text={lang === "ru" ? "Сжигает карту и выдаёт новую с тем же hero/tier и правильным URI." : "Burns the card and re-mints with the same hero/tier but correct URI."} />
           </div>
 
-          <div className="h-px bg-cyan-500/10" />
+          <div className="h-px" style={{ background: "var(--divider)" }} />
 
           <div className="space-y-3">
-            <div className="text-xs font-semibold text-cyan-300/80">{lang === "ru" ? "Выдать карту игроку (admin mint)" : "Mint card to player (admin)"}</div>
+            <div className={ADMIN_LABEL} style={{ color: "var(--panel-text)" }}>{lang === "ru" ? "Выдать карту игроку (admin mint)" : "Mint card to player (admin)"}</div>
             <div className="flex flex-wrap gap-2 items-center">
               <input type="text" placeholder={lang === "ru" ? "Адрес 0x..." : "Address 0x..."} id="admin-mint-addr"
-                className="flex-1 min-w-0 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white font-mono placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-white/20" />
+                className={`flex-1 min-w-0 ${ADMIN_INPUT} font-mono`} />
               <div className="flex gap-2 items-center shrink-0">
-                <label className="text-xs text-zinc-400">pid</label>
+                <label className="text-xs" style={{ color: "var(--panel-text-muted)" }}>pid</label>
                 <input type="number" min="0" max="49" defaultValue="0" id="admin-mint-pid"
-                  className="w-14 rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-white/20" />
-                <label className="text-xs text-zinc-400">{lang === "ru" ? "уровень" : "tier"}</label>
-                <select id="admin-mint-tier" className="rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-white/20">
+                  className={`w-14 ${ADMIN_INPUT_SM}`} />
+                <label className="text-xs" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "уровень" : "tier"}</label>
+                <select id="admin-mint-tier" className="select-sticker px-2 py-1.5 text-xs">
                   <option value="0">0 — Common</option>
                   <option value="1">1 — Uncommon</option>
                   <option value="2">2 — Rare</option>
@@ -1135,7 +1151,7 @@ export function AdminTab({
               if (!addr || !pid) return;
               queueAdminTx("queue_admin_mint_to", { function: `${MODULE_ADDRESS}::fantasy_league::queue_admin_mint_to`, typeArguments: [], functionArguments: [addr, pid, tier, "1"] });
             }} disabled={adminBusy !== null}
-              className="rounded-xl bg-indigo-700/70 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-700 disabled:opacity-40 transition">
+              className={ADMIN_BTN_SECONDARY}>
               {adminBusy === "queue_admin_mint_to" ? "…" : (lang === "ru" ? "🕒 Поставить mint в очередь" : "🕒 Queue mint")}
             </button>
             <button onClick={() => {
@@ -1145,7 +1161,7 @@ export function AdminTab({
               if (!addr || !pid) return;
               adminTx("admin_mint_to", { function: `${MODULE_ADDRESS}::fantasy_league::admin_mint_to`, typeArguments: [], functionArguments: [addr, pid, tier, "1"] });
             }} disabled={adminBusy !== null}
-              className="rounded-xl bg-indigo-600/80 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-600 disabled:opacity-40 transition">
+              className={ADMIN_BTN_PRIMARY}>
               {adminBusy === "admin_mint_to" ? "…" : (lang === "ru" ? "🎴 Исполнить mint" : "🎴 Execute mint")}
             </button>
             <AdminTip text={lang === "ru" ? "Выдаёт NFT-карточку с указанным героем (pid 0–49) и уровнем на адрес игрока бесплатно." : "Mints an NFT card with the specified hero (pid 0–49) and tier to a player address for free."} />
@@ -1155,22 +1171,22 @@ export function AdminTab({
           </div>{/* /merged block */}
 
           {/* Role bonus + Chest prices — merged block */}
-          <div className="rounded-2xl border border-violet-500/20 p-4 space-y-5" style={{ background: "var(--card)" }}>
+          <div className={`${ADMIN_PANEL} space-y-5`}>
 
           <div className="space-y-3">
-            <div className="text-xs font-semibold text-violet-300/80">⚡ {lang === "ru" ? "Бонус за правильную роль" : "Role bonus"}</div>
-            <div className="text-[11px] text-zinc-400">
+            <div className={ADMIN_LABEL} style={{ color: "var(--panel-text)" }}>⚡ {lang === "ru" ? "Бонус за правильную роль" : "Role bonus"}</div>
+            <div className="text-[11px]" style={{ color: "var(--panel-text-muted)" }}>
               {lang === "ru" ? "Если монета стоит в слоте своей категории — её очки умножаются на (100 + бонус)%." : "If a coin is in its category slot, its score is multiplied by (100 + bonus)%."}
             </div>
             <div className="flex items-center gap-3">
-              <label className="text-xs text-zinc-400 shrink-0">{lang === "ru" ? "Бонус %" : "Bonus %"}</label>
+              <label className="text-xs shrink-0" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Бонус %" : "Bonus %"}</label>
               <input type="number" min="0" max="100" step="1" value={roleBonusPct}
                 onChange={(e) => {
                   const v = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
                   setRoleBonusPct(v);
                 }}
-                className="w-20 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-violet-500/40" />
-              <span className="text-xs text-zinc-500">{lang === "ru" ? `Итого ×${((100 + roleBonusPct) / 100).toFixed(2)}` : `Multiplier ×${((100 + roleBonusPct) / 100).toFixed(2)}`}</span>
+                className={`w-20 ${ADMIN_INPUT}`} />
+              <span className="text-xs" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? `Итого ×${((100 + roleBonusPct) / 100).toFixed(2)}` : `Multiplier ×${((100 + roleBonusPct) / 100).toFixed(2)}`}</span>
               <button onClick={async () => {
                 const epoch = tnState?.epoch ?? 1;
                 const totalDays = tnState?.totalDays ?? 6;
@@ -1182,18 +1198,18 @@ export function AdminTab({
                 await fetch(`/api/leaderboard?${params}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ auth }) }).catch(() => null);
                 setAdminOk(lang === "ru" ? "Бонус обновлён, лидерборд пересчитывается" : "Bonus updated, leaderboard recalculating");
                 setTimeout(() => setAdminOk(""), 3000);
-              }} className="rounded-xl bg-violet-600/70 hover:bg-violet-600 px-3 py-1.5 text-xs font-bold text-white transition">
+              }} className={ADMIN_BTN_PRIMARY}>
                 {lang === "ru" ? "Применить" : "Apply"}
               </button>
               <AdminTip text={lang === "ru" ? "Пересчитывает лидерборд с новым бонусом за правильную роль." : "Recalculates the leaderboard with the new role-match bonus."} />
             </div>
           </div>
 
-          <div className="h-px bg-violet-500/15" />
+          <div className="h-px" style={{ background: "var(--divider)" }} />
 
           <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-3">
-                <div className="text-xs font-semibold text-violet-300/80">{lang === "ru" ? "Цены сундуков" : "Chest prices"}</div>
+                <div className={ADMIN_LABEL} style={{ color: "var(--panel-text)" }}>{lang === "ru" ? "Цены сундуков" : "Chest prices"}</div>
                 {([
                   { id: "wooden", label: lang === "ru" ? "Хомяк" : "Hamster", icon: "🐹", val: chestPrices.wooden },
                   { id: "iron",   label: lang === "ru" ? "Медведь" : "Bear",   icon: "🐻", val: chestPrices.iron },
@@ -1201,10 +1217,10 @@ export function AdminTab({
                 ] as const).map(({ id, label, icon, val }) => (
                   <div key={id} className="flex gap-2 items-center">
                     <span className="text-sm w-5">{icon}</span>
-                    <label className="text-xs text-zinc-400 w-20 shrink-0">{label}</label>
+                    <label className="text-xs w-20 shrink-0" style={{ color: "var(--panel-text-muted)" }}>{label}</label>
                     <input type="number" min="0.0001" step="0.0001" defaultValue={(val / 1e18).toFixed(4)} id={`admin-chest-price-${id}`}
-                      className="w-24 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/20" />
-                    <span className="text-xs text-zinc-400">ETH</span>
+                      className={`w-24 ${ADMIN_INPUT} text-sm`} />
+                    <span className="text-xs" style={{ color: "var(--panel-text-muted)" }}>ETH</span>
                   </div>
                 ))}
                 <div className="flex items-center gap-2">
@@ -1219,7 +1235,7 @@ export function AdminTab({
                     functionArguments: [w.toString(), ir.toString(), s.toString()],
                   });
                 }} disabled={adminBusy !== null}
-                  className="rounded-xl bg-teal-700/80 px-4 py-2 text-xs font-bold text-white hover:bg-teal-700 disabled:opacity-40 transition">
+                  className={ADMIN_BTN_SECONDARY}>
                   {adminBusy === "queue_set_chest_prices" ? "…" : (lang === "ru" ? "🕒 В очередь" : "🕒 Queue")}
                 </button>
                 <button onClick={() => {
@@ -1233,7 +1249,7 @@ export function AdminTab({
                     functionArguments: [w.toString(), ir.toString(), s.toString()],
                   }).then(() => setChestPrices({ wooden: Number(w), iron: Number(ir), silver: Number(s) }));
                 }} disabled={adminBusy !== null}
-                  className="rounded-xl bg-teal-600/80 px-4 py-2 text-xs font-bold text-white hover:bg-teal-600 disabled:opacity-40 transition">
+                  className={ADMIN_BTN_PRIMARY}>
                   {adminBusy === "set_chest_prices" ? "…" : (lang === "ru" ? "Установить" : "Set")}
                 </button>
                 </div>
@@ -1241,22 +1257,22 @@ export function AdminTab({
               </div>
 
               <div className="space-y-3">
-                <div className="text-xs font-semibold text-violet-300/80">{lang === "ru" ? "Множители тиров (×0.01)" : "Tier multipliers (×0.01)"}</div>
+                <div className={ADMIN_LABEL} style={{ color: "var(--panel-text)" }}>{lang === "ru" ? "Множители тиров (×0.01)" : "Tier multipliers (×0.01)"}</div>
                 {([
-                  { label: "Маленькое",     color: "text-[#D9D3C2]", idx: 0 },
-                  { label: "Среднее",       color: "text-[#7AC7E8]", idx: 1 },
-                  { label: "Тяжелое",       color: "text-[#26C6A8]", idx: 2 },
-                  { label: "Супер Тяжелое", color: "text-[#88FC00]", idx: 3 },
+                  { label: "Маленькое",     color: "var(--rarity-common)", idx: 0 },
+                  { label: "Среднее",       color: "var(--rarity-rare)", idx: 1 },
+                  { label: "Тяжелое",       color: "var(--rarity-epic)", idx: 2 },
+                  { label: "Супер Тяжелое", color: "var(--rarity-legendary)", idx: 3 },
                 ] as const).map(({ label, color, idx }) => (
                   <div key={label} className="flex gap-2 items-center">
-                    <label className={`text-xs font-semibold w-24 shrink-0 ${color}`}>{label}</label>
+                    <label className="text-xs font-semibold w-24 shrink-0" style={{ color }}>{label}</label>
                     <input type="number" min="100" max="1000" step="1" value={tierMults[idx]}
                       onChange={e => setTierMults(prev => { const n = [...prev]; n[idx] = Number(e.target.value) || 100; return n; })}
-                      className="w-20 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/20" />
-                    <span className="text-xs text-zinc-500">= ×{(tierMults[idx] / 100).toFixed(2)}</span>
+                      className={`w-20 ${ADMIN_INPUT} text-sm`} />
+                    <span className="text-xs" style={{ color: "var(--panel-text-muted)" }}>= ×{(tierMults[idx] / 100).toFixed(2)}</span>
                   </div>
                 ))}
-                <button onClick={saveLeaderboardConfig} className="rounded-xl bg-teal-600/80 px-4 py-2 text-xs font-bold text-white hover:bg-teal-600 transition">
+                <button onClick={saveLeaderboardConfig} className={ADMIN_BTN_PRIMARY}>
                   {lang === "ru" ? "Сохранить" : "Save"}
                 </button>
                 <AdminTip text={lang === "ru" ? "Множители применяются при расчёте лидерборда. 100 = ×1.0, 250 = ×2.5. Не записывается на блокчейн." : "Multipliers apply when calculating the leaderboard. 100 = ×1.0, 250 = ×2.5. Not written on-chain."} />
@@ -1266,29 +1282,29 @@ export function AdminTab({
           </div>{/* /role bonus + chest prices block */}
 
           {/* Claim management */}
-          <div className="rounded-2xl border border-violet-500/20 p-4 space-y-4" style={{ background: "var(--card)" }}>
+          <div className={`${ADMIN_PANEL} space-y-4`}>
             <div className="flex items-center justify-between">
-              <div className="text-xs font-semibold text-violet-300">🏆 {lang === "ru" ? "Выдача призов (Claim)" : "Prize distribution (Claim)"}</div>
+              <div className={ADMIN_LABEL} style={{ color: "var(--panel-text)" }}>🏆 {lang === "ru" ? "Выдача призов (Claim)" : "Prize distribution (Claim)"}</div>
               <button onClick={fetchClaimState} className="text-xs transition" style={{ color: "var(--nft-muted)" }}>↻</button>
             </div>
 
-            <div className="text-xs font-semibold text-zinc-300">🏆 {lang === "ru" ? "Распределение призов" : "Prize distribution"}</div>
+            <div className={ADMIN_LABEL} style={{ color: "var(--panel-text-muted)" }}>🏆 {lang === "ru" ? "Распределение призов" : "Prize distribution"}</div>
 
             <div className="space-y-2">
-              <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{lang === "ru" ? "Пул лиги (% от общего)" : "League pool (% of total)"}</div>
+              <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Пул лиги (% от общего)" : "League pool (% of total)"}</div>
               <div className="grid grid-cols-3 gap-2">
                 {([
-                  { key: "goldPct",   label: "🥇 Gold",   color: "text-violet-300" },
-                  { key: "silverPct", label: "🥈 Silver", color: "text-zinc-300" },
-                  { key: "bronzePct", label: "🥉 Bronze", color: "text-zinc-400" },
+                  { key: "goldPct",   label: "🥇 Gold",   color: "var(--rarity-legendary)" },
+                  { key: "silverPct", label: "🥈 Silver", color: "var(--rarity-rare)" },
+                  { key: "bronzePct", label: "🥉 Bronze", color: "var(--rarity-common)" },
                 ] as const).map(({ key, label, color }) => (
                   <div key={key} className="space-y-1">
-                    <div className={`text-[10px] font-bold ${color}`}>{label}</div>
+                    <div className="text-[10px] font-bold" style={{ color }}>{label}</div>
                     <div className="flex items-center gap-1">
                       <input type="number" min="0" max="100" step="1" value={prizeConfig[key]}
                         onChange={e => setPrizeConfig(p => ({ ...p, [key]: parseFloat(e.target.value) || 0 }))}
-                        className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-white/20" />
-                      <span className="text-[10px] text-zinc-500">%</span>
+                        className={`w-full ${ADMIN_INPUT_SM} py-1.5`} />
+                      <span className="text-[10px]" style={{ color: "var(--panel-text-muted)" }}>%</span>
                     </div>
                   </div>
                 ))}
@@ -1296,7 +1312,7 @@ export function AdminTab({
             </div>
 
             <div className="space-y-2">
-              <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{lang === "ru" ? "% от пула лиги по позициям" : "% of league pool by position"}</div>
+              <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "% от пула лиги по позициям" : "% of league pool by position"}</div>
               <div className="grid grid-cols-2 gap-2">
                 {([
                   { key: "pos1",     label: lang === "ru" ? "1 место" : "1st place" },
@@ -1307,24 +1323,24 @@ export function AdminTab({
                   { key: "pos20_49", label: lang === "ru" ? "20–49 места (каждый)" : "20–49 (each)" },
                 ] as const).map(({ key, label }) => (
                   <div key={key} className="flex items-center gap-2">
-                    <div className="text-[10px] text-zinc-400 w-32 shrink-0">{label}</div>
+                    <div className="text-[10px] w-32 shrink-0" style={{ color: "var(--panel-text-muted)" }}>{label}</div>
                     <input type="number" min="0" max="100" step="0.1" value={prizeConfig[key]}
                       onChange={e => setPrizeConfig(p => ({ ...p, [key]: parseFloat(e.target.value) || 0 }))}
-                      className="w-16 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-white/20" />
-                    <span className="text-[10px] text-zinc-500">%</span>
+                      className={`w-16 ${ADMIN_INPUT_SM}`} />
+                    <span className="text-[10px]" style={{ color: "var(--panel-text-muted)" }}>%</span>
                   </div>
                 ))}
               </div>
               <div className="flex items-center gap-2 justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="text-[10px] text-zinc-400 w-32 shrink-0">{lang === "ru" ? "50–99 места (каждый)" : "50–99 (each)"}</div>
+                  <div className="text-[10px] w-32 shrink-0" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "50–99 места (каждый)" : "50–99 (each)"}</div>
                   <input type="number" min="0" max="100" step="0.1" value={prizeConfig.pos50_99}
                     onChange={e => setPrizeConfig(p => ({ ...p, pos50_99: parseFloat(e.target.value) || 0 }))}
-                    className="w-16 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-white/20" />
-                  <span className="text-[10px] text-zinc-500">%</span>
+                    className={`w-16 ${ADMIN_INPUT_SM}`} />
+                  <span className="text-[10px]" style={{ color: "var(--panel-text-muted)" }}>%</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <button onClick={saveLeaderboardConfig} className="rounded-xl bg-teal-600/80 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-teal-600 transition">
+                  <button onClick={saveLeaderboardConfig} className={`${ADMIN_BTN_PRIMARY} px-3 py-1.5 text-[11px]`}>
                     {lang === "ru" ? "Сохранить" : "Save"}
                   </button>
                   <AdminTip text={lang === "ru" ? "Сохраняет конфигурацию распределения призов (проценты лиг и мест) на сервере." : "Saves the prize distribution config (league and position percentages) to the server."} />
@@ -1353,7 +1369,7 @@ export function AdminTab({
                 } finally {
                   setPrizeGenLoading(false);
                 }
-              }} className="flex-1 rounded-xl bg-violet-600/80 hover:bg-violet-600 px-4 py-2 text-xs font-bold text-white disabled:opacity-40 transition">
+              }} className={`${ADMIN_BTN_PRIMARY} flex-1`}>
                 {prizeGenLoading ? "…" : (lang === "ru" ? "⚡ Сгенерировать список победителей" : "⚡ Generate winners list")}
               </button>
               <button onClick={() => {
@@ -1367,50 +1383,50 @@ export function AdminTab({
                 a.href = url; a.download = `leaderboard-week${displayEp}.csv`; a.click();
                 URL.revokeObjectURL(url);
               }} disabled={lbRows.length === 0}
-                className="rounded-xl bg-white/5 hover:bg-white/10 px-3 py-2 text-xs font-bold text-zinc-300 disabled:opacity-30 transition">
+                className={ADMIN_BTN_GHOST}>
                 ⬇ CSV
               </button>
             </div>
 
             {claimState && (
-              <div className="rounded-xl bg-black/30 px-4 py-3 space-y-1 text-xs">
+              <div className="rounded-xl px-4 py-3 space-y-1 text-xs" style={{ background: "var(--sunken)", border: "2px solid var(--panel-border)" }}>
                 <div className="flex justify-between">
-                  <span className="text-zinc-400">{lang === "ru" ? "Статус" : "Status"}</span>
-                  <span className={claimState.active ? "text-emerald-400 font-bold" : "text-zinc-400"}>
+                  <span style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Статус" : "Status"}</span>
+                  <span className="font-bold" style={{ color: claimState.active ? "var(--up)" : "var(--panel-text-muted)" }}>
                     {claimState.active ? (lang === "ru" ? "▶ Активен" : "▶ Active") : (lang === "ru" ? "⏸ Неактивен" : "⏸ Inactive")}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-400">{lang === "ru" ? "Баланс claim vault" : "Claim vault balance"}</span>
+                  <span style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Баланс claim vault" : "Claim vault balance"}</span>
                   <span className="font-bold" style={{ color: "var(--panel-text)" }}>{(claimState.vaultBalance / 1e18).toFixed(4)} ETH</span>
                 </div>
                 {claimState.active && claimState.deadline > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-zinc-400">{lang === "ru" ? "Дедлайн" : "Deadline"}</span>
-                    <span className="text-zinc-300">{new Date(claimState.deadline * 1000).toLocaleString(lang === "ru" ? "ru-RU" : "en-US", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                    <span style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Дедлайн" : "Deadline"}</span>
+                    <span style={{ color: "var(--panel-text)" }}>{new Date(claimState.deadline * 1000).toLocaleString(lang === "ru" ? "ru-RU" : "en-US", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
                   </div>
                 )}
               </div>
             )}
 
             <div className="space-y-2">
-              <div className="text-[11px] text-zinc-400 font-semibold">0. {lang === "ru" ? "Дней для клейма (окно выдачи)" : "Claim window (days)"}</div>
+              <div className="text-[11px] font-semibold" style={{ color: "var(--panel-text-muted)" }}>0. {lang === "ru" ? "Дней для клейма (окно выдачи)" : "Claim window (days)"}</div>
               <div className="flex gap-2 items-center">
                 <input type="number" min="1" max="30" defaultValue={claimState?.claimDays ?? 7} id="admin-claim-days"
-                  className="w-20 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/20" />
-                <span className="text-xs text-zinc-400">{lang === "ru" ? "дней" : "days"}</span>
+                  className={`w-20 ${ADMIN_INPUT} text-sm`} />
+                <span className="text-xs" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "дней" : "days"}</span>
                 <button onClick={() => {
                   const days = parseInt((document.getElementById("admin-claim-days") as HTMLInputElement)?.value) || 7;
                   queueAdminTx("queue_set_claim_days", { function: `${MODULE_ADDRESS}::claim::queue_set_claim_days`, typeArguments: [], functionArguments: [String(days)] });
                 }} disabled={adminBusy !== null}
-                  className="rounded-xl bg-violet-700/70 px-3 py-1.5 text-xs font-bold text-white hover:bg-violet-700 disabled:opacity-40 transition">
+                  className={ADMIN_BTN_SECONDARY}>
                   {adminBusy === "queue_set_claim_days" ? "…" : (lang === "ru" ? "🕒 В очередь" : "🕒 Queue")}
                 </button>
                 <button onClick={() => {
                   const days = parseInt((document.getElementById("admin-claim-days") as HTMLInputElement)?.value) || 7;
                   adminTx("set_claim_days", { function: `${MODULE_ADDRESS}::claim::set_claim_days`, typeArguments: [], functionArguments: [String(days)] });
                 }} disabled={adminBusy !== null}
-                  className="rounded-xl bg-violet-600/80 px-3 py-1.5 text-xs font-bold text-white hover:bg-violet-600 disabled:opacity-40 transition">
+                  className={ADMIN_BTN_PRIMARY}>
                   {adminBusy === "set_claim_days" ? "…" : (lang === "ru" ? "Сохранить" : "Save")}
                 </button>
                 <AdminTip text={lang === "ru" ? "Устанавливает количество дней для окна выдачи призов." : "Sets how many days the claim window stays open."} />
@@ -1418,18 +1434,18 @@ export function AdminTab({
             </div>
 
             <div className="space-y-2">
-              <div className="text-[11px] text-zinc-400 font-semibold">1. {lang === "ru" ? "Перевести из prize vault в claim vault" : "Transfer prize vault → claim vault"}</div>
+              <div className="text-[11px] font-semibold" style={{ color: "var(--panel-text-muted)" }}>1. {lang === "ru" ? "Перевести из prize vault в claim vault" : "Transfer prize vault → claim vault"}</div>
               <div className="flex gap-2 items-center">
                 <input type="number" min="0.01" step="0.01" value={withdrawToClaimAmount}
                   onChange={(e) => setWithdrawToClaimAmount(e.target.value)}
-                  className="w-32 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/20" />
-                <span className="text-xs text-zinc-400">ETH</span>
+                  className={`w-32 ${ADMIN_INPUT} text-sm`} />
+                <span className="text-xs" style={{ color: "var(--panel-text-muted)" }}>ETH</span>
                 <button onClick={() => queueAdminTx("queue_withdraw_to_claim", {
                   function: `${MODULE_ADDRESS}::tournament::queue_admin_withdraw_to`,
                   typeArguments: [],
                   functionArguments: [CLAIM_VAULT_ADDRESS, parseEther(withdrawToClaimAmount || "0").toString()],
                 })} disabled={adminBusy !== null || parseFloat(withdrawToClaimAmount) <= 0}
-                  className="rounded-xl bg-violet-700/80 px-3 py-1.5 text-xs font-bold text-white hover:bg-violet-700 disabled:opacity-40 transition">
+                  className={ADMIN_BTN_SECONDARY}>
                   {adminBusy === "queue_withdraw_to_claim" ? "…" : (lang === "ru" ? "🕒 В очередь" : "🕒 Queue")}
                 </button>
                 <button onClick={() => adminTx("withdraw_to_claim", {
@@ -1437,7 +1453,7 @@ export function AdminTab({
                   typeArguments: [],
                   functionArguments: [CLAIM_VAULT_ADDRESS, parseEther(withdrawToClaimAmount || "0").toString()],
                 })} disabled={adminBusy !== null || parseFloat(withdrawToClaimAmount) <= 0}
-                  className="rounded-xl bg-violet-600/80 px-3 py-1.5 text-xs font-bold text-white hover:bg-violet-600 disabled:opacity-40 transition">
+                  className={ADMIN_BTN_PRIMARY}>
                   {adminBusy === "withdraw_to_claim" ? "…" : (lang === "ru" ? "Перевести" : "Transfer")}
                 </button>
                 <AdminTip text={lang === "ru" ? "Перемещает ETH из prize vault в claim vault перед открытием клейма." : "Moves ETH from prize vault to claim vault before opening claim."} />
@@ -1445,10 +1461,10 @@ export function AdminTab({
             </div>
 
             <div className="space-y-2">
-              <div className="text-[11px] text-zinc-400 font-semibold">2. {lang === "ru" ? "Список победителей (адрес сумма, по одному на строку)" : "Winners list (address amount, one per line)"}</div>
+              <div className="text-[11px] font-semibold" style={{ color: "var(--panel-text-muted)" }}>2. {lang === "ru" ? "Список победителей (адрес сумма, по одному на строку)" : "Winners list (address amount, one per line)"}</div>
               <textarea value={claimListText} onChange={(e) => setClaimListText(e.target.value)} rows={5}
                 placeholder={"0x123...abc 10.5\n0x456...def 5.0"}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white font-mono placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-white/20 resize-none" />
+                className="w-full input-sticker px-3 py-2 text-xs font-mono resize-none" />
               <div className="flex gap-2 items-center">
               <button onClick={() => {
                 const norm = (a: string) => "0x" + (a.startsWith("0x") ? a.slice(2) : a).padStart(64, "0");
@@ -1462,7 +1478,7 @@ export function AdminTab({
                 if (merged.size === 0) return;
                 queueAdminTx("queue_set_claim_list", { function: `${MODULE_ADDRESS}::claim::queue_set_claim_list`, typeArguments: [], functionArguments: [[...merged.keys()], [...merged.values()].map(String)] });
               }} disabled={adminBusy !== null || !claimListText.trim() || claimState?.active}
-                className="rounded-xl bg-violet-700/80 px-3 py-1.5 text-xs font-bold text-white hover:bg-violet-700 disabled:opacity-40 transition">
+                className={ADMIN_BTN_SECONDARY}>
                 {adminBusy === "queue_set_claim_list" ? "…" : (lang === "ru" ? "🕒 В очередь" : "🕒 Queue")}
               </button>
               <button onClick={() => {
@@ -1477,7 +1493,7 @@ export function AdminTab({
                 if (merged.size === 0) return;
                 adminTx("set_claim_list", { function: `${MODULE_ADDRESS}::claim::set_claim_list`, typeArguments: [], functionArguments: [[...merged.keys()], [...merged.values()].map(String)] });
               }} disabled={adminBusy !== null || !claimListText.trim() || claimState?.active}
-                className="rounded-xl bg-violet-600/80 px-3 py-1.5 text-xs font-bold text-white hover:bg-violet-600 disabled:opacity-40 transition">
+                className={ADMIN_BTN_PRIMARY}>
                 {adminBusy === "set_claim_list" ? "…" : (lang === "ru" ? "Сохранить список" : "Save list")}
               </button>
               </div>
@@ -1485,17 +1501,17 @@ export function AdminTab({
             </div>
 
             <div className="space-y-2">
-              <div className="text-[11px] text-zinc-400 font-semibold">3. {lang === "ru" ? "Открыть окно клейма" : "Open claim window"}</div>
-              <div className="text-[10px] text-zinc-500">{lang === "ru" ? "Остаток по истечении вернётся в prize vault" : "Unclaimed remainder returns to prize vault"}</div>
+              <div className="text-[11px] font-semibold" style={{ color: "var(--panel-text-muted)" }}>3. {lang === "ru" ? "Открыть окно клейма" : "Open claim window"}</div>
+              <div className="text-[10px]" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Остаток по истечении вернётся в prize vault" : "Unclaimed remainder returns to prize vault"}</div>
               <div className="flex gap-2 items-center">
               <button onClick={() => queueAdminTx("queue_start_claim", { function: `${MODULE_ADDRESS}::claim::queue_start_claim`, typeArguments: [], functionArguments: [VAULT_ADDRESS] })}
                 disabled={adminBusy !== null || claimState?.active}
-                className="rounded-xl bg-emerald-700/80 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-40 transition">
+                className={ADMIN_BTN_SECONDARY}>
                 {adminBusy === "queue_start_claim" ? "…" : (lang === "ru" ? "🕒 В очередь" : "🕒 Queue")}
               </button>
               <button onClick={() => adminTx("start_claim", { function: `${MODULE_ADDRESS}::claim::start_claim`, typeArguments: [], functionArguments: [VAULT_ADDRESS] })}
                 disabled={adminBusy !== null || claimState?.active}
-                className="rounded-xl bg-emerald-600/80 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-600 disabled:opacity-40 transition">
+                className={ADMIN_BTN_PRIMARY}>
                 {adminBusy === "start_claim" ? "…" : (lang === "ru" ? "▶ Открыть клейм" : "▶ Open claim")}
               </button>
               </div>
@@ -1503,21 +1519,21 @@ export function AdminTab({
             </div>
 
             <div className="space-y-2">
-              <div className="text-[11px] text-zinc-400 font-semibold">4. {lang === "ru" ? "Закрыть клейм досрочно" : "Close claim early"}</div>
-              <div className="text-[10px] text-zinc-500">{lang === "ru" ? "Остаток немедленно возвращается в prize vault" : "Remaining balance immediately returns to prize vault"}</div>
+              <div className="text-[11px] font-semibold" style={{ color: "var(--panel-text-muted)" }}>4. {lang === "ru" ? "Закрыть клейм досрочно" : "Close claim early"}</div>
+              <div className="text-[10px]" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Остаток немедленно возвращается в prize vault" : "Remaining balance immediately returns to prize vault"}</div>
               <div className="flex gap-2 items-center">
               <button onClick={() => {
                 if (!confirm(lang === "ru" ? "Поставить закрытие клейма в очередь?" : "Queue closing the claim window?")) return;
                 queueAdminTx("queue_close_claim", { function: `${MODULE_ADDRESS}::claim::queue_close_claim`, typeArguments: [], functionArguments: [] });
               }} disabled={adminBusy !== null || !claimState?.active}
-                className="rounded-xl bg-red-800/80 px-4 py-2 text-xs font-bold text-white hover:bg-red-800 disabled:opacity-40 transition">
+                className={ADMIN_BTN_DANGER}>
                 {adminBusy === "queue_close_claim" ? "…" : (lang === "ru" ? "🕒 В очередь" : "🕒 Queue")}
               </button>
               <button onClick={() => {
                 if (!confirm(lang === "ru" ? "Закрыть клейм? Остаток вернётся в prize vault." : "Close claim? Remainder returns to prize vault.")) return;
                 adminTx("close_claim", { function: `${MODULE_ADDRESS}::claim::close_claim`, typeArguments: [], functionArguments: [] });
               }} disabled={adminBusy !== null || !claimState?.active}
-                className="rounded-xl bg-red-700/80 px-4 py-2 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-40 transition">
+                className={ADMIN_BTN_DANGER}>
                 {adminBusy === "close_claim" ? "…" : (lang === "ru" ? "⏹ Закрыть клейм" : "⏹ Close claim")}
               </button>
               </div>
@@ -1525,9 +1541,9 @@ export function AdminTab({
           </div>
 
           {/* Danger zone */}
-          <div className="rounded-2xl border border-red-500/30 p-4 space-y-2" style={{ background: "rgba(254,226,226,0.95)" }}>
-            <div className="text-xs font-bold uppercase tracking-wider" style={{ color: "#991b1b" }}>⚠️ {lang === "ru" ? "Опасная зона" : "Danger zone"}</div>
-            <div className="text-[10px] leading-relaxed" style={{ color: "#b91c1c" }}>
+          <div className={`${ADMIN_PANEL} space-y-2`} style={{ background: "var(--warn-soft)", borderColor: "var(--down)" }}>
+            <div className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--down)" }}>⚠️ {lang === "ru" ? "Опасная зона" : "Danger zone"}</div>
+            <div className="text-[10px] leading-relaxed" style={{ color: "var(--down)" }}>
               {lang === "ru"
                 ? "Сбрасывает турнир: очищает данные оракула, эпоху, скоры и лиги. Карточки игроков сохраняются. Необратимо."
                 : "Resets tournament: clears oracle data, epoch, scores and leagues. Player cards are kept. Irreversible."}
@@ -1541,7 +1557,7 @@ export function AdminTab({
               setHeroStats(Array(50).fill(null).map(mkStats));
               setParseStatus("idle");
             }} disabled={adminBusy !== null}
-              className="rounded-xl bg-red-600/80 px-4 py-2 text-xs font-bold text-white hover:bg-red-600 disabled:opacity-40 transition">
+              className={ADMIN_BTN_DANGER}>
               {adminBusy === "hard_reset" ? "…" : (lang === "ru" ? "🔴 Хард ресет турнира" : "🔴 Hard reset tournament")}
             </button>
             <AdminTip text={lang === "ru" ? "Полный сброс. NFT-карточки и кошельки игроков НЕ затрагиваются. Необратимо." : "Full reset. Player NFT cards and wallets are NOT affected. Irreversible."} />

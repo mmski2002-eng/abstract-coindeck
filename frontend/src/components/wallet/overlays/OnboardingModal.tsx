@@ -30,7 +30,7 @@ export function OnboardingModal({
   const STEPS = [
     {
       icon: "🚀",
-      title: ru ? "Добро пожаловать в CoinDeck" : "Welcome to CoinDeck",
+      title: ru ? "Добро пожаловать в HeavyEggs" : "Welcome to HeavyEggs",
       body: ru
         ? "Крипто-фэнтези лига на блокчейне Movement.\nСобирай карточки топ-50 криптовалют, составляй команду и побеждай в ежедневных турнирах."
         : "A crypto fantasy league on the Movement blockchain.\nCollect cards of top-50 crypto coins, build your team, and win daily tournaments.",
@@ -83,11 +83,13 @@ export function OnboardingModal({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[200] flex items-center justify-center backdrop-blur-md p-4" style={{ background: "var(--overlay-backdrop)" }}>
-      <div className="relative w-full max-w-md rounded-3xl overflow-hidden" style={{ background: "var(--modal-bg)", border: "1px solid var(--panel-border)", boxShadow: "var(--modal-shadow)" }}>
-        <div className="h-1 w-full bg-white/5">
-          <div className="h-full bg-gradient-to-r from-cyan-500 to-sky-200 transition-all duration-300"
-            style={{ width: `${((step + 1) / total) * 100}%` }} />
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: "var(--overlay-backdrop)" }}>
+      <div className="card-sticker relative w-full max-w-md rounded-2xl overflow-hidden" style={{ background: "var(--modal-bg)" }}>
+        <div className="h-1 w-full" style={{ background: "var(--sunken)" }}>
+          <div
+            className="h-full transition-all duration-300"
+            style={{ background: "var(--mint)", width: `${((step + 1) / total) * 100}%` }}
+          />
         </div>
 
         <div className="p-6 space-y-4">
@@ -111,14 +113,16 @@ export function OnboardingModal({
                 }}
                 placeholder={ru ? "Твой никнейм…" : "Your nickname…"}
                 maxLength={14}
-                className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-                style={{ border: "1px solid var(--panel-border)", background: "var(--panel-bg)", color: "var(--panel-text)" }}
+                className="input-sticker w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none"
                 onKeyDown={e => e.key === "Enter" && handleCreate()}
                 autoFocus
               />
               <div className="flex items-center justify-between">
-                {err && <div className="text-xs text-red-400">{err}</div>}
-                <div className={`ml-auto text-[10px] tabular-nums ${nickBytes >= MAX_NICKNAME_BYTES - 2 ? "text-amber-400" : "text-zinc-600"}`}>
+                {err && <div className="text-xs" style={{ color: "var(--down)" }}>{err}</div>}
+                <div
+                  className="ml-auto text-[10px] tabular-nums"
+                  style={{ color: nickBytes >= MAX_NICKNAME_BYTES - 2 ? "var(--warn)" : "var(--ink-3)" }}
+                >
                   {nickBytes}/{MAX_NICKNAME_BYTES}
                 </div>
               </div>
@@ -126,13 +130,14 @@ export function OnboardingModal({
                 href="https://faucet.movementnetwork.xyz/"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2.5 w-full rounded-xl border border-cyan-400/20 bg-cyan-500/5 px-3.5 py-2.5 hover:bg-cyan-500/10 transition group"
+                className="flex items-center gap-2.5 w-full rounded-xl px-3.5 py-2.5 transition"
+                style={{ background: "var(--mint-soft)", border: "1.5px solid var(--outline)" }}
               >
-                <span className="inline-flex h-2 w-2 shrink-0 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
-                <span className="text-[11px] font-black uppercase tracking-[0.25em] text-cyan-200 group-hover:text-white transition">
+                <span className="inline-flex h-2 w-2 shrink-0 rounded-full" style={{ background: "var(--mint)", border: "1px solid var(--outline)" }} />
+                <span className="text-[11px] font-black uppercase tracking-[0.25em] transition" style={{ color: "var(--ink)" }}>
                   FAUCET
                 </span>
-                <span className="text-[11px] text-white/45 group-hover:text-white/65 transition">
+                <span className="text-[11px] transition" style={{ color: "var(--ink-3)" }}>
                   {ru ? "— нужны тестовые ABS для старта" : "— get test ABS to get started"}
                 </span>
               </a>
@@ -142,26 +147,29 @@ export function OnboardingModal({
           <div className="flex items-center justify-between pt-1">
             <div className="flex gap-1.5">
               {STEPS.map((_, i) => (
-                <div key={i} className={`h-1.5 rounded-full transition-all ${i === step ? "w-6 bg-cyan-500" : i < step ? "w-1.5 bg-cyan-500/50" : "w-1.5 bg-white/10"}`} />
+                <div
+                  key={i}
+                  className={`h-1.5 rounded-full transition-all ${i === step ? "w-6" : "w-1.5"}`}
+                  style={{ background: i <= step ? "var(--mint)" : "var(--sunken)", opacity: i < step ? 0.55 : 1 }}
+                />
               ))}
             </div>
 
             <div className="flex gap-2">
               {step > 0 && (
                 <button onClick={() => setStep(s => s - 1)}
-                  className="rounded-xl px-4 py-2 text-sm transition"
-                  style={{ border: "1px solid var(--panel-border)", background: "var(--button-secondary-bg)", color: "var(--button-secondary-text)" }}>
+                  className="btn-sticker-outline rounded-xl px-4 py-2 text-sm transition">
                   {ru ? "Назад" : "Back"}
                 </button>
               )}
               {isLast ? (
                 <button onClick={handleCreate} disabled={busy}
-                  className="rounded-xl bg-gradient-to-r from-cyan-500 to-sky-200 px-5 py-2 text-sm font-bold text-slate-950 hover:opacity-90 disabled:opacity-50 transition">
+                  className="btn-sticker-primary rounded-xl px-5 py-2 text-sm font-bold disabled:opacity-50 transition">
                   {busy ? "…" : (ru ? "🚀 Создать аккаунт" : "🚀 Create account")}
                 </button>
               ) : (
                 <button onClick={() => setStep(s => s + 1)}
-                  className="rounded-xl bg-white/10 px-5 py-2 text-sm font-semibold text-white hover:bg-white/20 transition">
+                  className="btn-sticker-secondary rounded-xl px-5 py-2 text-sm font-semibold transition">
                   {ru ? "Далее →" : "Next →"}
                 </button>
               )}

@@ -13,9 +13,9 @@ const EGG_STARS: { top?: string; left?: string; right?: string; bottom?: string;
 ];
 
 const THEME = [
-  { accent: "#D9D3C2", glow: "rgba(217,211,194,0.22)", bg: "rgba(217,211,194,0.08)" },
-  { accent: "#7AC7E8", glow: "rgba(122,199,232,0.22)", bg: "rgba(122,199,232,0.08)" },
-  { accent: "#26C6A8", glow: "rgba(38,198,168,0.22)",  bg: "rgba(38,198,168,0.08)"  },
+  { accent: "var(--rarity-common)", panel: "var(--paper-2)" },
+  { accent: "var(--rarity-rare)", panel: "var(--sky-soft)" },
+  { accent: "var(--rarity-epic)", panel: "var(--mint-soft)" },
 ];
 
 const TIER_NAME = ["Маленькое", "Среднее", "Тяжелое", "Супер Тяжелое"];
@@ -107,7 +107,7 @@ export function ChestOpenModal({ lang, modal, onClose, chestOpenQty, setChestOpe
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[150] flex items-center justify-center backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[150] flex items-center justify-center p-4"
       style={{ background: "var(--overlay-backdrop)" }}
       onClick={showContent ? onClose : undefined}
     >
@@ -146,7 +146,7 @@ export function ChestOpenModal({ lang, modal, onClose, chestOpenQty, setChestOpe
         className="relative w-full max-w-sm rounded-2xl overflow-hidden"
         style={{
           background: "var(--modal-bg)",
-          border: "2.5px solid var(--ink)",
+          border: "2.5px solid var(--outline)",
           boxShadow: "var(--shadow-sticker)",
           minHeight: showAnim ? 400 : undefined,
           transition: "min-height 0.3s",
@@ -156,7 +156,7 @@ export function ChestOpenModal({ lang, modal, onClose, chestOpenQty, setChestOpe
         {/* ── IDLE CONTENT ── */}
         <div style={{ opacity: showContent ? 1 : 0, transition: "opacity 0.35s", pointerEvents: showContent ? "auto" : "none", position: showAnim ? "absolute" : "relative", inset: showAnim ? 0 : undefined }}>
           <div className="relative flex flex-col items-center pt-8 pb-6 px-6 overflow-hidden">
-            <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at 50% 0%, ${t.bg} 0%, transparent 65%)` }} />
+            <div className="absolute inset-0 pointer-events-none" style={{ background: t.panel, opacity: 0.45 }} />
             <div className="relative mb-4" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
               <div className="egg-ripple"   style={{ color: t.accent, animationDelay: `${([0,-4,-8] as const)[modal.type]}s` }} />
               <div className="egg-ripple-2" style={{ color: t.accent, animationDelay: `${([0,-4,-8] as const)[modal.type]}s` }} />
@@ -169,29 +169,29 @@ export function ChestOpenModal({ lang, modal, onClose, chestOpenQty, setChestOpe
             <div className="relative text-center">
               <div className="font-display font-black text-xl tracking-tight" style={{ color: "var(--panel-text)" }}>{modal.label}</div>
               <div className="mt-2 flex items-center justify-center">
-                <span style={{ display: "inline-flex", alignItems: "center", background: t.accent, color: "var(--ink)", border: "2.5px solid var(--ink)", borderRadius: 999, padding: "4px 10px", fontSize: 10, letterSpacing: 1.6, fontWeight: 800, boxShadow: "2px 2px 0 var(--card-shadow)" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", background: t.accent, color: "var(--ink)", border: "2.5px solid var(--outline)", borderRadius: 999, padding: "4px 10px", fontSize: 10, letterSpacing: 1.6, fontWeight: 800, boxShadow: "2px 2px 0 var(--card-shadow)" }}>
                   {tn}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="mx-6 h-px" style={{ background: `linear-gradient(to right, transparent, ${t.accent}35, transparent)` }} />
+          <div className="mx-6 h-px" style={{ background: "var(--ink)", opacity: 0.14 }} />
 
           <div className="p-6 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--nft-muted)" }}>{ru ? "Выбери количество" : "Select amount"}</span>
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1">
-                  <button onClick={() => setChestOpenQty((q) => Math.max(1, q - 1))} className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90" style={{ background: t.accent, border: "2px solid var(--ink)", color: "var(--ink)" }}>−</button>
+                  <button onClick={() => setChestOpenQty((q) => Math.max(1, q - 1))} className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90" style={{ background: t.accent, border: "2px solid var(--outline)", color: "var(--ink)" }}>−</button>
                   <span className="w-10 text-center font-bold text-base tabular-nums" style={{ color: "var(--panel-text)" }}>{chestOpenQty}</span>
-                  <button onClick={() => setChestOpenQty((q) => Math.min(modal.available, q + 1))} className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90" style={{ background: t.accent, border: "2px solid var(--ink)", color: "var(--ink)" }}>+</button>
+                  <button onClick={() => setChestOpenQty((q) => Math.min(modal.available, q + 1))} className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90" style={{ background: t.accent, border: "2px solid var(--outline)", color: "var(--ink)" }}>+</button>
                 </div>
-                <button onClick={() => setChestOpenQty(modal.available)} className="rounded-lg px-3 h-8 text-xs font-bold transition active:scale-90" style={{ background: t.accent, border: "2px solid var(--ink)", color: "var(--ink)" }}>MAX</button>
+                <button onClick={() => setChestOpenQty(modal.available)} className="rounded-lg px-3 h-8 text-xs font-bold transition active:scale-90" style={{ background: t.accent, border: "2px solid var(--outline)", color: "var(--ink)" }}>MAX</button>
               </div>
             </div>
 
-            <div className="rounded-xl px-4 py-3 text-sm leading-relaxed" style={{ background: t.accent + "0a", border: `1px solid ${t.accent}22` }}>
+            <div className="rounded-xl px-4 py-3 text-sm leading-relaxed" style={{ background: "var(--sunken)", border: "1px solid var(--panel-border)" }}>
               <span style={{ color: "var(--panel-text-muted)" }}>{ru ? "Почешешь " : "Scratching "}</span>
               <span className="font-bold" style={{ color: "var(--panel-text)" }}>{chestOpenQty} {chestWord(chestOpenQty, ru)}</span>
             </div>
@@ -250,7 +250,7 @@ export function ChestOpenModal({ lang, modal, onClose, chestOpenQty, setChestOpe
                   <div key={i} style={{
                     position: "absolute", top: "50%", left: "50%",
                     width: 9, height: 9, borderRadius: "50%",
-                    background: [t.accent, "var(--ink)", coin?.brandColor ?? "#fff"][i % 3],
+                    background: [t.accent, "var(--ink)", coin?.brandColor ?? "var(--paper)"][i % 3],
                     "--cx": `${Math.round(Math.cos((angle * Math.PI) / 180) * dist)}px`,
                     "--cy": `${Math.round(Math.sin((angle * Math.PI) / 180) * dist)}px`,
                     animation: `confettiBurst 0.9s ease-out ${i * 60}ms both`,

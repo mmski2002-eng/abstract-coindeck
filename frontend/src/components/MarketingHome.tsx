@@ -5,10 +5,22 @@ import { useI18n } from "@/components/LanguageProvider";
 import { Modal, Card } from "@/components/ui";
 import { TourOverlay } from "@/components/TourOverlay";
 import React, { useEffect, useState } from "react";
-import { Moon, Shield, Store, Sun, TrendingUp, Trophy, Wallet } from "lucide-react";
+import { Shield, Store, TrendingUp, Trophy, Wallet } from "lucide-react";
+import { useAccount } from "wagmi";
+import { BeachScene } from "@/components/BeachScene";
 
 type Tab = "roster" | "marketplace" | "tournament" | "rankings" | "admin";
 type Theme = "light" | "dark";
+
+function hadPreviousWalletConnection(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const raw = localStorage.getItem("wagmi.store");
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    return data?.state?.status === "connected" || Boolean(data?.state?.current);
+  } catch { return false; }
+}
 
 const TICKER_DEFAULT = [
   { symbol: "BTC", price: "$109,482", change: "+2.41%" },
@@ -32,7 +44,7 @@ function MergeRow({
   to: { label: string; color: string; count: number };
 }) {
   return (
-    <div className="grid items-center gap-3 rounded-2xl p-4 md:grid-cols-[1fr_auto_1fr]" style={{ border: "1px solid var(--panel-border)", background: "var(--panel-bg)" }}>
+    <div className="grid items-center gap-3 rounded-xl p-4 md:grid-cols-[1fr_auto_1fr]" style={{ border: "2px solid var(--outline)", background: "var(--paper-2)", boxShadow: "2px 2px 0 var(--outline)" }}>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: from.color }} />
@@ -41,7 +53,7 @@ function MergeRow({
         <div className="text-xs" style={{ color: "var(--panel-text-muted)" }}>x{from.count}</div>
       </div>
       <div className="mx-auto flex items-center gap-2 text-xs font-semibold" style={{ color: "var(--panel-text-muted)" }}>
-        <span className="rounded-full px-3 py-1" style={{ background: "var(--panel-pill-bg)", boxShadow: "inset 0 0 0 1px var(--panel-pill-border)" }}>MERGE</span>
+        <span className="rounded-full px-3 py-1" style={{ border: "2px solid var(--outline)", background: "var(--mint-soft)", color: "var(--ink)" }}>MERGE</span>
         <span style={{ color: "var(--panel-text-muted)" }}>5 → 1</span>
       </div>
       <div className="flex items-center justify-between gap-3">
@@ -57,8 +69,8 @@ function MergeRow({
 
 function StepCard({ num, icon, title, desc }: { num: number; icon: string; title: string; desc: string }) {
   return (
-    <div className="relative rounded-2xl p-5 shadow-[0_10px_24px_rgba(22,24,29,0.05)]" style={{ border: "1px solid var(--panel-border)", background: "var(--panel-bg)" }}>
-      <div className="absolute -top-3 -left-3 flex h-6 w-6 items-center justify-center rounded-full text-xs font-black text-white shadow" style={{ background: "var(--panel-text)" }}>
+    <div className="relative rounded-xl p-5" style={{ border: "2px solid var(--outline)", background: "var(--paper-2)", boxShadow: "3px 3px 0 var(--outline)" }}>
+      <div className="absolute -top-3 -left-3 flex h-7 w-7 items-center justify-center rounded-full text-xs font-black" style={{ border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--ink)" }}>
         {num}
       </div>
       <div className="mb-2 text-2xl">{icon}</div>
@@ -70,6 +82,7 @@ function StepCard({ num, icon, title, desc }: { num: number; icon: string; title
 
 export function MarketingHome() {
   const { lang, setLang, t } = useI18n();
+  const { isConnected, status } = useAccount();
   const [mechanicsOpen, setMechanicsOpen] = useState(false);
   const [fabDismissed, setFabDismissed] = useState(false);
   const [feedbackBtnDismissed, setFeedbackBtnDismissed] = useState(false);
@@ -82,19 +95,21 @@ export function MarketingHome() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [tourActive, setTourActive] = useState(false);
   const [tourDemoMode, setTourDemoMode] = useState(false);
-  const [langOpen, setLangOpen] = useState(false);
   const [tickerItems, setTickerItems] = useState(TICKER_DEFAULT);
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof document === "undefined") return "light";
-    const current = document.documentElement.dataset.theme;
-    return current === "dark" || current === "light" ? current : "light";
-  });
-  const themeReady = React.useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  );
-  const langRef = React.useRef<HTMLDivElement>(null);
+  const [theme, setTheme] = useState<Theme>("dark");
+  const _prevConnected = hadPreviousWalletConnection();
+  const [contentReady, setContentReady] = useState(_prevConnected);
+  const [beachFading, setBeachFading] = useState(_prevConnected);
+  const wasReconnecting = React.useRef(_prevConnected);
+  useEffect(() => {
+    if (status === "reconnecting") { wasReconnecting.current = true; }
+    if (status === "connected" && wasReconnecting.current) { wasReconnecting.current = false; setContentReady(true); }
+    if (status === "disconnected") { wasReconnecting.current = false; setContentReady(false); setBeachFading(false); }
+  }, [status]);
+  useEffect(() => {
+    if (contentReady) setBeachFading(true);
+    else setBeachFading(false);
+  }, [contentReady]);
 
   const tabs: { id: Tab; ru: string; en: string; icon: React.ElementType; adminOnly?: boolean }[] = [
     { id: "roster", ru: "Мои Яйца", en: "My Eggs", icon: Wallet },
@@ -141,15 +156,6 @@ export function MarketingHome() {
     setFeedbackStatus("idle");
   }
 
-  useEffect(() => {
-    if (!langOpen) return;
-    function onOutside(e: MouseEvent) {
-      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false);
-    }
-    document.addEventListener("mousedown", onOutside);
-    return () => document.removeEventListener("mousedown", onOutside);
-  }, [langOpen]);
-
   const startTour = () => {
     setMechanicsOpen(false);
     setActiveTab("roster");
@@ -162,6 +168,31 @@ export function MarketingHome() {
     setTourDemoMode(false);
     try { localStorage.setItem("cd_tour_seen", "1"); } catch {}
   };
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("cd_theme");
+      if (stored === "light" || stored === "dark") {
+        setTheme(stored);
+        return;
+      }
+      if (!stored && window.matchMedia && !window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        const overlay = document.createElement("div");
+        overlay.style.cssText = "position:fixed;inset:0;z-index:99999;background:#F4EFE2;pointer-events:none;opacity:0;transition:opacity 0.35s ease";
+        document.body.appendChild(overlay);
+        requestAnimationFrame(() => {
+          overlay.style.opacity = "1";
+          setTimeout(() => {
+            setTheme("light");
+            setTimeout(() => {
+              overlay.style.opacity = "0";
+              setTimeout(() => overlay.remove(), 350);
+            }, 50);
+          }, 300);
+        });
+      }
+    } catch {}
+  }, []);
 
   useEffect(() => {
     try {
@@ -216,7 +247,7 @@ export function MarketingHome() {
     } catch {}
   }, [theme]);
 
-  const isDark = themeReady && theme === "dark";
+  const isDark = theme === "dark";
 
   return (
     <div className="noise min-h-screen" style={{ color: "var(--foreground)" }}>
@@ -305,25 +336,43 @@ export function MarketingHome() {
         />
       </div>
 
-      <header className="sticky top-0 z-20 border-b backdrop-blur-xl" style={{ borderColor: "var(--header-border)", background: "var(--header-bg)" }}>
+      <header className="sticky top-0 z-20" style={{ borderBottom: contentReady ? "2.5px solid var(--outline)" : "none", background: contentReady ? "var(--header-bg)" : "transparent", opacity: contentReady ? 1 : 0, transform: contentReady ? "none" : "translateY(-16px)", transition: "opacity 500ms ease, transform 500ms ease", pointerEvents: contentReady ? undefined : "none" }}>
         <div className="mx-auto flex min-h-16 max-w-[1440px] items-center gap-4 px-6 py-2 lg:px-10">
-          <div className="hidden shrink-0 xl:flex items-center gap-2.5">
+          {contentReady && <div className="hidden shrink-0 xl:flex items-center gap-2.5">
             <div
+              className="grid place-items-center"
+              style={{
+                width: 40,
+                height: 40,
+                border: "2.5px solid var(--outline)",
+                borderRadius: 12,
+                background: "var(--lime-pop)",
+                boxShadow: "3px 3px 0 var(--outline)",
+              }}
             >
               <img src="/logo.webp" alt="logo" style={{ width: 32, height: 32, objectFit: "cover", borderRadius: 8 }} />
             </div>
             <img src="/brand/name.png" alt="HeavyEggs" style={{ height: 36, width: "auto", objectFit: "contain" }} />
-          </div>
+          </div>}
 
-          <div className="flex shrink-0 items-center gap-2.5 xl:hidden">
+          {contentReady && <div className="flex shrink-0 items-center gap-2.5 xl:hidden">
             <div
+              className="grid place-items-center"
+              style={{
+                width: 40,
+                height: 40,
+                border: "2.5px solid var(--outline)",
+                borderRadius: 12,
+                background: "var(--lime-pop)",
+                boxShadow: "3px 3px 0 var(--outline)",
+              }}
             >
               <img src="/logo.webp" alt="logo" style={{ width: 32, height: 32, objectFit: "cover", borderRadius: 8 }} />
             </div>
             <img src="/brand/name.png" alt="HeavyEggs" style={{ height: 36, width: "auto", objectFit: "contain" }} />
-          </div>
+          </div>}
 
-          <nav className="mx-auto hidden min-w-0 flex-shrink items-center gap-1.5 overflow-x-auto scrollbar-hide lg:flex" style={{ paddingBottom: 6, marginBottom: -6 }}>
+          {contentReady && <nav className="mx-auto hidden min-w-0 flex-shrink items-center gap-1.5 overflow-x-auto scrollbar-hide lg:flex" style={{ paddingBottom: 6, marginBottom: -6 }}>
             {tabs.filter(({ adminOnly }) => !adminOnly || isAdmin).map(({ id, ru, en, icon: Icon }) => {
               const active = activeTab === id;
               return (
@@ -336,7 +385,7 @@ export function MarketingHome() {
                   style={{
                     padding: "6px 14px", whiteSpace: "nowrap",
                     background: active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)",
-                    color: "var(--header-btn-color)", border: "2.5px solid var(--ink)", borderRadius: 999,
+                    color: active ? "var(--ink)" : "var(--ink-2)", border: "2.5px solid var(--outline)", borderRadius: 999,
                     fontSize: 11, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
                     boxShadow: active ? "var(--filter-btn-shadow-active)" : "var(--filter-btn-shadow)",
                   }}
@@ -346,9 +395,9 @@ export function MarketingHome() {
                 </button>
               );
             })}
-          </nav>
+          </nav>}
 
-          <nav className="mx-auto flex gap-1.5 overflow-x-auto scrollbar-hide lg:hidden" style={{ paddingBottom: 6, marginBottom: -6 }}>
+          {contentReady && <nav className="mx-auto flex gap-1.5 overflow-x-auto scrollbar-hide lg:hidden" style={{ paddingBottom: 6, marginBottom: -6 }}>
             {tabs.filter(({ adminOnly }) => !adminOnly || isAdmin).map(({ id, icon: Icon }) => {
               const active = activeTab === id;
               return (
@@ -360,7 +409,7 @@ export function MarketingHome() {
                   style={{
                     width: 36, height: 36,
                     background: active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)",
-                    color: "var(--ink)", border: "2.5px solid var(--ink)", borderRadius: 999,
+                    color: "var(--ink)", border: "2.5px solid var(--outline)", borderRadius: 999,
                     cursor: "pointer",
                     boxShadow: active ? "var(--filter-btn-shadow-active)" : "var(--filter-btn-shadow)",
                   }}
@@ -369,127 +418,23 @@ export function MarketingHome() {
                 </button>
               );
             })}
-          </nav>
+          </nav>}
 
-          <div className="ml-auto flex shrink-0 items-center gap-3 lg:ml-0">
+          <div className="ml-auto flex shrink-0 items-center gap-3 lg:ml-0" style={{ display: contentReady ? undefined : "none" }}>
             <div id="network-badge" />
-            {/* Группа: соцсеть + тема + язык */}
-            <div className="hidden items-center gap-2 md:flex">
-              <a
-                href="https://x.com/MrHeavyEggs"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-sticker-outline h-9 w-9 p-0"
-                aria-label="X (Twitter)"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.733-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-              </a>
-
-              <button
-                type="button"
-                onClick={() => setTheme((prev) => (prev === "dark" ? "light" : "dark"))}
-                className="btn-sticker-outline h-9 w-9 p-0"
-                aria-label={lang === "ru" ? "Переключить тему" : "Toggle theme"}
-              >
-                {themeReady && isDark ? <Moon size={15} /> : <Sun size={15} />}
-              </button>
-
-              <div className="relative" ref={langRef}>
-              <button
-                type="button"
-                onClick={() => setLangOpen((v) => !v)}
-                className="btn-sticker-outline flex items-center gap-1.5 px-3 py-2"
-                aria-label="Switch language"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                </svg>
-                <span className="text-xs font-bold uppercase tracking-widest">{lang}</span>
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="opacity-50 transition-transform duration-200" style={{ transform: langOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
-                  <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-
-              {langOpen && (
-                <div
-                  className="absolute right-0 top-full z-50 mt-3 w-40"
-                  style={{
-                    background: "var(--paper-2)",
-                    border: "2.5px solid var(--ink)",
-                    borderRadius: 14,
-                    boxShadow: "4px 4px 0 var(--shadow-sticker-color)",
-                  }}
-                >
-                  {([
-                    { code: "ru", label: "Русский", flag: "🇷🇺" },
-                    { code: "en", label: "English", flag: "🇺🇸" },
-                  ] as const).map(({ code, label, flag }, i, arr) => (
-                    <button
-                      key={code}
-                      type="button"
-                      onClick={() => { setLang(code); setLangOpen(false); }}
-                      className="flex w-full items-center gap-2.5 px-4 py-3 text-sm font-bold transition-colors"
-                      style={{
-                        color: lang === code ? "var(--ink)" : "var(--ink-2)",
-                        background: lang === code ? "var(--mint-soft)" : "transparent",
-                        borderBottom: i < arr.length - 1 ? "1.5px solid rgba(15,17,21,0.12)" : "none",
-                        borderRadius: i === 0 ? "11px 11px 0 0" : i === arr.length - 1 ? "0 0 11px 11px" : 0,
-                      }}
-                      onMouseEnter={e => { if (lang !== code) e.currentTarget.style.background = "var(--filter-btn-hover-bg)"; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = lang === code ? "var(--mint-soft)" : "transparent"; }}
-                    >
-                      <span className="text-base leading-none">{flag}</span>
-                      <span>{label}</span>
-                      {lang === code && (
-                        <svg className="ml-auto" width="12" height="12" viewBox="0 0 12 12" fill="none">
-                          <path d="M2 6l3 3 5-5" stroke="var(--mint-deep)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-              </div>
-            </div>
-            {/* Разделитель между настройками и кнопкой кошелька */}
-            <div className="hidden md:block h-6 w-px" style={{ background: "var(--ink)", opacity: 0.18 }} />
             <div id="wallet-cta" className="flex items-center" />
           </div>
         </div>
 
       </header>
 
-      <div className="sticky top-16 z-[15] overflow-hidden border-b" style={{ borderColor: "var(--header-border)", background: "var(--ticker-bg)" }}>
-        {/* Fade-маски по краям для бесшовного эффекта */}
-        <div aria-hidden style={{
-          position: "absolute", left: 0, top: 0, bottom: 0, width: 64, zIndex: 2,
-          background: "linear-gradient(to right, var(--ticker-bg), transparent)",
-          pointerEvents: "none",
-        }} />
-        <div aria-hidden style={{
-          position: "absolute", right: 0, top: 0, bottom: 0, width: 64, zIndex: 2,
-          background: "linear-gradient(to left, var(--ticker-bg), transparent)",
-          pointerEvents: "none",
-        }} />
-        <div className="ticker-marquee flex min-w-max items-center gap-4 px-6 py-1.5">
-          {/* Два повтора достаточно для seamless loop */}
-          {[...tickerItems, ...tickerItems].map((item, idx) => {
-            const positive = item.change.startsWith("+");
-            return (
-              <div key={`${item.symbol}-${idx}`} className="flex items-center gap-3 rounded-full px-4 py-1.5" style={{ border: "1px solid var(--ticker-pill-border)", background: "var(--ticker-pill-bg)" }}>
-                <span className="font-mono text-[11px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--ticker-symbol)" }}>{item.symbol}</span>
-                <span className="font-display text-sm font-semibold" style={{ color: "var(--panel-text)" }}>{item.price}</span>
-                <span className={`text-xs font-black ${positive ? "text-emerald-400" : "text-red-400"}`}>{item.change}</span>
-              </div>
-            );
-          })}
+      {(!contentReady || beachFading) && (
+        <div style={{ opacity: beachFading ? 0 : 1, transition: "opacity 700ms ease" }}>
+          <BeachScene lang={lang} isDark={isDark} />
         </div>
-      </div>
+      )}
 
-      <main className="relative z-10 overflow-x-hidden" style={{ background: isDark ? "rgba(15,17,21,0.70)" : "rgba(250,243,227,0.65)" }}>
+      <main className="relative z-10 overflow-x-hidden" style={{ background: contentReady ? (isDark ? "rgba(15,17,21,0.70)" : "rgba(250,243,227,0.65)") : "transparent", opacity: contentReady ? 1 : 0, transform: contentReady ? "none" : "translateY(32px)", transition: "opacity 600ms ease 100ms, transform 600ms ease 100ms", pointerEvents: contentReady ? undefined : "none" }}>
         <section id="app" className="container py-6">
           <WalletApp
             activeTab={activeTab}
@@ -498,26 +443,28 @@ export function MarketingHome() {
             tourDemoMode={tourDemoMode}
             onStartTour={startTour}
             isDark={isDark}
+            theme={theme}
+            setTheme={setTheme}
+            themeReady={true}
+            onEnterApp={() => setContentReady(true)}
           />
         </section>
       </main>
 
-      {!fabDismissed && !mechanicsOpen && (
+      {contentReady && !fabDismissed && !mechanicsOpen && (
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
           {!feedbackBtnDismissed && (
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setFeedbackOpen(true)}
-                className="flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold shadow-xl backdrop-blur transition"
-                style={{ border: "1px solid var(--floating-border)", background: "var(--floating-bg)", color: "var(--floating-text)" }}
+                className="btn-sticker-outline gap-2 px-4 py-2.5 text-sm"
               >
                 <span className="text-base">💬</span>
                 {lang === "ru" ? "Оставить отзыв" : "Leave a review"}
               </button>
               <button
                 onClick={() => setFeedbackBtnDismissed(true)}
-                className="flex h-8 w-8 items-center justify-center rounded-full shadow-xl backdrop-blur transition"
-                style={{ border: "1px solid var(--floating-border)", background: "var(--floating-bg)", color: "var(--floating-muted)" }}
+                className="btn-sticker-ghost h-8 w-8 p-0"
                 aria-label="Dismiss feedback button"
               >
                 ×
@@ -527,16 +474,14 @@ export function MarketingHome() {
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setMechanicsOpen(true)}
-              className="flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold shadow-xl backdrop-blur transition"
-              style={{ border: "1px solid var(--floating-border)", background: "var(--floating-bg)", color: "var(--floating-text)" }}
+              className="btn-sticker-secondary gap-2 px-4 py-2.5 text-sm"
             >
               <span className="text-base">❓</span>
               {lang === "ru" ? "Как это работает" : "How it works"}
             </button>
             <button
               onClick={() => setFabDismissed(true)}
-              className="flex h-8 w-8 items-center justify-center rounded-full shadow-xl backdrop-blur transition"
-              style={{ border: "1px solid var(--floating-border)", background: "var(--floating-bg)", color: "var(--floating-muted)" }}
+              className="btn-sticker-ghost h-8 w-8 p-0"
               aria-label="Close all"
             >
               ×
@@ -554,7 +499,7 @@ export function MarketingHome() {
           </Card>
 
           <div>
-            <div className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-400">{lang === "ru" ? "Как играть" : "How to play"}</div>
+            <div className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--ink-3)" }}>{lang === "ru" ? "Как играть" : "How to play"}</div>
             <div className="grid gap-3 sm:grid-cols-2">
               {steps.map((s, i) => (
                 <StepCard key={i} num={i + 1} icon={s.icon} title={s.title} desc={s.desc} />
@@ -563,7 +508,7 @@ export function MarketingHome() {
           </div>
 
           <Card className="overflow-hidden p-0">
-            <div className="border-b px-5 py-4" style={{ borderColor: "var(--panel-border)", background: "var(--soft-surface)" }}>
+            <div className="px-5 py-4" style={{ borderBottom: "2px solid var(--outline)", background: "var(--paper-3)" }}>
               <div className="flex items-center justify-between">
                 <div className="text-sm font-semibold">{t("merge.example.title")}</div>
                 <div className="text-xs" style={{ color: "var(--panel-text-muted)" }}>{t("merge.example.subtitle")}</div>
@@ -573,7 +518,7 @@ export function MarketingHome() {
               <MergeRow from={{ label: "Small (L1)", color: "var(--rarity-common)", count: 5 }} to={{ label: "Heavy (L2)", color: "var(--rarity-rare)", count: 1 }} />
               <MergeRow from={{ label: "Heavy (L2)", color: "var(--rarity-rare)", count: 5 }} to={{ label: "Big (L3)", color: "var(--rarity-epic)", count: 1 }} />
               <MergeRow from={{ label: "Big (L3)", color: "var(--rarity-epic)", count: 5 }} to={{ label: "Super Heavy (L4)", color: "var(--rarity-legendary)", count: 1 }} />
-              <div className="rounded-xl border p-4 text-xs" style={{ borderColor: "var(--soft-border)", background: "var(--soft-surface-2)", color: "var(--panel-text-muted)" }}>{t("merge.note")}</div>
+              <div className="rounded-xl p-4 text-xs" style={{ border: "2px solid var(--outline)", background: "var(--sunken)", color: "var(--ink-2)" }}>{t("merge.note")}</div>
             </div>
           </Card>
 
@@ -582,50 +527,50 @@ export function MarketingHome() {
               <div className="mb-3 text-xs font-semibold tracking-wide" style={{ color: "var(--panel-text-muted)" }}>{t("rarity.kicker")}</div>
               <div className="grid gap-2">
                 {[
-                  { label: lang === "ru" ? "Малое • L1" : "Small • L1",           color: "var(--rarity-common)",    cls: "border-[#D9D3C2]/60 bg-[#D9D3C2]/20 text-[var(--ink-2)]" },
-                  { label: lang === "ru" ? "Тяжелое яйцо • L2" : "Heavy Egg • L2", color: "var(--rarity-rare)",      cls: "border-[#7AC7E8]/60 bg-[#7AC7E8]/15 text-[var(--ink-2)]" },
-                  { label: lang === "ru" ? "Тяжелое • L3" : "Big • L3",             color: "var(--rarity-epic)",      cls: "border-[#26C6A8]/60 bg-[#26C6A8]/15 text-[var(--ink-2)]" },
-                  { label: lang === "ru" ? "Супер тяжелое • L4" : "Super Heavy • L4", color: "var(--rarity-legendary)", cls: "border-[#88FC00]/60 bg-[#88FC00]/15 text-[var(--ink-2)]" },
-                ].map(({ label, color, cls }) => (
-                  <div key={label} className={`flex items-center justify-between rounded-xl border px-4 py-2.5 ${cls}`}>
+                  { label: lang === "ru" ? "Малое • L1" : "Small • L1", color: "var(--rarity-common)" },
+                  { label: lang === "ru" ? "Тяжелое яйцо • L2" : "Heavy Egg • L2", color: "var(--rarity-rare)" },
+                  { label: lang === "ru" ? "Тяжелое • L3" : "Big • L3", color: "var(--rarity-epic)" },
+                  { label: lang === "ru" ? "Супер тяжелое • L4" : "Super Heavy • L4", color: "var(--rarity-legendary)" },
+                ].map(({ label, color }) => (
+                  <div key={label} className="flex items-center justify-between rounded-xl px-4 py-2.5" style={{ border: "2px solid var(--outline)", background: color, color: "var(--ink)" }}>
                     <div className="text-sm font-semibold">{label}</div>
                     <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
                   </div>
                 ))}
               </div>
-              <div className="mt-3 rounded-xl border p-3 text-xs" style={{ borderColor: "var(--soft-border)", background: "var(--soft-surface)", color: "var(--panel-text-muted)" }}>{t("rarity.note")}</div>
+              <div className="mt-3 rounded-xl p-3 text-xs" style={{ border: "2px solid var(--outline)", background: "var(--sunken)", color: "var(--ink-2)" }}>{t("rarity.note")}</div>
             </Card>
 
             <Card className="p-5">
               <div className="mb-3 text-xs font-semibold tracking-wide" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Инвестиционные лиги" : "Investment leagues"}</div>
               <div className="grid gap-2">
-                <div className="flex items-start justify-between rounded-xl border border-zinc-500/30 bg-zinc-800/30 px-4 py-3">
+                <div className="flex items-start justify-between rounded-xl px-4 py-3" style={{ border: "2px solid var(--outline)", background: "var(--rarity-common)", color: "var(--ink)" }}>
                   <div>
                     <div className="flex items-center gap-2">
-                      <div className="text-sm font-black text-zinc-300">Bronze</div>
-                      <div className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-500">25%</div>
+                      <div className="text-sm font-black">Bronze</div>
+                      <div className="rounded px-1.5 py-0.5 text-[10px] font-semibold" style={{ border: "1.5px solid var(--outline)", background: "var(--paper-2)", color: "var(--ink)" }}>25%</div>
                     </div>
-                    <div className="mt-0.5 text-[10px] text-zinc-500">{lang === "ru" ? "Только Common (T1) во все дни" : "Only Common (T1) on all days"}</div>
+                    <div className="mt-0.5 text-[10px]" style={{ color: "var(--ink-2)" }}>{lang === "ru" ? "Только Common (T1) во все дни" : "Only Common (T1) on all days"}</div>
                   </div>
                   <span className="text-lg">🥉</span>
                 </div>
-                <div className="flex items-start justify-between rounded-xl border border-zinc-400/30 bg-zinc-700/20 px-4 py-3">
+                <div className="flex items-start justify-between rounded-xl px-4 py-3" style={{ border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--ink)" }}>
                   <div>
                     <div className="flex items-center gap-2">
-                      <div className="text-sm font-black text-zinc-200">Silver</div>
-                      <div className="rounded bg-zinc-700/60 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-400">35%</div>
+                      <div className="text-sm font-black">Silver</div>
+                      <div className="rounded px-1.5 py-0.5 text-[10px] font-semibold" style={{ border: "1.5px solid var(--outline)", background: "var(--paper-2)", color: "var(--ink)" }}>35%</div>
                     </div>
-                    <div className="mt-0.5 text-[10px] text-zinc-400/70">{lang === "ru" ? "1–2 Тяжелых яйца (T2) в любой день" : "1–2 Heavy Eggs (T2) on any day"}</div>
+                    <div className="mt-0.5 text-[10px]" style={{ color: "var(--ink-2)" }}>{lang === "ru" ? "1–2 Тяжелых яйца (T2) в любой день" : "1–2 Heavy Eggs (T2) on any day"}</div>
                   </div>
                   <span className="text-lg">🥈</span>
                 </div>
-                <div className="flex items-start justify-between rounded-xl border border-violet-500/30 bg-violet-900/20 px-4 py-3">
+                <div className="flex items-start justify-between rounded-xl px-4 py-3" style={{ border: "2px solid var(--outline)", background: "var(--mint)", color: "var(--ink)" }}>
                   <div>
                     <div className="flex items-center gap-2">
-                      <div className="text-sm font-black text-violet-300">Gold</div>
-                      <div className="rounded bg-violet-900/60 px-1.5 py-0.5 text-[10px] font-semibold text-violet-400">40%</div>
+                      <div className="text-sm font-black">Gold</div>
+                      <div className="rounded px-1.5 py-0.5 text-[10px] font-semibold" style={{ border: "1.5px solid var(--outline)", background: "var(--paper-2)", color: "var(--ink)" }}>40%</div>
                     </div>
-                    <div className="mt-0.5 text-[10px] text-violet-300/60">{lang === "ru" ? "Тяжелое (T3) в любой день или 3+ Тяжелых за день" : "Big (T3) on any day, or 3+ Heavy on any day"}</div>
+                    <div className="mt-0.5 text-[10px]" style={{ color: "var(--ink-2)" }}>{lang === "ru" ? "Тяжелое (T3) в любой день или 3+ Тяжелых за день" : "Big (T3) on any day, or 3+ Heavy on any day"}</div>
                   </div>
                   <span className="text-lg">🥇</span>
                 </div>
@@ -643,23 +588,23 @@ export function MarketingHome() {
                 [lang === "ru" ? "Температура рынка" : "Market temperature", lang === "ru" ? "до +150 очков" : "up to +150 pts"],
                 [lang === "ru" ? "Hype-индекс" : "Hype index", lang === "ru" ? "+100 очков" : "+100 pts"],
               ].map(([ev, pts]) => (
-                <div key={String(ev)} className="flex items-center justify-between rounded-lg border border-white/5 bg-black/20 px-3 py-2 text-xs">
-                  <span className="text-zinc-400">{ev}</span>
-                  <span className="font-black text-emerald-400">{pts}</span>
+                <div key={String(ev)} className="flex items-center justify-between rounded-lg px-3 py-2 text-xs" style={{ border: "2px solid var(--outline)", background: "var(--paper-3)" }}>
+                  <span style={{ color: "var(--ink-2)" }}>{ev}</span>
+                  <span className="font-black" style={{ color: "var(--up)" }}>{pts}</span>
                 </div>
               ))}
             </div>
             <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Множители карточек" : "Card multipliers"}</div>
             <div className="grid grid-cols-4 gap-1.5">
               {[
-                { label: lang === "ru" ? "Мал." : "Sm.", mult: "x1.0", color: "text-zinc-400", bg: "bg-zinc-800/40 border-zinc-600/30" },
-                { label: lang === "ru" ? "Ср."  : "Md.", mult: "x1.4", color: "text-blue-300", bg: "bg-blue-900/20 border-blue-500/20" },
-                { label: lang === "ru" ? "Бол." : "Hvy.", mult: "x1.9", color: "text-purple-300", bg: "bg-purple-900/20 border-purple-500/20" },
-                { label: lang === "ru" ? "Тяж." : "S.H.", mult: "x2.5", color: "text-amber-300", bg: "bg-amber-900/20 border-amber-500/20" },
-              ].map(({ label, mult, color, bg }) => (
-                <div key={label} className={`rounded-lg border px-2 py-2 text-center ${bg}`}>
-                  <div className={`text-[10px] font-semibold ${color}`}>{label}</div>
-                  <div className={`mt-0.5 text-sm font-black ${color}`}>{mult}</div>
+                { label: lang === "ru" ? "Мал." : "Sm.", mult: "x1.0", bg: "var(--rarity-common)" },
+                { label: lang === "ru" ? "Ср."  : "Md.", mult: "x1.4", bg: "var(--rarity-rare)" },
+                { label: lang === "ru" ? "Бол." : "Hvy.", mult: "x1.9", bg: "var(--rarity-epic)" },
+                { label: lang === "ru" ? "Тяж." : "S.H.", mult: "x2.5", bg: "var(--rarity-legendary)" },
+              ].map(({ label, mult, bg }) => (
+                <div key={label} className="rounded-lg px-2 py-2 text-center" style={{ border: "2px solid var(--outline)", background: bg, color: "var(--ink)" }}>
+                  <div className="text-[10px] font-semibold">{label}</div>
+                  <div className="mt-0.5 text-sm font-black">{mult}</div>
                 </div>
               ))}
             </div>
@@ -685,8 +630,7 @@ export function MarketingHome() {
           <button
             type="button"
             onClick={startTour}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-black text-black transition hover:brightness-110 active:brightness-95"
-            style={{ background: "linear-gradient(90deg, #00F0FF, #B026FF)" }}
+            className="btn-sticker-primary w-full gap-2 py-3 text-sm"
           >
             <span>🗺</span>
             {lang === "ru" ? "Пройти обучающий тур" : "Take the guided tour"}
@@ -702,7 +646,7 @@ export function MarketingHome() {
           <div className="flex flex-col items-center gap-4 py-6">
             <div className="text-4xl">🙏</div>
             <div className="text-base font-black" style={{ color: "var(--panel-text)" }}>{lang === "ru" ? "Спасибо за отзыв!" : "Thanks for your feedback!"}</div>
-            <button onClick={closeFeedback} className="rounded-2xl px-6 py-2.5 text-sm font-black text-black" style={{ background: "linear-gradient(90deg,#00F0FF,#B026FF)" }}>
+            <button onClick={closeFeedback} className="btn-sticker-primary px-6 py-2.5 text-sm">
               {lang === "ru" ? "Закрыть" : "Close"}
             </button>
           </div>
@@ -712,7 +656,7 @@ export function MarketingHome() {
               <div className="mb-2 text-xs font-semibold" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Оценка" : "Rating"}</div>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((s) => (
-                  <button key={s} type="button" onClick={() => setFeedbackRating(s)} className={`text-2xl transition-transform hover:scale-110 ${s <= feedbackRating ? "text-amber-400" : "text-white/20"}`}>
+                  <button key={s} type="button" onClick={() => setFeedbackRating(s)} className="text-2xl transition-transform hover:scale-110" style={{ color: s <= feedbackRating ? "var(--warn)" : "var(--ink-3)" }}>
                     ★
                   </button>
                 ))}
@@ -726,8 +670,7 @@ export function MarketingHome() {
                 value={feedbackName}
                 onChange={(e) => setFeedbackName(e.target.value)}
                 placeholder={lang === "ru" ? "Ваше имя..." : "Your name..."}
-                className="themed-input w-full rounded-xl border px-3 py-2 text-sm focus:outline-none"
-                style={{ borderColor: "var(--input-border)", background: "var(--input-bg)", color: "var(--input-text)", boxShadow: "inset 0 0 0 1px transparent" }}
+                className="input-sticker w-full px-3 py-2 text-sm"
               />
             </div>
             <div>
@@ -738,19 +681,17 @@ export function MarketingHome() {
                 value={feedbackText}
                 onChange={(e) => setFeedbackText(e.target.value)}
                 placeholder={lang === "ru" ? "Что понравилось? Что улучшить?" : "What did you like? What can we improve?"}
-                className="themed-input w-full resize-none rounded-xl border px-3 py-2 text-sm focus:outline-none"
-                style={{ borderColor: "var(--input-border)", background: "var(--input-bg)", color: "var(--input-text)" }}
+                className="input-sticker w-full resize-none px-3 py-2 text-sm"
               />
               <div className="mt-0.5 text-right text-[10px]" style={{ color: "var(--panel-text-muted)" }}>{feedbackText.length}/1000</div>
             </div>
             {feedbackStatus === "error" && (
-              <div className="text-xs text-red-400">{lang === "ru" ? "Ошибка отправки. Попробуйте ещё раз." : "Send error. Please try again."}</div>
+              <div className="text-xs font-semibold" style={{ color: "var(--down)" }}>{lang === "ru" ? "Ошибка отправки. Попробуйте ещё раз." : "Send error. Please try again."}</div>
             )}
             <button
               onClick={submitFeedback}
               disabled={feedbackStatus === "sending" || !feedbackText.trim()}
-              className="w-full rounded-2xl py-3 text-sm font-black text-black transition hover:brightness-110 disabled:opacity-40"
-              style={{ background: "linear-gradient(90deg,#00F0FF,#B026FF)" }}
+              className="btn-sticker-primary w-full py-3 text-sm"
             >
               {feedbackStatus === "sending" ? "…" : (lang === "ru" ? "Отправить" : "Submit")}
             </button>

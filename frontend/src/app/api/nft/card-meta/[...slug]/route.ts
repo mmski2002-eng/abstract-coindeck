@@ -4,8 +4,7 @@ import {
   ASSET_NAMES as NAMES,
   ASSET_ROLES as ROLES,
 } from "@/config/assetUniverse";
-
-const TIER_LABELS = ["COMMON", "RARE", "EPIC", "LEGENDARY"];
+import { NFT_RARITY_STYLES } from "../../palette";
 
 export async function GET(
   req: NextRequest,
@@ -20,14 +19,14 @@ export async function GET(
   const ticker = TICKERS[playerId];
   const name = NAMES[playerId];
   const role = ROLES[playerId];
-  const tierLabel = TIER_LABELS[tier] ?? "COMMON";
+  const tierLabel = NFT_RARITY_STYLES[tier]?.label ?? NFT_RARITY_STYLES[0].label;
   const proto = req.headers.get("x-forwarded-proto") ?? "https";
   const host = req.headers.get("host") ?? "escape.isgood.host";
   const origin = `${proto}://${host}`;
 
   return NextResponse.json({
     name: `${name} — ${tierLabel}`,
-    description: `CoinDeck NFT Card — ${ticker} (${role})`,
+    description: `HeavyEggs NFT Card — ${ticker} (${role})`,
     image: `${origin}/cards-anim/${playerId}_${tier}.gif`,
     animation_url: `${origin}/api/nft/card-anim/${playerId}/${tier}`,
     attributes: [

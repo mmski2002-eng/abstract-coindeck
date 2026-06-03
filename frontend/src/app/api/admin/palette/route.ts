@@ -3,17 +3,15 @@ import { readFile, writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { verifyAdminAction, clientIp, checkRateLimit, adminRateLimits, appendAuditLog } from "../auth";
 import { PALETTE_ACTION } from "@/lib/adminAuth";
+import { sanitizePaletteData, type PaletteData } from "@/lib/palette";
 
 const DATA_DIR = join(process.cwd(), "data");
 const PALETTE_FILE = join(DATA_DIR, "palette.json");
 
-type ThemeVars = Record<string, string>;
-type PaletteData = { light: ThemeVars; dark: ThemeVars };
-
 async function readPalette(): Promise<PaletteData> {
   try {
     const raw = await readFile(PALETTE_FILE, "utf-8");
-    return JSON.parse(raw) as PaletteData;
+    return sanitizePaletteData(JSON.parse(raw));
   } catch {
     return { light: {}, dark: {} };
   }
@@ -36,9 +34,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid-body" }, { status: 400 });
   }
 
-  const light = (body.light ?? {}) as ThemeVars;
-  const dark = (body.dark ?? {}) as ThemeVars;
-  const payload = { light, dark };
+  const payload = sanitizePaletteData({ light: body.light, dark: body.dark });
 
   const result = await verifyAdminAction(req, body, PALETTE_ACTION, payload);
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: 403 });

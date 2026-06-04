@@ -23,6 +23,31 @@ const KEYFRAMES = `
     0%,100% { transform: translateY(0) rotate(-2deg); }
     50% { transform: translateY(-8px) rotate(2deg); }
   }
+  @keyframes penguinWalkLeft {
+    0%   { transform: translateX(0)     scaleX(1);  }
+    8%   { transform: translateX(3vw)   scaleX(1);  }
+    40%  { transform: translateX(30vw)  scaleX(1);  }
+    48%  { transform: translateX(30vw)  scaleX(-1); }
+    56%  { transform: translateX(27vw)  scaleX(-1); }
+    90%  { transform: translateX(0)     scaleX(-1); }
+    98%  { transform: translateX(0)     scaleX(1);  }
+    100% { transform: translateX(0)     scaleX(1);  }
+  }
+  @keyframes penguinWalkRight {
+    0%   { transform: translateX(0)      scaleX(-1); }
+    8%   { transform: translateX(-3vw)   scaleX(-1); }
+    40%  { transform: translateX(-30vw)  scaleX(-1); }
+    48%  { transform: translateX(-30vw)  scaleX(1);  }
+    56%  { transform: translateX(-27vw)  scaleX(1);  }
+    90%  { transform: translateX(0)      scaleX(1);  }
+    98%  { transform: translateX(0)      scaleX(-1); }
+    100% { transform: translateX(0)      scaleX(-1); }
+  }
+  @keyframes penguinBob {
+    0%,100% { transform: translateY(0);    }
+    25%     { transform: translateY(-5px); }
+    75%     { transform: translateY(-5px); }
+  }
   @keyframes ghostFloat {
     0%,100% { transform: translateY(0); }
     50% { transform: translateY(-12px); }
@@ -79,33 +104,44 @@ export function BeachScene({ lang, isDark }: { lang: string; isDark: boolean }) 
         </div>
 
         {/* Penguin left */}
-        <img
-          src="/penguin-left.webp"
-          alt=""
-          style={{
-            position: "absolute", bottom: "18.5%", left: "3%",
-            height: "clamp(88px, 17vh, 220px)", width: "auto",
-            objectFit: "contain",
-            animation: "penguinSway 4.5s ease-in-out infinite",
-            filter: isDark ? "brightness(0.65)" : "none",
-            zIndex: 3,
-          }}
-        />
+        <div style={{
+          position: "absolute", bottom: "18.5%", left: "3%",
+          animation: "penguinWalkLeft 11s ease-in-out infinite",
+          zIndex: 3,
+        }}>
+          <img
+            src="/penguin-left.webp"
+            alt=""
+            style={{
+              height: "clamp(88px, 17vh, 220px)", width: "auto",
+              objectFit: "contain",
+              animation: "penguinBob 0.55s ease-in-out infinite",
+              filter: isDark ? "brightness(0.65)" : "none",
+              display: "block",
+            }}
+          />
+        </div>
 
         {/* Penguin right */}
-        <img
-          src="/fonpepe-right.webp"
-          alt=""
-          style={{
-            position: "absolute", bottom: "18.5%", right: "3%",
-            height: "clamp(88px, 17vh, 220px)", width: "auto",
-            objectFit: "contain",
-            animation: "penguinSway 5.5s ease-in-out infinite",
-            animationDelay: "-2.5s",
-            filter: isDark ? "brightness(0.65)" : "none",
-            zIndex: 3,
-          }}
-        />
+        <div style={{
+          position: "absolute", bottom: "18.5%", right: "3%",
+          animation: "penguinWalkRight 13s ease-in-out infinite",
+          animationDelay: "-4s",
+          zIndex: 3,
+        }}>
+          <img
+            src="/fonpepe-right.webp"
+            alt=""
+            style={{
+              height: "clamp(88px, 17vh, 220px)", width: "auto",
+              objectFit: "contain",
+              animation: "penguinBob 0.6s ease-in-out infinite",
+              animationDelay: "-0.3s",
+              filter: isDark ? "brightness(0.65)" : "none",
+              display: "block",
+            }}
+          />
+        </div>
 
         {/* Egg 1 — top-left, large */}
         <img

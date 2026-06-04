@@ -104,34 +104,30 @@ function PenguinMascot({ mood = "happy", size = 72 }: {
 // ─────────────────────────────────────────────────────────────────────────────
 // Connector icon — sticker style
 // ─────────────────────────────────────────────────────────────────────────────
+function customWalletSrc(id: string, name: string): string | null {
+  const lower = (id + name).toLowerCase();
+  if (lower.includes("abstract")) return "/wallets/abc.webp";
+  if (lower.includes("metamask")) return "/wallets/mm.webp";
+  if (lower.includes("okx")) return "/wallets/okx.webp";
+  if (lower.includes("rabby")) return "/wallets/rabby.webp";
+  return null;
+}
+
 function ConnectorIcon({ id, name }: { id: string; name: string }) {
   const lower = (id + name).toLowerCase();
+  const custom = customWalletSrc(id, name);
 
-  if (lower.includes("abstract")) return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#26C6A8", border: "2px solid var(--outline)" }}>
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
-        <path d="M5 19L12 5L19 19" stroke="var(--ink)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M7.5 14.5H16.5" stroke="var(--ink)" strokeWidth="2" strokeLinecap="round"/>
-      </svg>
-    </div>
-  );
+  const sz = { width: 56, height: 56, borderRadius: 14, overflow: "hidden" as const, flexShrink: 0 as const, border: "2px solid var(--outline)" };
 
-  if (lower.includes("metamask")) return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#F6851B", border: "2px solid var(--outline)" }}>
-      <svg viewBox="0 0 32 32" fill="none" className="h-6 w-6">
-        <path d="M28 4L17.6 11.6L19.5 7L28 4Z" fill="white" opacity="0.9"/>
-        <path d="M4 4L14.3 11.7L12.5 7L4 4Z" fill="white" opacity="0.9"/>
-        <path d="M10.4 14.4L8.7 17L14.8 17.3L14.6 10.7L10.4 14.4Z" fill="white" opacity="0.9"/>
-        <path d="M21.6 14.4L17.3 10.6L17.2 17.3L23.3 17L21.6 14.4Z" fill="white" opacity="0.9"/>
-        <path d="M14.8 17.3L14.2 20.6L15 24.3L15.2 19L14.8 17.3Z" fill="white"/>
-        <path d="M17.2 17.3L16.8 19L17 24.3L17.8 20.6L17.2 17.3Z" fill="white"/>
-      </svg>
+  if (custom) return (
+    <div style={sz}>
+      <img src={custom} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
     </div>
   );
 
   if (lower.includes("coinbase")) return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#0052FF", border: "2px solid var(--outline)" }}>
-      <svg viewBox="0 0 32 32" fill="none" className="h-6 w-6">
+    <div style={{ ...sz, background: "#0052FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <svg viewBox="0 0 32 32" fill="none" style={{ width: 32, height: 32 }}>
         <circle cx="16" cy="16" r="11" fill="white"/>
         <rect x="11.5" y="13.5" width="9" height="5" rx="2.5" fill="#0052FF"/>
       </svg>
@@ -139,42 +135,17 @@ function ConnectorIcon({ id, name }: { id: string; name: string }) {
   );
 
   if (lower.includes("walletconnect") || lower.includes("wallet connect")) return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#3B99FC", border: "2px solid var(--outline)" }}>
-      <svg viewBox="0 0 32 32" fill="none" className="h-6 w-6">
+    <div style={{ ...sz, background: "#3B99FC", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <svg viewBox="0 0 32 32" fill="none" style={{ width: 32, height: 32 }}>
         <path d="M9.5 12.5C13 9 19 9 22.5 12.5L23 13C23.5 13.5 23.5 14.5 23 15L21.5 16.5C21.25 16.75 20.75 16.75 20.5 16.5L19.5 15.5C17.5 13.5 14.5 13.5 12.5 15.5L11.3 16.7C11.05 16.95 10.55 16.95 10.3 16.7L8.8 15.2C8.3 14.7 8.3 13.7 8.8 13.2L9.5 12.5Z" fill="white"/>
         <path d="M13.5 17.5L15 19C15.5 19.5 16.5 19.5 17 19L18.5 17.5C18.75 17.25 19.25 17.25 19.5 17.5L21 19C21.5 19.5 21.5 20.5 21 21L17.5 24.5C17 25 16 25 15.5 24.5L12 21C11.5 20.5 11.5 19.5 12 19L13.5 17.5C13.75 17.25 13.25 17.25 13.5 17.5Z" fill="white"/>
       </svg>
     </div>
   );
 
-  if (lower.includes("okx")) return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#000000", border: "2px solid var(--outline)" }}>
-      <svg viewBox="0 0 32 32" fill="none" className="h-6 w-6">
-        <rect x="4" y="13" width="7" height="7" rx="1" fill="white"/>
-        <rect x="13" y="4" width="7" height="7" rx="1" fill="white"/>
-        <rect x="13" y="22" width="7" height="7" rx="1" fill="white"/>
-        <rect x="22" y="13" width="7" height="7" rx="1" fill="white"/>
-        <rect x="13" y="13" width="7" height="7" rx="1" fill="white"/>
-      </svg>
-    </div>
-  );
-
-  if (lower.includes("rabby")) return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#8697FF", border: "2px solid var(--outline)" }}>
-      <svg viewBox="0 0 32 32" fill="none" className="h-6 w-6">
-        <ellipse cx="16" cy="17" rx="10" ry="8" fill="white" opacity="0.95"/>
-        <ellipse cx="11" cy="10" rx="4" ry="6" fill="white" opacity="0.9" transform="rotate(-20 11 10)"/>
-        <ellipse cx="21" cy="10" rx="4" ry="6" fill="white" opacity="0.9" transform="rotate(20 21 10)"/>
-        <circle cx="13" cy="17" r="1.8" fill="#8697FF"/>
-        <circle cx="19" cy="17" r="1.8" fill="#8697FF"/>
-        <path d="M13 21.5 Q16 24 19 21.5" stroke="#8697FF" strokeWidth="1.5" strokeLinecap="round"/>
-      </svg>
-    </div>
-  );
-
   if (lower.includes("phantom")) return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0" style={{ background: "#AB9FF2", border: "2px solid var(--outline)" }}>
-      <svg viewBox="0 0 32 32" fill="none" className="h-6 w-6">
+    <div style={{ ...sz, background: "#AB9FF2", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <svg viewBox="0 0 32 32" fill="none" style={{ width: 32, height: 32 }}>
         <ellipse cx="16" cy="15" rx="9" ry="11" fill="white" opacity="0.9"/>
         <circle cx="13" cy="14" r="2" fill="#AB9FF2"/>
         <circle cx="19" cy="14" r="2" fill="#AB9FF2"/>
@@ -184,7 +155,7 @@ function ConnectorIcon({ id, name }: { id: string; name: string }) {
   );
 
   return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0 text-xs font-black" style={{ background: "var(--sunken)", border: "2px solid var(--outline)", color: "var(--ink-2)" }}>
+    <div style={{ ...sz, background: "var(--sunken)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800, color: "var(--ink-2)" }}>
       {name.slice(0, 2).toUpperCase()}
     </div>
   );
@@ -219,7 +190,7 @@ function SBtn({
   disabled?: boolean;
 }) {
   const base = variant === "primary"
-    ? { background: "var(--mint)", color: "var(--ink)", border: "2.5px solid var(--outline)", boxShadow: "4px 4px 0 var(--shadow-sticker-color)" }
+    ? { background: "var(--mint)", color: "var(--on-rarity)", border: "2.5px solid var(--outline)", boxShadow: "4px 4px 0 var(--shadow-sticker-color)" }
     : { background: "var(--paper-3)", color: "var(--ink-2)", border: "2px solid var(--outline)", boxShadow: "2px 2px 0 var(--shadow-sticker-color)" };
   const hoverShadow = variant === "primary" ? "2px 2px 0 var(--shadow-sticker-color)" : "1px 1px 0 var(--shadow-sticker-color)";
 
@@ -317,14 +288,14 @@ function WalletButton({ theme, setTheme, themeReady }: {
               <button
                 onClick={() => setTheme("light")}
                 className="flex items-center justify-center rounded-full transition-all"
-                style={{ width: 28, height: 28, background: themeReady && theme === "light" ? "var(--paper)" : "transparent", boxShadow: themeReady && theme === "light" ? "1px 1px 0 var(--shadow-sticker-color)" : "none" }}
+                style={{ width: 28, height: 28, background: themeReady && theme === "light" ? "var(--paper-3)" : "transparent", border: themeReady && theme === "light" ? "1.5px solid var(--outline)" : "1.5px solid transparent", boxShadow: themeReady && theme === "light" ? "1px 1px 0 var(--shadow-sticker-color)" : "none" }}
               >
                 <Sun size={12} />
               </button>
               <button
                 onClick={() => setTheme("dark")}
                 className="flex items-center justify-center rounded-full transition-all"
-                style={{ width: 28, height: 28, background: themeReady && theme === "dark" ? "var(--paper)" : "transparent", boxShadow: themeReady && theme === "dark" ? "1px 1px 0 var(--shadow-sticker-color)" : "none" }}
+                style={{ width: 28, height: 28, background: themeReady && theme === "dark" ? "var(--paper-3)" : "transparent", border: themeReady && theme === "dark" ? "1.5px solid var(--outline)" : "1.5px solid transparent", boxShadow: themeReady && theme === "dark" ? "1px 1px 0 var(--shadow-sticker-color)" : "none" }}
               >
                 <Moon size={12} />
               </button>
@@ -333,14 +304,14 @@ function WalletButton({ theme, setTheme, themeReady }: {
               <button
                 onClick={() => setLang("ru")}
                 className="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest transition-all"
-                style={{ background: lang === "ru" ? "var(--paper)" : "transparent", boxShadow: lang === "ru" ? "1px 1px 0 var(--shadow-sticker-color)" : "none", color: "var(--ink)" }}
+                style={{ background: lang === "ru" ? "var(--paper-3)" : "transparent", border: lang === "ru" ? "1.5px solid var(--outline)" : "1.5px solid transparent", boxShadow: lang === "ru" ? "1px 1px 0 var(--shadow-sticker-color)" : "none", color: "var(--ink)" }}
               >
                 RU
               </button>
               <button
                 onClick={() => setLang("en")}
                 className="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest transition-all"
-                style={{ background: lang === "en" ? "var(--paper)" : "transparent", boxShadow: lang === "en" ? "1px 1px 0 var(--shadow-sticker-color)" : "none", color: "var(--ink)" }}
+                style={{ background: lang === "en" ? "var(--paper-3)" : "transparent", border: lang === "en" ? "1.5px solid var(--outline)" : "1.5px solid transparent", boxShadow: lang === "en" ? "1px 1px 0 var(--shadow-sticker-color)" : "none", color: "var(--ink)" }}
               >
                 EN
               </button>
@@ -356,7 +327,7 @@ function WalletButton({ theme, setTheme, themeReady }: {
                 <button
                   onClick={() => { switchChain({ chainId: abstractTestnet.id }); setMenuOpen(false); }}
                   className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md"
-                  style={{ background: "var(--down)", color: "var(--ink)", border: "1.5px solid var(--outline)" }}
+                  style={{ background: "var(--down)", color: "var(--on-rarity)", border: "1.5px solid var(--outline)" }}
                 >
                   {lang === "ru" ? "Сменить" : "Switch"}
                 </button>
@@ -591,7 +562,7 @@ export function ConnectModal({ lang, open, onClose, onEnterApp }: ConnectModalPr
       </div>
       <button
         onClick={() => setModalState("select")}
-        style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--mint)", color: "var(--ink)", border: "2.5px solid var(--outline)", borderRadius: 14, padding: "13px 20px", fontSize: 14, fontWeight: 800, letterSpacing: 0.6, cursor: "pointer", marginBottom: 16, outline: "none" }}
+        style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--mint)", color: "var(--on-rarity)", border: "2.5px solid var(--outline)", borderRadius: 14, padding: "13px 20px", fontSize: 14, fontWeight: 800, letterSpacing: 0.6, cursor: "pointer", marginBottom: 16, outline: "none" }}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>
         {lang === "ru" ? "Подключить кошелёк" : "Connect Wallet"}
@@ -629,7 +600,7 @@ export function ConnectModal({ lang, open, onClose, onEnterApp }: ConnectModalPr
               onClick={() => handleConnect(connector)}
               style={{
                 display: "flex", flexDirection: "column", alignItems: "center", gap: 7,
-                width: 72, background: "transparent", border: "none", cursor: "pointer",
+                width: 88, background: "transparent", border: "none", cursor: "pointer",
                 padding: "4px 2px", borderRadius: 14,
                 transition: "transform 0.15s",
                 position: "relative",
@@ -638,15 +609,17 @@ export function ConnectModal({ lang, open, onClose, onEnterApp }: ConnectModalPr
               onMouseLeave={e => { e.currentTarget.style.transform = ""; }}
             >
               <div style={{
-                width: 56, height: 56, borderRadius: 16, overflow: "hidden",
+                width: 72, height: 72, borderRadius: 18, overflow: "hidden",
                 border: isAGW ? "2.5px solid var(--mint)" : "2px solid var(--outline)",
                 boxShadow: isAGW ? "3px 3px 0 var(--mint)" : "2px 2px 0 var(--shadow-sticker-color-strong)",
                 flexShrink: 0,
               }}>
-                {connector.icon
-                  ? <img src={connector.icon} alt={connector.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}><ConnectorIcon id={connector.id} name={connector.name} /></div>
-                }
+                {(() => {
+                  const src = customWalletSrc(connector.id, connector.name) || connector.icon;
+                  return src
+                    ? <img src={src} alt={connector.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 800, color: "var(--ink-2)" }}>{connector.name.slice(0, 2).toUpperCase()}</div>;
+                })()}
               </div>
               <span style={{ fontSize: 10, fontWeight: 700, color: "var(--ink-2)", textAlign: "center", lineHeight: 1.2, letterSpacing: 0.2 }}>
                 {connector.name}
@@ -775,7 +748,7 @@ export function ConnectModal({ lang, open, onClose, onEnterApp }: ConnectModalPr
           <SBtn variant="primary" onClick={() => { setIsClosing(true); setTimeout(() => { onEnterApp?.(); onClose(); setIsClosing(false); }, 500); }}>
             {lang === "ru" ? "Вперёд!" : "Let's go!"}
           </SBtn>
-          <SBtn variant="outline" onClick={() => { disconnect(); onClose(); }}>
+          <SBtn variant="outline" onClick={() => { setModalState("cta"); setDisplayState("cta"); disconnect(); }}>
             {lang === "ru" ? "Отключить" : "Disconnect"}
           </SBtn>
         </div>

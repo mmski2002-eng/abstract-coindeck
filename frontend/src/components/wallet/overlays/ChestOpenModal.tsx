@@ -169,7 +169,7 @@ export function ChestOpenModal({ lang, modal, onClose, chestOpenQty, setChestOpe
             <div className="relative text-center">
               <div className="font-display font-black text-xl tracking-tight" style={{ color: "var(--panel-text)" }}>{modal.label}</div>
               <div className="mt-2 flex items-center justify-center">
-                <span style={{ display: "inline-flex", alignItems: "center", background: t.accent, color: "var(--ink)", border: "2.5px solid var(--outline)", borderRadius: 999, padding: "4px 10px", fontSize: 10, letterSpacing: 1.6, fontWeight: 800, boxShadow: "2px 2px 0 var(--card-shadow)" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", background: t.accent, color: "var(--on-rarity)", border: "2.5px solid var(--outline)", borderRadius: 999, padding: "4px 10px", fontSize: 10, letterSpacing: 1.6, fontWeight: 800, boxShadow: "2px 2px 0 var(--card-shadow)" }}>
                   {tn}
                 </span>
               </div>
@@ -183,11 +183,11 @@ export function ChestOpenModal({ lang, modal, onClose, chestOpenQty, setChestOpe
               <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--nft-muted)" }}>{ru ? "Выбери количество" : "Select amount"}</span>
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1">
-                  <button onClick={() => setChestOpenQty((q) => Math.max(1, q - 1))} className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90" style={{ background: t.accent, border: "2px solid var(--outline)", color: "var(--ink)" }}>−</button>
+                  <button onClick={() => setChestOpenQty((q) => Math.max(1, q - 1))} className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90" style={{ background: t.accent, border: "2px solid var(--outline)", color: "var(--on-rarity)" }}>−</button>
                   <span className="w-10 text-center font-bold text-base tabular-nums" style={{ color: "var(--panel-text)" }}>{chestOpenQty}</span>
-                  <button onClick={() => setChestOpenQty((q) => Math.min(modal.available, q + 1))} className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90" style={{ background: t.accent, border: "2px solid var(--outline)", color: "var(--ink)" }}>+</button>
+                  <button onClick={() => setChestOpenQty((q) => Math.min(modal.available, q + 1))} className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90" style={{ background: t.accent, border: "2px solid var(--outline)", color: "var(--on-rarity)" }}>+</button>
                 </div>
-                <button onClick={() => setChestOpenQty(modal.available)} className="rounded-lg px-3 h-8 text-xs font-bold transition active:scale-90" style={{ background: t.accent, border: "2px solid var(--outline)", color: "var(--ink)" }}>MAX</button>
+                <button onClick={() => setChestOpenQty(modal.available)} className="rounded-lg px-3 h-8 text-xs font-bold transition active:scale-90" style={{ background: t.accent, border: "2px solid var(--outline)", color: "var(--on-rarity)" }}>MAX</button>
               </div>
             </div>
 

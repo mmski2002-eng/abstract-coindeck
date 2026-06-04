@@ -314,14 +314,14 @@ export function RankingsTab({
                       {row.nickname && (
                         <div className={`text-xs font-semibold truncate leading-tight`} style={isMe ? { color: "var(--panel-text)" } : {}}>
                           {row.nickname}
-                          {isMe && <span className="ml-1.5 text-[9px] font-black rounded px-1" style={{ color: "var(--ink)", background: "var(--mint-soft)", border: "1px solid var(--outline)" }}>YOU</span>}
+                          {isMe && <span className="ml-1.5 text-[9px] font-black rounded px-1" style={{ color: "var(--on-rarity)", background: "var(--mint-soft)", border: "1px solid var(--outline)" }}>YOU</span>}
                         </div>
                       )}
                       <div
                         className={`font-mono truncate leading-tight ${row.nickname ? "text-[10px]" : `text-xs ${isMe ? "font-bold" : ""}`}`}
                         style={{ color: isMe ? "var(--panel-text)" : "var(--ink-3)" }}>
                         {row.addr.slice(0, 6)}…{row.addr.slice(-4)}
-                        {!row.nickname && isMe && <span className="ml-1.5 text-[9px] font-black rounded px-1" style={{ color: "var(--ink)", background: "var(--mint-soft)", border: "1px solid var(--outline)" }}>YOU</span>}
+                        {!row.nickname && isMe && <span className="ml-1.5 text-[9px] font-black rounded px-1" style={{ color: "var(--on-rarity)", background: "var(--mint-soft)", border: "1px solid var(--outline)" }}>YOU</span>}
                       </div>
                     </div>
                     {row.prevDayPids && row.prevDayPids.length > 0 && (

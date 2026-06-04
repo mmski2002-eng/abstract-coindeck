@@ -32,7 +32,7 @@ function RosterCard({ card, isNew }: { card: { playerId: number; tier: number };
       {/* header row */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{
-          background: primerFill, color: "var(--ink)",
+          background: primerFill, color: "var(--on-rarity)",
           border: "2.5px solid var(--outline)", borderRadius: 999,
           padding: "3px 9px", fontSize: 9, letterSpacing: 1.6, fontWeight: 800,
           boxShadow: "2px 2px 0 var(--card-shadow)",

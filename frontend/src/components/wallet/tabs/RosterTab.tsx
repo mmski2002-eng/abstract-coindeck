@@ -257,7 +257,7 @@ export function RosterTab({
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{
                       display: "inline-flex", alignItems: "center", gap: 6,
-                      background: accent, color: "var(--ink)",
+                      background: accent, color: "var(--on-rarity)",
                       border: "2.5px solid var(--outline)", borderRadius: 999,
                       padding: "4px 10px", fontSize: 10, letterSpacing: 1.6,
                       fontWeight: 800, boxShadow: "2px 2px 0 var(--card-shadow)",
@@ -266,7 +266,7 @@ export function RosterTab({
                     </div>
                     {has && (
                       <div style={{
-                        background: accent, color: "var(--ink)",
+                        background: accent, color: "var(--on-rarity)",
                         border: "2.5px solid var(--outline)", borderRadius: 999,
                         padding: "2px 8px", fontSize: 11, fontWeight: 800,
                         boxShadow: "2px 2px 0 var(--card-shadow)",
@@ -354,7 +354,7 @@ export function RosterTab({
 
         {/* Claim banner */}
         {claimState?.active && userClaimable > 0 && (
-          <div className="flex items-center justify-between gap-4 rounded-xl px-4 py-3" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
+          <div className="flex items-center justify-between gap-4 rounded-xl px-4 py-3" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--on-rarity)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
             <div>
               <div className="text-sm font-bold">🎉 {lang === "ru" ? "Доступен приз!" : "Prize available!"}</div>
               <div className="mt-0.5 text-xs font-semibold" style={{ color: "var(--ink-2)" }}>
@@ -533,14 +533,14 @@ export function RosterTab({
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <div style={{
                         display: "inline-flex", alignItems: "center", gap: 5,
-                        background: chestFill, color: "var(--ink)",
+                        background: chestFill, color: "var(--on-rarity)",
                         border: "2.5px solid var(--outline)", borderRadius: 999,
                         padding: "3px 9px", fontSize: 9, letterSpacing: 1.6, fontWeight: 800,
                         boxShadow: "2px 2px 0 var(--card-shadow)",
                       }}>{tierLabel}</div>
                       <div style={{
                         fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 999,
-                        background: chestFill, color: "var(--ink)",
+                        background: chestFill, color: "var(--on-rarity)",
                         border: "2.5px solid var(--outline)", boxShadow: "2px 2px 0 var(--card-shadow)",
                         fontFamily: "Roobert, system-ui, sans-serif",
                       }}>×{count}</div>
@@ -569,7 +569,7 @@ export function RosterTab({
                         disabled={busy !== null}
                         onClick={() => { if (busy) return; setChestOpenQty(1); setChestOpenModal({ type, label, emoji, tier, available: count, grad, ring, buyBg }); }}
                         className="btn-sticker-outline"
-                        style={{ width: "100%", padding: "10px 16px", justifyContent: "center", borderColor: chestFill, background: chestFill, color: "var(--chest-buy-btn-text)" }}>
+                        style={{ width: "100%", padding: "10px 16px", justifyContent: "center", borderColor: chestFill }}>
                         {isOpening ? "…" : (lang === "ru" ? "Почесать" : "Scratch")}
                       </button>
                       <button
@@ -580,8 +580,8 @@ export function RosterTab({
                         }}
                         disabled={!hasWalletAccount || busy !== null}
                         title={!hasWalletAccount ? (lang === "ru" ? "Подключи кошелёк" : "Connect wallet") : undefined}
-                        className="btn-sticker-primary"
-                        style={{ width: "100%", padding: "10px 16px", justifyContent: "center", background: chestFill, color: "var(--chest-buy-btn-text)" }}>
+                        className="btn-sticker-outline"
+                        style={{ width: "100%", padding: "10px 16px", justifyContent: "center", borderColor: chestFill }}>
                         {lang === "ru" ? "Купить ещё" : "Buy more"}
                       </button>
                     </div>
@@ -634,7 +634,7 @@ export function RosterTab({
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <div style={{
                         display: "inline-flex", alignItems: "center", gap: 5,
-                        background: primerFill, color: "var(--ink)",
+                        background: primerFill, color: "var(--on-rarity)",
                         border: "2.5px solid var(--outline)", borderRadius: 999,
                         padding: "3px 9px", fontSize: 10, letterSpacing: 1.4, fontWeight: 800,
                         boxShadow: "2px 2px 0 var(--card-shadow)",
@@ -644,7 +644,7 @@ export function RosterTab({
                       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                         <div style={{
                           fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 999,
-                          background: primerFill, color: "var(--ink)",
+                          background: primerFill, color: "var(--on-rarity)",
                           border: "2.5px solid var(--outline)", boxShadow: "2px 2px 0 var(--card-shadow)",
                           fontFamily: "Roobert, system-ui, sans-serif",
                         }}>×{count}</div>
@@ -682,7 +682,7 @@ export function RosterTab({
                         </div>
                       </div>
                       {isAllLocked && (
-                        <div style={{ position: "absolute", inset: 0, background: "var(--paper-2)", opacity: 0.92, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                        <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                               <rect x="3" y="11" width="18" height="11" rx="2"/>
@@ -738,7 +738,7 @@ export function RosterTab({
                       {canMerge ? (
                         <button onClick={() => onMerge(playerId, tier, mergeCardAddrs)} disabled={busy !== null}
                           className="btn-sticker-primary"
-                          style={{ width: "100%", padding: "10px 16px", justifyContent: "center", background: primerFill }}>
+                          style={{ width: "100%", padding: "10px 16px", justifyContent: "center", background: primerFill, color: "var(--on-rarity)" }}>
                           {busy === mergeKey ? "…" : (lang === "ru" ? "Слить ×5" : "Merge ×5")}
                         </button>
                       ) : canQuickBuy ? (

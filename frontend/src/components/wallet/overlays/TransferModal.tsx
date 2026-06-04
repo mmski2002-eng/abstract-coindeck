@@ -43,7 +43,7 @@ export function TransferModal({ lang, modal, onClose, transferRecipient, setTran
         </div>
         <div
           className="rounded-xl px-4 py-3 text-xs"
-          style={{ background: "var(--warn)", border: "2px solid var(--outline)", color: "var(--ink)" }}
+          style={{ background: "var(--warn)", border: "2px solid var(--outline)", color: "var(--on-rarity)" }}
         >
           {lang === "ru"
             ? "Карточка будет безвозвратно отправлена на указанный адрес. Отменить нельзя."

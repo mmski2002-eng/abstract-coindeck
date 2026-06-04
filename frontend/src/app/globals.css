@@ -39,6 +39,7 @@
   --sky-deep:   #4DAFD5;
   --sky-soft:   #DCEEF7;
   --lime-pop:   #88FC00;
+  --on-rarity:  #0F1115;
 
   --paper:      #F4EFE2;
   --paper-2:    #FBF7EC;
@@ -313,6 +314,11 @@ html[data-theme="dark"] {
   --floating-muted: var(--text-muted);
   --input-placeholder: var(--text-muted);
   --chest-open-disabled-border: rgba(15,17,21,0.60);
+  --chest-buy-btn-text: #0F1115;
+  --mint-soft: #1B4A3E;
+  --sky-soft:  #1A3045;
+  --filter-chip-active-text: var(--on-rarity);
+  --header-btn-active-text: var(--on-rarity);
   --nft-badge-bg: var(--surface-sunken);
   --nft-badge-text: var(--text-primary);
   --nft-lock-bg: rgba(0,0,0,0.55);
@@ -411,7 +417,7 @@ body {
 /* ── Active nav tab wave animation ───────────────────────────────────── */
 .nav-tab-active {
   background: var(--sky-soft);
-  color: var(--ink);
+  color: var(--on-rarity);
   border-color: var(--outline);
   box-shadow: var(--shadow-sticker-sm);
 }
@@ -584,7 +590,7 @@ html[data-theme="dark"] .sky-night { display: block; }
   justify-content: center;
   gap: 8px;
   background: var(--mint);
-  color: var(--ink);
+  color: var(--on-rarity);
   border: 2.5px solid var(--outline);
   box-shadow: var(--shadow-sticker);
   border-radius: 12px;
@@ -614,7 +620,7 @@ html[data-theme="dark"] .sky-night { display: block; }
   justify-content: center;
   gap: 8px;
   background: var(--sky);
-  color: var(--ink);
+  color: var(--on-rarity);
   border: 2.5px solid var(--outline);
   box-shadow: var(--shadow-sticker);
   border-radius: 12px;

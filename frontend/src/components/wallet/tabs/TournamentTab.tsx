@@ -137,7 +137,7 @@ export function TournamentTab({
       {tnError && <div className="rounded-xl p-3 text-sm font-semibold" style={{ border: "2px solid var(--down)", background: "var(--paper-2)", color: "var(--down)", boxShadow: "2px 2px 0 var(--down)" }}>{tnError}</div>}
 
       {!tnState && !tnRefreshing && (
-        <div className="rounded-xl p-4 text-center text-sm font-semibold" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
+        <div className="rounded-xl p-4 text-center text-sm font-semibold" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--on-rarity)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
           {lang === "ru" ? "Инвестирование ещё не запущено администратором" : "Investing not started yet"}
         </div>
       )}
@@ -182,7 +182,7 @@ export function TournamentTab({
                 </div>
               </div>
               {tnLineups.length > 0 && (
-                <div className="flex shrink-0 items-center self-stretch rounded-xl px-3" style={{ border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
+                <div className="flex shrink-0 items-center self-stretch rounded-xl px-3" style={{ border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--on-rarity)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
                   <div className="text-sm font-bold">
                     TOTAL {weeklyTotal} pts
                   </div>
@@ -202,12 +202,12 @@ export function TournamentTab({
         .eligible-glow { animation: eligiblePulse 1.8s ease-in-out infinite; }
       `}</style>
       {tnState?.active && tnState.startTimestamp * 1000 > nowMs && hasWalletAccount && (
-        <div className="rounded-xl p-4 text-center text-sm font-semibold" style={{ border: "2px solid var(--outline)", background: "var(--sky-soft)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
+        <div className="rounded-xl p-4 text-center text-sm font-semibold" style={{ border: "2px solid var(--outline)", background: "var(--sky-soft)", color: "var(--on-rarity)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
           {lang === "ru" ? "Турнир стартует завтра — выставить портфель можно будет после старта" : "Tournament starts tomorrow — you can submit your portfolio once it begins"}
         </div>
       )}
       {tnState?.active && tnState.currentDay === 0 && !tnRefreshing && (viewEpoch === null || viewEpoch === tnState.epoch) && (
-        <div className="flex items-start gap-3 rounded-xl p-4" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
+        <div className="flex items-start gap-3 rounded-xl p-4" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--on-rarity)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
           <div className="text-xl mt-0.5">⏳</div>
           <div>
             <div className="text-sm font-semibold">
@@ -231,7 +231,7 @@ export function TournamentTab({
             <div className="overflow-hidden rounded-2xl" style={{ border: "2.5px solid var(--outline)", background: "var(--paper-2)", boxShadow: "4px 4px 0 var(--card-shadow)" }}>
               {/* Header */}
               <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: "2px solid var(--outline)" }}>
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-sm" style={{ border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--ink)" }}>
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-sm" style={{ border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--on-rarity)" }}>
                   🔒
                 </div>
                 <div>
@@ -344,7 +344,7 @@ export function TournamentTab({
                   {lang === "ru" ? "Выбери яйцо для каждой категории" : "Pick an egg for each category"}
                 </div>
               </div>
-              <div className="shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-semibold" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)" }}>
+              <div className="shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-semibold" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--on-rarity)" }}>
                 ⚡ +{roleBonusPct}% {lang === "ru" ? "за роль" : "role bonus"}
               </div>
             </div>
@@ -378,7 +378,7 @@ export function TournamentTab({
                           {isRoleMatch && <div className="absolute top-0.5 right-0.5 text-[10px] leading-none">⚡</div>}
                         </div>
                         <div className="w-full truncate text-[10px] font-semibold leading-tight" style={{ color: "var(--ink-2)" }}>{HEROES[card.playerId]}</div>
-                        <span className="rounded px-1 py-0.5 text-[9px] font-bold" style={{ border: "1.5px solid var(--outline)", background: tierStyle?.color ?? "var(--rarity-common)", color: "var(--ink)" }}>{TIER_NAMES[card.tier]}</span>
+                        <span className="rounded px-1 py-0.5 text-[9px] font-bold" style={{ border: "1.5px solid var(--outline)", background: tierStyle?.color ?? "var(--rarity-common)", color: "var(--on-rarity)" }}>{TIER_NAMES[card.tier]}</span>
                       </>
                     ) : (
                       <div className="relative w-full aspect-square flex items-center justify-center">
@@ -442,7 +442,7 @@ export function TournamentTab({
                         {([null, 0, 1, 2, 3] as (number | null)[]).map((t) => (
                           <button key={t ?? "all"} onClick={() => setLineupPickerTier(t)}
                             className="whitespace-nowrap rounded-full px-3 py-1.5 font-display text-[10px] font-bold uppercase tracking-widest transition-all"
-                            style={{ border: "2px solid var(--outline)", background: lineupPickerTier === t ? "var(--mint)" : "var(--paper-2)", color: lineupPickerTier === t ? "var(--ink)" : "var(--ink-2)", boxShadow: lineupPickerTier === t ? "2px 2px 0 var(--shadow-sticker-color-strong)" : "none" }}>
+                            style={{ border: "2px solid var(--outline)", background: lineupPickerTier === t ? "var(--mint)" : "var(--paper-2)", color: lineupPickerTier === t ? "var(--on-rarity)" : "var(--ink-2)", boxShadow: lineupPickerTier === t ? "2px 2px 0 var(--shadow-sticker-color-strong)" : "none" }}>
                             {t === null ? (lang === "ru" ? "Все" : "All") : TIER_NAMES[t]}
                           </button>
                         ))}
@@ -471,7 +471,7 @@ export function TournamentTab({
                                   {isRoleMatch && <div className="absolute top-0.5 right-0.5 text-[9px] leading-none">⚡</div>}
                                 </div>
                                 <div className="text-[9px] font-semibold truncate w-full leading-tight" style={{ color: "var(--panel-text)" }}>{HEROES[c.playerId]}</div>
-                                <span className="rounded px-1 text-[8px] font-bold" style={{ border: "1.5px solid var(--outline)", background: tierStyle.color, color: "var(--ink)" }}>{TIER_NAMES[c.tier]}</span>
+                                <span className="rounded px-1 text-[8px] font-bold" style={{ border: "1.5px solid var(--outline)", background: tierStyle.color, color: "var(--on-rarity)" }}>{TIER_NAMES[c.tier]}</span>
                               </button>
                             );
                           })}
@@ -525,7 +525,7 @@ export function TournamentTab({
                     className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition"
                     style={{ background: isExpanded ? "var(--paper-3)" : "transparent" }}>
                     <span className="w-14 shrink-0 text-xs" style={{ color: "var(--ink-3)" }}>{lang === "ru" ? `День ${l.day}` : `Day ${l.day}`}</span>
-                    <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold" style={{ border: "1.5px solid var(--outline)", background: l.league === 2 ? "var(--warn)" : l.league === 1 ? "var(--sky)" : "var(--rarity-common)", color: "var(--ink)" }}>{leagueLabel}</span>
+                    <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold" style={{ border: "1.5px solid var(--outline)", background: l.league === 2 ? "var(--warn)" : l.league === 1 ? "var(--sky)" : "var(--rarity-common)", color: "var(--on-rarity)" }}>{leagueLabel}</span>
                     <span className="flex-1 text-sm font-black" style={{ color: "var(--ink)" }}>{hasScores ? <>{totalPts} <span className="text-xs font-normal" style={{ color: "var(--ink-3)" }}>pts</span></> : <span className="text-xs" style={{ color: "var(--ink-3)" }}>—</span>}</span>
                     <svg className={`w-4 h-4 shrink-0 transition-transform ${isExpanded ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -542,7 +542,7 @@ export function TournamentTab({
                             <div className="flex items-center gap-2 px-4 py-1.5" style={{ borderBottom: "1px solid var(--divider)" }}>
                               <img src={COIN_ICONS[slot.playerId]} alt="" className="h-6 w-10 shrink-0 rounded object-cover object-top opacity-80" style={{ border: "1.5px solid var(--outline)", background: tierStyle.color }} />
                               <span className="w-24 shrink-0 truncate text-xs" style={{ color: "var(--ink-2)" }}>{HEROES[slot.playerId]}</span>
-                              <span className="shrink-0 rounded px-1 py-0.5 text-[9px] font-semibold" style={{ border: "1.5px solid var(--outline)", background: tierStyle.color, color: "var(--ink)" }}>{TIER_NAMES[slot.tier]}</span>
+                              <span className="shrink-0 rounded px-1 py-0.5 text-[9px] font-semibold" style={{ border: "1.5px solid var(--outline)", background: tierStyle.color, color: "var(--on-rarity)" }}>{TIER_NAMES[slot.tier]}</span>
                               <span className="shrink-0 text-[9px]" style={{ color: "var(--ink-3)" }}>{SLOT_ROLES[si]}</span>
                               {hasRoleBonus && <span className="shrink-0 text-[9px] font-semibold" style={{ color: "var(--up)" }}>+role</span>}
                               {hasScores && (
@@ -667,7 +667,7 @@ export function TournamentTab({
             </details>
 
             {claimState?.active && userClaimable > 0 && (
-              <div className="space-y-3 rounded-xl p-4" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--ink)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
+              <div className="space-y-3 rounded-xl p-4" style={{ border: "2px solid var(--outline)", background: "var(--warn)", color: "var(--on-rarity)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-sm font-bold">🎉 {lang === "ru" ? "Ваш приз готов к получению" : "Your prize is ready to claim"}</div>
@@ -703,9 +703,9 @@ export function TournamentTab({
                         disabled={!past && !isToday}
                         className={`w-12 h-12 rounded-lg text-xs font-bold transition relative flex flex-col items-center justify-center leading-none ${btnClass}`}
                         style={isToday
-                          ? { border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--ink)", boxShadow: "2px 2px 0 var(--shadow-sticker-color-strong)" }
+                          ? { border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--on-rarity)", boxShadow: "2px 2px 0 var(--shadow-sticker-color-strong)" }
                           : resultsDay === d
-                            ? { border: "2px solid var(--outline)", background: "var(--mint)", color: "var(--ink)", boxShadow: "2px 2px 0 var(--shadow-sticker-color-strong)" }
+                            ? { border: "2px solid var(--outline)", background: "var(--mint)", color: "var(--on-rarity)", boxShadow: "2px 2px 0 var(--shadow-sticker-color-strong)" }
                             : !past
                               ? { background: "var(--paper-2)", color: "var(--ink-3)", border: "2px dashed var(--ink)" }
                               : { background: "var(--paper-2)", color: "var(--ink-2)", border: "2px solid var(--outline)" }}>

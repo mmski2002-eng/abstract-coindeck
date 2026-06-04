@@ -53,7 +53,7 @@ function MergeRow({
         <div className="text-xs" style={{ color: "var(--panel-text-muted)" }}>x{from.count}</div>
       </div>
       <div className="mx-auto flex items-center gap-2 text-xs font-semibold" style={{ color: "var(--panel-text-muted)" }}>
-        <span className="rounded-full px-3 py-1" style={{ border: "2px solid var(--outline)", background: "var(--mint-soft)", color: "var(--ink)" }}>MERGE</span>
+        <span className="rounded-full px-3 py-1" style={{ border: "2px solid var(--outline)", background: "var(--mint-soft)", color: "var(--on-rarity)" }}>MERGE</span>
         <span style={{ color: "var(--panel-text-muted)" }}>5 → 1</span>
       </div>
       <div className="flex items-center justify-between gap-3">
@@ -70,7 +70,7 @@ function MergeRow({
 function StepCard({ num, icon, title, desc }: { num: number; icon: string; title: string; desc: string }) {
   return (
     <div className="relative rounded-xl p-5" style={{ border: "2px solid var(--outline)", background: "var(--paper-2)", boxShadow: "3px 3px 0 var(--shadow-sticker-color-strong)" }}>
-      <div className="absolute -top-3 -left-3 flex h-7 w-7 items-center justify-center rounded-full text-xs font-black" style={{ border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--ink)" }}>
+      <div className="absolute -top-3 -left-3 flex h-7 w-7 items-center justify-center rounded-full text-xs font-black" style={{ border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--on-rarity)" }}>
         {num}
       </div>
       <div className="mb-2 text-2xl">{icon}</div>
@@ -386,7 +386,7 @@ export function MarketingHome() {
                   style={{
                     padding: "6px 14px", whiteSpace: "nowrap",
                     background: active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)",
-                    color: active ? "var(--ink)" : "var(--ink-2)", border: "2.5px solid var(--outline)", borderRadius: 999,
+                    color: active ? "var(--on-rarity)" : "var(--ink-2)", border: "2.5px solid var(--outline)", borderRadius: 999,
                     fontSize: 11, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
                     boxShadow: active ? "var(--filter-btn-shadow-active)" : "var(--filter-btn-shadow)",
                   }}
@@ -412,7 +412,7 @@ export function MarketingHome() {
                   style={{
                     width: 36, height: 36,
                     background: active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)",
-                    color: "var(--ink)", border: "2.5px solid var(--outline)", borderRadius: 999,
+                    color: active ? "var(--on-rarity)" : "var(--ink)", border: "2.5px solid var(--outline)", borderRadius: 999,
                     cursor: "pointer",
                     boxShadow: active ? "var(--filter-btn-shadow-active)" : "var(--filter-btn-shadow)",
                   }}
@@ -535,7 +535,7 @@ export function MarketingHome() {
                   { label: lang === "ru" ? "Тяжелое • L3" : "Big • L3", color: "var(--rarity-epic)" },
                   { label: lang === "ru" ? "Супер тяжелое • L4" : "Super Heavy • L4", color: "var(--rarity-legendary)" },
                 ].map(({ label, color }) => (
-                  <div key={label} className="flex items-center justify-between rounded-xl px-4 py-2.5" style={{ border: "2px solid var(--outline)", background: color, color: "var(--ink)" }}>
+                  <div key={label} className="flex items-center justify-between rounded-xl px-4 py-2.5" style={{ border: "2px solid var(--outline)", background: color, color: "var(--on-rarity)" }}>
                     <div className="text-sm font-semibold">{label}</div>
                     <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
                   </div>
@@ -547,7 +547,7 @@ export function MarketingHome() {
             <Card className="p-5">
               <div className="mb-3 text-xs font-semibold tracking-wide" style={{ color: "var(--panel-text-muted)" }}>{lang === "ru" ? "Инвестиционные лиги" : "Investment leagues"}</div>
               <div className="grid gap-2">
-                <div className="flex items-start justify-between rounded-xl px-4 py-3" style={{ border: "2px solid var(--outline)", background: "var(--rarity-common)", color: "var(--ink)" }}>
+                <div className="flex items-start justify-between rounded-xl px-4 py-3" style={{ border: "2px solid var(--outline)", background: "var(--rarity-common)", color: "var(--on-rarity)" }}>
                   <div>
                     <div className="flex items-center gap-2">
                       <div className="text-sm font-black">Bronze</div>
@@ -557,7 +557,7 @@ export function MarketingHome() {
                   </div>
                   <span className="text-lg">🥉</span>
                 </div>
-                <div className="flex items-start justify-between rounded-xl px-4 py-3" style={{ border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--ink)" }}>
+                <div className="flex items-start justify-between rounded-xl px-4 py-3" style={{ border: "2px solid var(--outline)", background: "var(--sky)", color: "var(--on-rarity)" }}>
                   <div>
                     <div className="flex items-center gap-2">
                       <div className="text-sm font-black">Silver</div>
@@ -567,7 +567,7 @@ export function MarketingHome() {
                   </div>
                   <span className="text-lg">🥈</span>
                 </div>
-                <div className="flex items-start justify-between rounded-xl px-4 py-3" style={{ border: "2px solid var(--outline)", background: "var(--mint)", color: "var(--ink)" }}>
+                <div className="flex items-start justify-between rounded-xl px-4 py-3" style={{ border: "2px solid var(--outline)", background: "var(--mint)", color: "var(--on-rarity)" }}>
                   <div>
                     <div className="flex items-center gap-2">
                       <div className="text-sm font-black">Gold</div>
@@ -605,7 +605,7 @@ export function MarketingHome() {
                 { label: lang === "ru" ? "Бол." : "Hvy.", mult: "x1.9", bg: "var(--rarity-epic)" },
                 { label: lang === "ru" ? "Тяж." : "S.H.", mult: "x2.5", bg: "var(--rarity-legendary)" },
               ].map(({ label, mult, bg }) => (
-                <div key={label} className="rounded-lg px-2 py-2 text-center" style={{ border: "2px solid var(--outline)", background: bg, color: "var(--ink)" }}>
+                <div key={label} className="rounded-lg px-2 py-2 text-center" style={{ border: "2px solid var(--outline)", background: bg, color: "var(--on-rarity)" }}>
                   <div className="text-[10px] font-semibold">{label}</div>
                   <div className="mt-0.5 text-sm font-black">{mult}</div>
                 </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import {
   HEROES, COIN_TICKERS, COIN_ICONS,
   CARD_TIER_STYLES, TIER_NAMES, ALL_TEAMS,
@@ -59,6 +60,37 @@ export function MarketplaceTab({
   isDark = false,
 }: Props) {
   const accentBg = isDark ? "var(--paper-2)" : "var(--paper)";
+
+  const [tierOpen, setTierOpen] = useState(false);
+  const [teamOpen, setTeamOpen] = useState(false);
+  const tierRef = useRef<HTMLDivElement>(null);
+  const teamRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (tierRef.current && !tierRef.current.contains(e.target as Node)) setTierOpen(false);
+      if (teamRef.current && !teamRef.current.contains(e.target as Node)) setTeamOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const TIER_OPTIONS = [
+    { id: null, label: lang === "ru" ? "Все редкости" : "All rarities" },
+    { id: 0,    label: lang === "ru" ? "Маленькое" : "Small" },
+    { id: 1,    label: lang === "ru" ? "Среднее" : "Medium" },
+    { id: 2,    label: lang === "ru" ? "Тяжелое" : "Heavy" },
+    { id: 3,    label: lang === "ru" ? "Супер Тяжелое" : "Super Heavy" },
+  ] as { id: number | null; label: string }[];
+
+  const TEAM_OPTIONS = [
+    { id: null, label: lang === "ru" ? "Все типы" : "All types" },
+    ...ALL_TEAMS.map(t => ({ id: t, label: t })),
+  ];
+
+  const tierLabel = TIER_OPTIONS.find(o => o.id === mpFilterTier)?.label ?? (lang === "ru" ? "Все редкости" : "All rarities");
+  const teamLabel = TEAM_OPTIONS.find(o => o.id === mpFilterTeam)?.label ?? (lang === "ru" ? "Все типы" : "All types");
+
   return (
     <div className="mt-2 space-y-4">
       {mpError && <div className="rounded-xl p-3 text-sm font-semibold" style={{ border: "2px solid var(--down)", background: "var(--paper-2)", color: "var(--down)", boxShadow: "2px 2px 0 var(--down)" }}>{mpError}</div>}
@@ -110,9 +142,9 @@ export function MarketplaceTab({
       })()}
 
       {/* Filter panel */}
-      <div className="space-y-2.5" data-tour="market-filters">
+      <div data-tour="market-filters" style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", paddingBottom: 4 }}>
         {/* Ticker search */}
-        <div className="relative">
+        <div className="relative" style={{ flex: "1 1 160px", minWidth: 0 }}>
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--ink-3)" }}>
               <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
@@ -120,62 +152,75 @@ export function MarketplaceTab({
           </div>
           <input
             type="text"
-            placeholder={lang === "ru" ? "Поиск по тикеру или монете…" : "Search ticker or coin…"}
+            placeholder={lang === "ru" ? "Поиск…" : "Search…"}
             value={mpSearchTicker}
             onChange={(e) => setMpSearchTicker(e.target.value)}
             className="input-sticker w-full py-2 pl-8 pr-8 font-mono text-xs tracking-wide"
           />
           {mpSearchTicker && (
-            <button
-              onClick={() => setMpSearchTicker("")}
-            className="absolute inset-y-0 right-2.5 flex items-center transition text-xs" style={{ color: "var(--panel-text-muted)" }}>✕</button>
+            <button onClick={() => setMpSearchTicker("")}
+              className="absolute inset-y-0 right-2.5 flex items-center transition text-xs" style={{ color: "var(--panel-text-muted)" }}>✕</button>
           )}
         </div>
-        <div className="flex gap-2 flex-wrap pb-1">
-          {([
-            { t: null, label: lang === "ru" ? "Все" : "All" },
-            { t: 0,    label: lang === "ru" ? "Маленькое" : "Small" },
-            { t: 1,    label: lang === "ru" ? "Среднее" : "Medium" },
-            { t: 2,    label: lang === "ru" ? "Тяжелое" : "Heavy" },
-            { t: 3,    label: lang === "ru" ? "Супер Тяжелое" : "Super Heavy" },
-          ] as { t: number | null; label: string }[]).map(({ t, label }) => {
-            const active = mpFilterTier === t;
-            return (
-              <button key={t ?? "all"} onClick={() => setMpFilterTier(t)}
-                style={{
-                  padding: "8px 14px", whiteSpace: "nowrap",
-                  background: active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)",
-                  color: active ? "var(--ink)" : "var(--ink-2)", border: "2.5px solid var(--outline)", borderRadius: 999,
-                  fontSize: 11, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
-                  boxShadow: active ? "var(--filter-btn-shadow-active)" : "var(--filter-btn-shadow)",
-                  transition: "background .12s",
-                }}
-                onMouseEnter={e => { if (!active) e.currentTarget.style.background = "var(--filter-btn-hover-bg)"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)"; }}>
-                {label}
-              </button>
-            );
-          })}
+
+        {/* Tier dropdown */}
+        <div ref={tierRef} style={{ position: "relative" }}>
+          <button type="button" className="btn-sticker-outline flex items-center gap-1.5 px-3 py-2"
+            onClick={() => { setTierOpen(v => !v); setTeamOpen(false); }}>
+            <span className="text-xs font-bold uppercase tracking-widest">{tierLabel}</span>
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="opacity-50" style={{ transform: tierOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform .2s" }}>
+              <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          {tierOpen && (
+            <div className="absolute left-0 top-full z-50 mt-2" style={{ background: "var(--paper-2)", border: "2.5px solid var(--outline)", borderRadius: 14, boxShadow: "4px 4px 0 var(--shadow-sticker-color)", minWidth: 160 }}>
+              {TIER_OPTIONS.map(({ id, label }, i, arr) => (
+                <button key={String(id)} type="button"
+                  onClick={() => { setMpFilterTier(id); setTierOpen(false); }}
+                  className="flex w-full items-center px-4 py-3 text-sm font-bold transition-colors"
+                  style={{
+                    color: mpFilterTier === id ? "var(--ink)" : "var(--ink-2)",
+                    background: mpFilterTier === id ? "var(--mint-soft)" : "transparent",
+                    borderBottom: i < arr.length - 1 ? "1.5px solid var(--divider)" : "none",
+                    borderRadius: i === 0 ? "11px 11px 0 0" : i === arr.length - 1 ? "0 0 11px 11px" : 0,
+                  }}
+                  onMouseEnter={e => { if (mpFilterTier !== id) e.currentTarget.style.background = "var(--filter-btn-hover-bg)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = mpFilterTier === id ? "var(--mint-soft)" : "transparent"; }}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide flex-wrap">
-          {([null, ...ALL_TEAMS] as (string | null)[]).map((team) => {
-            const active = mpFilterTeam === team;
-            return (
-              <button key={team ?? "all"} onClick={() => setMpFilterTeam(team)}
-                style={{
-                  padding: "8px 14px", whiteSpace: "nowrap",
-                  background: active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)",
-                  color: active ? "var(--ink)" : "var(--ink-2)", border: "2.5px solid var(--outline)", borderRadius: 999,
-                  fontSize: 11, letterSpacing: 1.4, fontWeight: 800, cursor: "pointer",
-                  boxShadow: active ? "var(--filter-btn-shadow-active)" : "var(--filter-btn-shadow)",
-                  transition: "background .12s",
-                }}
-                onMouseEnter={e => { if (!active) e.currentTarget.style.background = "var(--filter-btn-hover-bg)"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = active ? "var(--header-btn-active-bg)" : "var(--header-btn-bg)"; }}>
-                {team ?? (lang === "ru" ? "Все" : "All")}
-              </button>
-            );
-          })}
+
+        {/* Team dropdown */}
+        <div ref={teamRef} style={{ position: "relative" }}>
+          <button type="button" className="btn-sticker-outline flex items-center gap-1.5 px-3 py-2"
+            onClick={() => { setTeamOpen(v => !v); setTierOpen(false); }}>
+            <span className="text-xs font-bold uppercase tracking-widest">{teamLabel}</span>
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="opacity-50" style={{ transform: teamOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform .2s" }}>
+              <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          {teamOpen && (
+            <div className="absolute left-0 top-full z-50 mt-2" style={{ background: "var(--paper-2)", border: "2.5px solid var(--outline)", borderRadius: 14, boxShadow: "4px 4px 0 var(--shadow-sticker-color)", minWidth: 160 }}>
+              {TEAM_OPTIONS.map(({ id, label }, i, arr) => (
+                <button key={String(id)} type="button"
+                  onClick={() => { setMpFilterTeam(id); setTeamOpen(false); }}
+                  className="flex w-full items-center px-4 py-3 text-sm font-bold transition-colors"
+                  style={{
+                    color: mpFilterTeam === id ? "var(--ink)" : "var(--ink-2)",
+                    background: mpFilterTeam === id ? "var(--mint-soft)" : "transparent",
+                    borderBottom: i < arr.length - 1 ? "1.5px solid var(--divider)" : "none",
+                    borderRadius: i === 0 ? "11px 11px 0 0" : i === arr.length - 1 ? "0 0 11px 11px" : 0,
+                  }}
+                  onMouseEnter={e => { if (mpFilterTeam !== id) e.currentTarget.style.background = "var(--filter-btn-hover-bg)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = mpFilterTeam === id ? "var(--mint-soft)" : "transparent"; }}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -207,7 +252,7 @@ export function MarketplaceTab({
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <div style={{
                         display: "inline-flex", alignItems: "center", gap: 5,
-                        background: primerFill, color: "var(--ink)",
+                        background: primerFill, color: "var(--on-rarity)",
                         border: "2.5px solid var(--outline)", borderRadius: 999,
                         padding: "3px 9px", fontSize: 9, letterSpacing: 1.6, fontWeight: 800,
                         boxShadow: "2px 2px 0 var(--card-shadow)",
@@ -217,7 +262,7 @@ export function MarketplaceTab({
                       {isOwn && (
                         <div style={{
                           fontSize: 9, letterSpacing: 1.5, fontWeight: 800, padding: "3px 8px",
-                          borderRadius: 999, background: primerFill, color: "var(--ink)",
+                          borderRadius: 999, background: primerFill, color: "var(--on-rarity)",
                           border: "2.5px solid var(--outline)", boxShadow: "2px 2px 0 var(--card-shadow)",
                         }}>{lang === "ru" ? "МОЙ" : "MINE"}</div>
                       )}

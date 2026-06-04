@@ -87,7 +87,7 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
             <div className="font-display font-black text-xl tracking-tight" style={{ color: "var(--panel-text)" }}>{modal.label}</div>
             <div style={{
               marginTop: 8, display: "inline-flex", alignItems: "center",
-              background: t.accent, color: "var(--ink)",
+              background: t.accent, color: "var(--on-rarity)",
               border: "2.5px solid var(--outline)", borderRadius: 999,
               padding: "4px 10px", fontSize: 10, letterSpacing: 1.6,
               fontWeight: 800, boxShadow: "2px 2px 0 var(--card-shadow)",
@@ -113,13 +113,13 @@ export function ChestBuyModal({ lang, modal, onClose, chestBuyQty, setChestBuyQt
               <button
                 onClick={() => handleQtyChange(-1)}
                 className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90"
-                style={{ background: t.accent, border: "2px solid var(--outline)", color: "var(--ink)" }}
+                style={{ background: t.accent, border: "2px solid var(--outline)", color: "var(--on-rarity)" }}
               >−</button>
               <span className="w-10 text-center font-bold text-base tabular-nums" style={{ color: "var(--panel-text)" }}>{chestBuyQty}</span>
               <button
                 onClick={() => handleQtyChange(1)}
                 className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base transition active:scale-90"
-                style={{ background: t.accent, border: "2px solid var(--outline)", color: "var(--ink)" }}
+                style={{ background: t.accent, border: "2px solid var(--outline)", color: "var(--on-rarity)" }}
               >+</button>
             </div>
           </div>

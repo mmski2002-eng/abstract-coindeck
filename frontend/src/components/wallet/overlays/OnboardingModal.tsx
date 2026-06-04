@@ -126,21 +126,6 @@ export function OnboardingModal({
                   {nickBytes}/{MAX_NICKNAME_BYTES}
                 </div>
               </div>
-              <a
-                href="https://faucet.movementnetwork.xyz/"
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-2.5 w-full rounded-xl px-3.5 py-2.5 transition"
-                style={{ background: "var(--mint-soft)", border: "1.5px solid var(--outline)" }}
-              >
-                <span className="inline-flex h-2 w-2 shrink-0 rounded-full" style={{ background: "var(--mint)", border: "1px solid var(--outline)" }} />
-                <span className="text-[11px] font-black uppercase tracking-[0.25em] transition" style={{ color: "var(--ink)" }}>
-                  FAUCET
-                </span>
-                <span className="text-[11px] transition" style={{ color: "var(--ink-3)" }}>
-                  {ru ? "— нужны тестовые ABS для старта" : "— get test ABS to get started"}
-                </span>
-              </a>
             </div>
           )}
 

@@ -19,10 +19,11 @@ import {
 } from "./runner";
 
 async function statusResponse() {
+  const { txHashes: _txHashes, ...publicState } = await readState();
   return NextResponse.json({
     config: await readConfig(),
-    state: await readState(),
-    wallet: botWalletStatus(),
+    state: publicState,
+    wallet: { configured: botWalletStatus().configured },
   });
 }
 

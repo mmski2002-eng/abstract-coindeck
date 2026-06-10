@@ -193,19 +193,17 @@ scripts/                 Утилиты (oracle_post.js, daily_lineup_bot.js, et
 ## Deployment
 
 ### Server
-- IP: `216.173.70.241`, domain: `https://escape.isgood.host`
-- SSH: `ssh root@216.173.70.241` (password: `REDACTED`)
+- IP, SSH-пароль, домен, PM2/DB реквизиты — см. `DEPLOY_CREDENTIALS.local.md` (не в git, локальный файл)
 - App dir: `/var/www/abstract-coindeck`
 - PM2 process: `abstract-coindeck` (id=5), port `3003`
-- DB: PostgreSQL, db=`abstract`, user=`abstract_app`
 
 ### Подключение из агента (Windows, нет sshpass)
-Используй Python + paramiko (установлен):
+Используй Python + paramiko (установлен), креды — из `DEPLOY_CREDENTIALS.local.md`:
 ```python
 import paramiko
 client = paramiko.SSHClient()
 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-client.connect('216.173.70.241', username='root', password='REDACTED')
+client.connect('<ip>', username='root', password='<см. DEPLOY_CREDENTIALS.local.md>')
 # выполнить команду:
 stdin, stdout, stderr = client.exec_command('pm2 list')
 print(stdout.read().decode())

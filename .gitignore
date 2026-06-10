@@ -13,6 +13,9 @@ frontend/tsconfig.tsbuildinfo
 **/.env
 **/.env.local
 **/.env.*.local
+**/*.env.local
+**/*.env.*.local
+DEPLOY_CREDENTIALS.local.md
 ИНФО.md
 Abstract_Builder_Support_Plan_MarketLeague_final.docx
 PROJECT_SCHEME.html

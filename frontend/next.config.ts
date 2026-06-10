@@ -30,6 +30,7 @@ function buildContentSecurityPolicy() {
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  poweredByHeader: false,
   serverExternalPackages: ["pg"],
   experimental: {},
   async headers() {

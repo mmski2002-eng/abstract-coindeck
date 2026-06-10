@@ -21,6 +21,7 @@ import {
 import { getRuntimeProjectAddresses } from "@/config/projectAddresses";
 import { ASSET_ROLE_IDS, ASSET_SET_VERSION } from "@/config/assetUniverse";
 import { readMarketJobState } from "@/lib/storage/marketData";
+import { startJob as startMarketJob } from "../market-data/worker";
 import { saveMarketSnapshot, readMarketSnapshot } from "@/lib/storage/marketSnapshot";
 import { formatUtcDateKey } from "@/lib/oracleWindow";
 import { dbQuery } from "@/lib/db/client";
@@ -80,6 +81,8 @@ async function pruneStaleDerivedData(
   const liveEpoch = liveState?.epoch ?? key.epoch;
   const closedDay = liveState?.epoch === key.epoch ? liveState.closedDay : Math.max(0, Math.min(key.currentDay - 1, key.totalDays));
   const allowedOracleDay = Math.max(0, Math.min(closedDay, key.totalDays));
+  const isFinalizingEpoch = key.currentDay >= key.totalDays;
+  const allowedOracleHistoryDay = isFinalizingEpoch ? key.totalDays : allowedOracleDay;
 
   await dbQuery(
     `delete from leaderboard_rows lr
@@ -103,7 +106,7 @@ async function pruneStaleDerivedData(
   await dbQuery(
     `delete from oracle_history
      where epoch = $1 and day > $2`,
-    [key.epoch, allowedOracleDay],
+    [key.epoch, allowedOracleHistoryDay],
   );
 
   await dbQuery(
@@ -137,6 +140,27 @@ async function pruneStaleDerivedData(
      where window_start < $1`,
     [nowMs - RATE_LIMIT_RETENTION_MS],
   );
+}
+
+async function ensureMarketSnapshot(
+  epoch: number,
+  day: number,
+  liveState: { startTimestamp: number; baseEpoch: number } | null,
+): Promise<void> {
+  if (!liveState || liveState.startTimestamp <= 0) return;
+  const existing = await readMarketSnapshot(epoch, day).catch(() => null);
+  if (existing) return;
+  const dayStartTs = liveState.startTimestamp + (epoch - liveState.baseEpoch) * 7 * 86400 + (day - 1) * 86400;
+  const dateKey = formatUtcDateKey(dayStartTs);
+  const jobKey = `${dateKey}.${dayStartTs}-${dayStartTs + 86400}`;
+  const marketJob = await readMarketJobState(jobKey);
+  if (marketJob.state === "done" && marketJob.data && marketJob.data.length > 0) {
+    await saveMarketSnapshot(epoch, day, marketJob.data).catch(() => {});
+    return;
+  }
+  if (marketJob.state !== "running") {
+    await startMarketJob(dateKey, dayStartTs).catch(() => {});
+  }
 }
 
 async function heroScore(playerId: number, tier: number, slotIdx: number, dayScores: number[], roleBonusPct: number): Promise<number> {
@@ -377,18 +401,7 @@ export async function runJob(epoch: number, totalDays: number, currentDay: numbe
         scoreCache.set(day, historical);
         finalizedDays.add(day);
         await saveOracleCache(key.epoch, day, { scores: historical, finalized: true, cachedAt: Date.now() });
-        if (liveState && liveState.startTimestamp > 0) {
-          const existing = await readMarketSnapshot(key.epoch, day).catch(() => null);
-          if (!existing) {
-            const dayStartTs = liveState.startTimestamp + (key.epoch - liveState.baseEpoch) * 7 * 86400 + (day - 1) * 86400;
-            const dateKey = formatUtcDateKey(dayStartTs);
-            const jobKey = `${dateKey}.${dayStartTs}-${dayStartTs + 86400}`;
-            const marketJob = await readMarketJobState(jobKey);
-            if (marketJob.state === "done" && marketJob.data && marketJob.data.length > 0) {
-              await saveMarketSnapshot(key.epoch, day, marketJob.data).catch(() => {});
-            }
-          }
-        }
+        await ensureMarketSnapshot(key.epoch, day, liveState);
         return;
       }
 
@@ -396,13 +409,18 @@ export async function runJob(epoch: number, totalDays: number, currentDay: numbe
       if (existing?.finalized) {
         scoreCache.set(day, existing.scores);
         finalizedDays.add(day);
+        if (!history[key.epoch]?.[day]) {
+          await saveDay(key.epoch, day, existing.scores, "chain");
+        }
+        await ensureMarketSnapshot(key.epoch, day, liveState);
         return;
       }
       if (existing && day < key.currentDay && Date.now() - existing.cachedAt < ORACLE_STALE_MS) {
         scoreCache.set(day, existing.scores);
         return;
       }
-      if (liveState?.epoch !== key.epoch || day > liveState.closedDay) {
+      const isFinalizingEpoch = key.currentDay >= key.totalDays;
+      if (!isFinalizingEpoch && (liveState?.epoch !== key.epoch || day > (liveState?.closedDay ?? 0))) {
         if (existing) scoreCache.set(day, existing.scores);
         return;
       }
@@ -430,15 +448,7 @@ export async function runJob(epoch: number, totalDays: number, currentDay: numbe
       await saveOracleCache(key.epoch, day, { scores, finalized, cachedAt: Date.now() });
       if (finalized && scores.length === 50) {
         await saveDay(key.epoch, day, scores, "chain");
-        if (liveState && liveState.startTimestamp > 0) {
-          const dayStartTs = liveState.startTimestamp + (key.epoch - liveState.baseEpoch) * 7 * 86400 + (day - 1) * 86400;
-          const dateKey = formatUtcDateKey(dayStartTs);
-          const jobKey = `${dateKey}.${dayStartTs}-${dayStartTs + 86400}`;
-          const marketJob = await readMarketJobState(jobKey);
-          if (marketJob.state === "done" && marketJob.data && marketJob.data.length > 0) {
-            await saveMarketSnapshot(key.epoch, day, marketJob.data).catch(() => {});
-          }
-        }
+        await ensureMarketSnapshot(key.epoch, day, liveState);
       }
     }));
 

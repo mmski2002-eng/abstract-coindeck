@@ -44,8 +44,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       epoch: result.epoch,
       updatedAt: result.updatedAt,
-      poolOctas: result.poolOctas,
-      totalOctas: result.totalOctas,
+      poolWei: result.poolWei,
+      totalWei: result.totalWei,
       entries: result.addrs.length,
       claimListText: result.claimListText,
     });

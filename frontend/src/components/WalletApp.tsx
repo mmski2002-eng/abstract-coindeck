@@ -32,7 +32,7 @@ import { useTournamentLogic } from "./wallet/hooks/useTournamentLogic"
 import { useRosterLogic } from "./wallet/hooks/useRosterLogic"
 import { useAdminLogic } from "./wallet/hooks/useAdminLogic"
 import { getErrorMessage } from "./wallet/utils";
-import { submitEvmTx } from "@/lib/evmContracts";
+import { submitEvmTx, readEvmClaimable } from "@/lib/evmContracts";
 import type { Listing, QuickBuyMergeData, RankRow, TxOptions } from "./wallet/types";
 
 type CardData = { playerId: number; tier: number; cardAddr: string };
@@ -259,13 +259,9 @@ function Inner({
     function pollClaim() {
       void fetchClaimState();
       if (accountAddress) {
-        fetch(`${restUrl}/view`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ function: `${moduleAddress}::claim::get_claimable`, type_arguments: [], arguments: [accountAddress] }),
-        }).then((r) => r.ok ? r.json() : null).then((v) => {
-          setUserClaimable(typeof v === "string" ? Number(v) : Array.isArray(v) ? Number(v[0]) : 0);
-        }).catch(() => {});
+        readEvmClaimable(wagmiConfig, accountAddress as `0x${string}`)
+          .then((v) => setUserClaimable(Number(v)))
+          .catch(() => setUserClaimable(0));
       } else {
         setUserClaimable(0);
       }

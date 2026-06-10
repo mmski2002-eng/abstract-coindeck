@@ -7,7 +7,7 @@ import { getErrorMessage } from "../utils";
 import { buildAdminActionMessage, buildWalletFullMessage, stableStringify, MARKET_DATA_PARSE_ACTION } from "@/lib/adminAuth";
 import { calcOraclePoints } from "@/lib/oracleScoring";
 import { buildMarketDataQuery, resolveOracleWindow } from "@/lib/oracleWindow";
-import { readBaseUris, readEvmGovernanceState } from "@/lib/evmContracts";
+import { readBaseUris, readEvmGovernanceState, readEvmClaimState } from "@/lib/evmContracts";
 import type { Config } from "@wagmi/core";
 
 interface Deps {
@@ -267,15 +267,8 @@ export function useAdminLogic({ submitTx, refreshTournament, refreshInventory, r
 
   async function fetchClaimState() {
     try {
-      const resp = await fetch(`${restUrl}/view`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ function: `${moduleAddress}::claim::get_claim_state`, type_arguments: [], arguments: [] }),
-      });
-      if (!resp.ok) return;
-      const [rawActive, startTs, deadline, vaultBalance, claimDays] = await resp.json() as [unknown, string, string, string, string];
-      const active = rawActive === true || rawActive === "true";
-      setClaimState({ active, startTs: Number(startTs), deadline: Number(deadline), vaultBalance: Number(vaultBalance), claimDays: Number(claimDays) });
+      const state = await readEvmClaimState(wagmiConfig);
+      setClaimState(state);
     } catch {}
   }
 

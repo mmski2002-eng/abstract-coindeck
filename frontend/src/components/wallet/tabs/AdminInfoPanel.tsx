@@ -18,7 +18,7 @@ type BotStatus = {
     lastRunAt: number | null;
     lastError: string | null;
     pendingTimelock: null | { action: string; executeAfter: number; directLabel: string };
-    lastClaimList: null | { totalOctas: number; entries: number; generatedAt: number };
+    lastClaimList: null | { totalWei: string; entries: number; generatedAt: number };
   };
   wallet: { configured: boolean; address: string | null };
 };
@@ -353,7 +353,7 @@ export function AdminInfoPanel({
 
           {botStatus?.state.lastClaimList && (
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px]" style={{ color: "var(--ink-3)" }}>
-              <span>{ru ? "Сумма" : "Total"}: <span className="font-mono" style={{ color: "var(--panel-text-muted)" }}>{fmtEth(botStatus.state.lastClaimList.totalOctas)} ETH</span></span>
+              <span>{ru ? "Сумма" : "Total"}: <span className="font-mono" style={{ color: "var(--panel-text-muted)" }}>{fmtEth(Number(botStatus.state.lastClaimList.totalWei))} ETH</span></span>
               <span>{ru ? "Создан" : "Generated"}: <span className="font-mono" style={{ color: "var(--panel-text-muted)" }}>{fmt(botStatus.state.lastClaimList.generatedAt)}</span></span>
               <span>{ru ? "Дней" : "Days"}: <span className="font-mono" style={{ color: "var(--panel-text-muted)" }}>{claimState?.claimDays ?? "—"}</span></span>
             </div>

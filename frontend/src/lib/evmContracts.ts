@@ -305,7 +305,25 @@ export const CLAIM_ABI = [
     { name: "vaultBalance",       type: "uint256" },
     { name: "_claimDays",         type: "uint256" },
   ]},
+  { name: "getClaimable", type: "function", stateMutability: "view", inputs: [{ name: "addr", type: "address" }], outputs: [{ name: "", type: "uint256" }] },
 ] as const;
+
+export async function readEvmClaimState(config: Config): Promise<{
+  active: boolean; startTs: number; deadline: number; vaultBalance: number; claimDays: number;
+}> {
+  const addr = getRuntimeProjectAddresses().claim as `0x${string}`;
+  const [active, startTs, deadline, vaultBalance, claimDays] = await readContract(config, {
+    address: addr, abi: CLAIM_ABI, functionName: "getClaimState",
+  }) as readonly [boolean, bigint, bigint, bigint, bigint];
+  return { active, startTs: Number(startTs), deadline: Number(deadline), vaultBalance: Number(vaultBalance), claimDays: Number(claimDays) };
+}
+
+export async function readEvmClaimable(config: Config, account: `0x${string}`): Promise<bigint> {
+  const addr = getRuntimeProjectAddresses().claim as `0x${string}`;
+  return await readContract(config, {
+    address: addr, abi: CLAIM_ABI, functionName: "getClaimable", args: [account],
+  }) as bigint;
+}
 
 const COIN_DECK_NFT_VIEW_ABI = [
   { name: "getEggPrices", type: "function", stateMutability: "view", inputs: [], outputs: [

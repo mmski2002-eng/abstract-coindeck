@@ -12,6 +12,21 @@ import { BeachScene } from "@/components/BeachScene";
 type Tab = "roster" | "marketplace" | "tournament" | "rankings" | "admin";
 type Theme = "light" | "dark";
 
+function KlickLabel({ color, shadow }: { color: string; shadow: string }) {
+  const [pos, setPos] = useState({ top: -22, left: 68 });
+  const next = () => {
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 48 + Math.random() * 28;
+    setPos({ top: 32 + Math.sin(angle) * dist - 8, left: 32 + Math.cos(angle) * dist - 14 });
+  };
+  return (
+    <span
+      onAnimationIteration={next}
+      style={{ position: "absolute", top: pos.top, left: pos.left, fontSize: 11, fontWeight: 700, color, textShadow: shadow, whiteSpace: "nowrap", pointerEvents: "none", userSelect: "none", animation: "klickPop 2.8s ease-in-out infinite" }}
+    >klick!</span>
+  );
+}
+
 function hadPreviousWalletConnection(): boolean {
   if (typeof window === "undefined") return false;
   try {
@@ -262,13 +277,24 @@ export function MarketingHome() {
           0%, 100% { opacity: 0.15; transform: scale(1); }
           50% { opacity: 1; transform: scale(1.3); }
         }
+        @keyframes klickPop {
+          0%         { opacity: 0; transform: scale(0.6); }
+          8%, 18%    { opacity: 1; transform: scale(1); }
+          26%, 100%  { opacity: 0; transform: scale(0.8); }
+        }
       `}</style>
 
       {/* Дневное небо */}
-      <div aria-hidden className="sky-day pointer-events-none fixed inset-0 z-[1] overflow-hidden">
-          <div style={{ position: "absolute", top: "16%", animation: "sky-drift 195s linear infinite", animationDelay: "-30s" }}>
-            <div style={{ width: 64, height: 64, borderRadius: "50%", background: "radial-gradient(circle at 40% 40%, #FFF176, #FFD600)", boxShadow: "0 0 40px 14px rgba(255,214,0,0.45)" }} />
-          </div>
+      <div aria-hidden className={`sky-day pointer-events-none fixed inset-0 overflow-hidden ${contentReady ? "z-[1]" : "z-[10000]"}`}>
+          {!contentReady && (
+            <div
+              onClick={() => setTheme("dark")}
+              style={{ position: "absolute", top: 10, animation: "sky-drift 195s linear infinite", animationDelay: "-30s", pointerEvents: "auto", cursor: "pointer" }}
+            >
+              <div style={{ width: 64, height: 64, borderRadius: "50%", background: "radial-gradient(circle at 40% 40%, #FFF176, #FFD600)", boxShadow: "0 0 40px 14px rgba(255,214,0,0.45)" }} />
+              <KlickLabel color="#fff" shadow="0 1px 4px rgba(0,0,0,0.4)" />
+            </div>
+          )}
           <div style={{ position: "absolute", top: "22%", animation: "sky-drift 135s linear infinite", animationDelay: "-15s" }}>
             <svg width="180" height="80" viewBox="0 0 180 80" fill="white" opacity="0.92">
               <ellipse cx="90" cy="62" rx="82" ry="24" /><ellipse cx="60" cy="48" rx="44" ry="32" /><ellipse cx="105" cy="42" rx="52" ry="36" /><ellipse cx="140" cy="54" rx="36" ry="26" />
@@ -292,14 +318,20 @@ export function MarketingHome() {
         </div>
 
       {/* Ночное небо */}
-      <div aria-hidden className="sky-night pointer-events-none fixed inset-0 z-[1] overflow-hidden">
+      <div aria-hidden className={`sky-night pointer-events-none fixed inset-0 overflow-hidden ${contentReady ? "z-[1]" : "z-[10000]"}`}>
           {/* Луна-полумесяц */}
-          <div style={{ position: "absolute", top: "14%", animation: "sky-drift 220s linear infinite", animationDelay: "-50s" }}>
-            <svg width="64" height="64" viewBox="0 0 64 64">
-              <circle cx="32" cy="32" r="28" fill="#FFD633" />
-              <circle cx="44" cy="24" r="24" fill="#05061a" />
-            </svg>
-          </div>
+          {!contentReady && (
+            <div
+              onClick={() => setTheme("light")}
+              style={{ position: "absolute", top: 10, animation: "sky-drift 195s linear infinite", animationDelay: "-30s", pointerEvents: "auto", cursor: "pointer" }}
+            >
+              <svg width="64" height="64" viewBox="0 0 64 64">
+                <circle cx="32" cy="32" r="28" fill="#FFD633" />
+                <circle cx="44" cy="24" r="24" fill="#05061a" />
+              </svg>
+              <KlickLabel color="#FFD633" shadow="0 1px 6px rgba(0,0,0,0.7)" />
+            </div>
+          )}
           {([
             [8,6,1.8,0],[15,18,1.2,2.1],[24,9,2,0.8],[33,4,1.4,3.5],[41,22,1,1.6],
             [50,11,1.6,4.2],[58,7,1.2,0.3],[66,19,2.2,2.8],[74,3,1,1.1],[82,14,1.5,3.9],
@@ -433,7 +465,7 @@ export function MarketingHome() {
 
       {(!contentReady || beachFading) && (
         <div style={{ opacity: beachFading ? 0 : 1, transition: "opacity 700ms ease" }}>
-          <BeachScene lang={lang} isDark={isDark} />
+          <BeachScene lang={lang} isDark={isDark} onToggleTheme={() => setTheme(t => t === "dark" ? "light" : "dark")} />
         </div>
       )}
 

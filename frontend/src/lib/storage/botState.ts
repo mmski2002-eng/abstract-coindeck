@@ -40,7 +40,7 @@ export type BotState = {
     payloadHash?: string;
   };
   lastClaimList: null | {
-    totalOctas: number;
+    totalWei: string;
     entries: number;
     generatedAt: number;
   };

@@ -43,7 +43,7 @@ type BotStatus = {
     lastRunAt: number | null;
     lastError: string | null;
     pendingTimelock: null | { action: string; executeAfter: number; directLabel: string };
-    lastClaimList: null | { totalOctas: number; entries: number; generatedAt: number };
+    lastClaimList: null | { totalWei: string; entries: number; generatedAt: number };
   };
   wallet: { configured: boolean; address: string | null };
 };
